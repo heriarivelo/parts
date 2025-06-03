@@ -1,0 +1,30 @@
+/* Styles spécifiques si nécessaire */
+.fi {
+    background-size: contain;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    position: relative;
+    display: inline-block;
+    width: 1.33333333em;
+    line-height: 1em;
+  }
+  
+  .fi:before {
+    content: "\00a0";
+  }
+  
+  .fi-de {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 3'%3E%3Cpath d='M0 0h5v3H0z'/%3E%3Cpath fill='%23D00' d='M0 1h5v2H0z'/%3E%3Cpath fill='%23FFCE00' d='M0 2h5v1H0z'/%3E%3C/svg%3E");
+  }
+  
+  .fi-jp {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 6'%3E%3Cpath fill='%23fff' d='M0 0h9v6H0z'/%3E%3Cpath fill='%23bc002d' d='M4.5 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z'/%3E%3C/svg%3E");
+  }
+  
+  .fi-fr {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 6'%3E%3Cpath fill='%230055A4' d='M0 0h3v6H0z'/%3E%3Cpath fill='%23fff' d='M3 0h3v6H3z'/%3E%3Cpath fill='%23EF4135' d='M6 0h3v6H6z'/%3E%3C/svg%3E");
+  }
+  
+  .fi-ca {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 6'%3E%3Cpath fill='%23D52B1E' d='M0 0h9v6H0z'/%3E%3Cpath fill='%23fff' d='M3 0h3v6H3z'/%3E%3C/svg%3E");
+  }

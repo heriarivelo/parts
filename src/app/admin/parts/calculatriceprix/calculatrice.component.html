@@ -1,0 +1,479 @@
+<div class="lg:max-w-7xl overflow-auto p-4">
+    <h1 class="text-2xl font-bold mb-6 text-primary-dark">
+        <i class="fas fa-calculator mr-2"></i>Gestion des Pièces - Calculs Complets
+    </h1>
+
+    <!-- Paramètres Globaux -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border-l-4 border-accent">
+        <h2 class="text-lg font-semibold mb-3 text-secondary-dark">
+            <i class="fas fa-cog mr-2"></i>Paramètres de Calcul
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-secondary">Taux de Change (€ → MGA)</label>
+                <input [(ngModel)]="parametres.tauxChange" type="number"
+                    class="mt-1 p-2 border rounded-lg w-full bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-secondary">Fret Méthode 1 (€)</label>
+                <input [(ngModel)]="parametres.fretTotal" type="number"
+                    class="mt-1 p-2 border rounded-lg w-full bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-secondary">Fret Méthode 2 (€)</label>
+                <input [(ngModel)]="parametres.fretMethode2" type="number"
+                    class="mt-1 p-2 border rounded-lg w-full bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-secondary">Marge Standard (%)</label>
+                <input [(ngModel)]="parametres.margeStandard" type="number"
+                    class="mt-1 p-2 border rounded-lg w-full bg-gray-50">
+            </div>
+            <div class="bg-blue-50 p-3 rounded-lg border border-method1">
+                <label class="block text-xs font-medium text-method1">Douane Méthode 1 (%)</label>
+                <input [(ngModel)]="parametres.tauxDouane" type="number"
+                    class="mt-1 p-1 border rounded w-full bg-white">
+            </div>
+            <div class="bg-blue-50 p-3 rounded-lg border border-method1">
+                <label class="block text-xs font-medium text-method1">TVA Méthode 1 (%)</label>
+                <input [(ngModel)]="parametres.tauxTVA" type="number" class="mt-1 p-1 border rounded w-full bg-white">
+            </div>
+        </div>
+        <div class="mt-3 flex justify-end">
+            <button (click)="appliquerParametres()"
+                class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark">
+                <i class="fas fa-sync-alt mr-2"></i>Actualiser les Calculs
+            </button>
+        </div>
+    </div>
+    <!-- Dans la section des contrôles du tableau -->
+    <div class="flex justify-between p-4">
+        <div class="flex space-x-2">
+            <!-- ... autres boutons ... -->
+
+            <button (click)="exporterExcel()" class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark">
+                <i class="fas fa-file-export mr-2"></i>Exporter Excel
+            </button>
+
+            <div class="relative">
+                <input type="file" id="file-input" class="hidden" accept=".xlsx, .xls" (change)="importerExcel($event)"
+                    #fileInput>
+                <button (click)="fileInput.click()"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    <i class="fas fa-file-import mr-2"></i>Importer Excel
+                </button>
+            </div>
+            <!-- Bouton pour ouvrir le modal -->
+            <button (click)="previewDevis()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                [disabled]="isLoading">
+                <i class="fa-solid fa-file-pen mr-2"></i> Aperçu Devis
+            </button>
+
+
+        </div>
+        <button (click)="showImportModal = true" class="bg-primary text-white px-4 py-2 rounded hover:bg-accent-dark">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Enregister
+        </button>
+    </div>
+
+    <!-- Tableau Comparatif -->
+    <div class="bg-white shadow rounded-lg overflow-x-auto mb-6">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-secondary text-white">
+                <tr>
+                    <th rowspan="2"
+                        class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sticky left-0 bg-secondary z-10">
+                        Code Art</th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Marque</th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Référence
+                    </th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Auto final
+                    </th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">LIB1</th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Qté</th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Prix U. (€)
+                    </th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Poids (kg)
+                    </th>
+                    <!-- <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Qté Commandée</th> -->
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Qté Arrivée
+                    </th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Écart</th>
+
+                    <!-- Méthode 1 -->
+                    <th colspan="7"
+                        class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider bg-method1">Méthode 1
+                        (Avec Fret)</th>
+
+                    <!-- Méthode 2 -->
+                    <th colspan="8"
+                        class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider bg-method2">Méthode 2
+                        (Avec Fret)</th>
+
+                    <!-- Calculs Finaux -->
+                    <th colspan="4" class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider bg-final">
+                        Calculs Finaux</th>
+                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions
+                    </th>
+                </tr>
+                <tr>
+                    <!-- Sous-colonnes Méthode 1 -->
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">Pondération</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">Fret (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">CAF (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">Douane (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">TVA (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">Total TTC (MGA)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method1">Prix Final (MGA)</th>
+
+                    <!-- Sous-colonnes Méthode 2 -->
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">Pondération</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">Fret (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">CAF (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">Douane (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">TVA (€)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">Total TTC (MGA)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">D+TVA U. (MGA)</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-method2">Prix Final (MGA)</th>
+
+                    <!-- Sous-colonnes Calculs Finaux -->
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-final">Prix Applicable</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-final">Taux Marge</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-final">Prix Suivant</th>
+                    <th class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-final">Prix Final</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let piece of pieceService.getPieces(); let i = index" class="hover:bg-gray-50">
+                    <td class="px-4 py-3 whitespace-nowrap sticky left-0 bg-white font-medium text-primary-dark">
+                        {{piece.code}}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{piece.marque}}</td>
+                    <td class="w-12 px-4 py-3 overflow-hidden whitespace-nowrap text-ellipsis">{{piece.reference}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{piece.autofinal}}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{piece.libelle}}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <input [(ngModel)]="piece.quantite" (change)="pieceService.updatePiece(i, piece)" type="number"
+                            class="w-16 border rounded px-2 py-1 text-center">
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <input [(ngModel)]="piece.prixUnitaireEur" (change)="pieceService.updatePiece(i, piece)"
+                            type="number" step="0.01" class="w-20 border rounded px-2 py-1 text-right">
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <input [(ngModel)]="piece.poidsKg" (change)="pieceService.updatePiece(i, piece)" type="number"
+                            step="0.001" class="w-20 border rounded px-2 py-1 text-right">
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <input [(ngModel)]="piece.quantiteArrivee" (change)="pieceService.updatePiece(i, piece)"
+                            type="number" class="w-16 border rounded px-2 py-1 text-right">
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap" [ngClass]="pieceService.calculerEcart(piece).ecartClass">
+                        {{pieceService.calculerEcart(piece).ecart}}
+                    </td>
+
+                    <!-- Méthode 1 -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).ponderationPoids | number:'1.2-2'}}%
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).fretReparti | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).caEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).douaneEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).tvaEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                        {{pieceService.calculerLigneMethode1(piece).totalMGA | number:'1.0-0'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-blue-50 font-bold">
+                        {{pieceService.calculerLigneMethode1(piece).prixFinalMGA | number:'1.0-0'}}
+                    </td>
+
+                    <!-- Méthode 2 -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).ponderationPoids | number:'1.2-2'}}%
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).fretReparti | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).caEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).douaneEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).tvaEur | number:'1.2-2'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).totalMGA | number:'1.0-0'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50">
+                        {{pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA | number:'1.0-0'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-green-50 font-bold">
+                        {{pieceService.calculerLigneMethode2(piece).prixFinalMGA | number:'1.0-0'}}
+                    </td>
+
+                    <!-- Calculs Finaux -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-purple-50">
+                        {{ (pieceService.calculerLigneMethode1(piece).prixFinalMGA -
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA) | number:'1.0-0' }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-purple-50">
+                        {{
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA > 0
+                        ? (
+                        (pieceService.calculerLigneMethode1(piece).prixFinalMGA -
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA) /
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA
+                        )
+                        : 0
+                        | number:'1.2-2'
+                        }}%
+                    </td>
+
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-purple-50">
+                        {{(pieceService.calculerLigneMethode1(piece).prixFinalMGA -
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA) +
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA | number:'1.0-0'}}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right bg-purple-100 font-bold">
+                        {{arrondirInf(
+                        (pieceService.calculerLigneMethode1(piece).prixFinalMGA -
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA) +
+                        pieceService.calculerLigneMethode2(piece).douaneTvaUnitaireMGA, -3) | number:'1.0-0'}}
+                    </td>
+
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <button (click)="supprimerPiece(i)" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totaux Comparatifs -->
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-method1 text-white p-3 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Total Méthode 1</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <p class="text-sm">CA Prévisionnel:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxMethode1.caPrevisionnel | number:'1.0-0' }} MGA
+                    </p>
+
+                </div>
+                <div>
+                    <p class="text-sm">Marge Totale:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxMethode1.margeTotale | number:'1.0-0' }} MGA
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-method2 text-white p-3 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Total Méthode 2</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <p class="text-sm">CA Prévisionnel:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxMethode2.caPrevisionnel | number:'1.0-0' }} MGA
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm">Marge Totale:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxMethode2.margeTotale | number:'1.0-0' }} MGA
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-final text-white p-3 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Totaux Finaux</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <p class="text-sm">CA Prévisionnel:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxFinaux.caPrevisionnel | number:'1.0-0' }} MGA
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm">Marge Totale:</p>
+                    <p class="text-xl font-bold">
+                        {{ totauxFinaux.margeTotale | number:'1.0-0' }} MGA
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div *ngIf="showImportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!-- MODAL CONTENT -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Confirmer l'importation</h3>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description de l'import</label>
+            <input [(ngModel)]="description" type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ex : Importation pièces avril" required />
+        </div>
+
+        <div *ngIf="success" class="bg-green-100 text-green-700 p-3 rounded mb-3">
+            Importation enregistrée avec succès !
+        </div>
+
+        <div *ngIf="error" class="bg-red-100 text-red-700 p-3 rounded mb-3">
+            {{ error }}
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-4">
+            <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+                (click)="showImportModal = false">
+                Annuler
+            </button>
+
+            <button
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50"
+                [disabled]="!description || isSaving" (click)="confirmImport()">
+                <svg *ngIf="isSaving" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                Confirmer
+            </button>
+        </div>
+
+        <!-- Close Icon (optionnel) -->
+        <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-600" (click)="showImportModal = false">
+            ✕
+        </button>
+    </div>
+</div>
+
+
+<!-- Modal Aperçu Devis -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg w-full max-w-4xl shadow-xl relative max-h-[90vh] overflow-y-auto">
+        <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+            ✖
+        </button>
+
+        <div class="p-6">
+            <h2 class="text-2xl font-bold mb-6 text-center">Aperçu de Devis</h2>
+
+            <!-- En-tête -->
+            <div class="border p-4 flex justify-between items-start">
+                <!-- Logo et infos entreprise -->
+                <div class="flex gap-4">
+                    <img src="/logo/facture.png" alt="Kaleo Parts" class="w-32 h-auto object-contain" />
+                    <div class="text-sm leading-6">
+                        <h1 class="text-primary font-extrabold text-lg">kaleo<span
+                                class="text-black font-extrabold">PARTS</span></h1>
+                        <p>Tél : 038 66 332 82</p>
+                        <p>e-mail : <a href="mailto:kaleoparts@gmail.com"
+                                class="text-blue-600">kaleoparts&#64;gmail.com</a>
+                        </p>
+                        <p>NIF 6018289282</p>
+                        <p>STAT 46101112023011160</p>
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="text-right">
+                    <p><span class="font-semibold">Date :</span> ____________________</p>
+                </div>
+            </div>
+
+            <!-- Contenu du devis -->
+            <div *ngIf="devisPreview && !isLoading">
+                <!-- Détails Articles -->
+                <div class="mb-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Référence</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Description</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marque
+                                    </th>
+                                    <!-- <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">OEM</th>-->
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix
+                                        Unitaire</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr *ngFor="let item of devisPreview.items">
+                                    <td class="px-4 py-3">{{ item.reference }}</td>
+                                    <td class="px-4 py-3">{{ item.productName }}</td>
+                                    <td class="px-4 py-3">{{ item.marque }}</td>
+                                    <!--  <td class="px-4 py-3">{{ item.oem }}</td>-->
+                                    <td class="px-4 py-3">{{ item.unitPrice | currency:'Ar':'symbol':'1.2-2' }}</td>
+                                    <td class="px-4 py-3">{{ item.quantity }}</td>
+                                    <td class="px-4 py-3">{{ item.total | currency:'Ar':'symbol':'1.2-2' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Totaux -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Total HT:</span>
+                            <span class="font-semibold">{{ devisPreview.total | currency:'Ar':'symbol':'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>TVA (20%):</span>
+                            <span>{{ devisPreview.total * 0 | currency:'Ar':'symbol':'1.2-2' }}</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-200 pt-2 mt-2 font-bold text-lg">
+                            <span>Total TTC:</span>
+                            <span>{{ devisPreview.total | currency:'Ar':'symbol':'1.2-2' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-4">
+                    <button (click)="closeModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Retour
+                    </button>
+                    <button (click)="confirmDevis()"
+                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Confirmer le Devis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chargement -->
+            <div *ngIf="isLoading" class="text-center py-8">
+                <p>Génération de l'aperçu en cours...</p>
+            </div>
+        </div>
+    </div>
+</div>

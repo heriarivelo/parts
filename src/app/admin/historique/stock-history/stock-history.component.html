@@ -1,0 +1,124 @@
+<div class="container mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Historique des Mouvements de Stock</h2>
+        <button routerLink="/stock/add" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+            <i class="fas fa-plus mr-2"></i> Nouveau Mouvement
+        </button>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form [formGroup]="filterForm" (ngSubmit)="onFilter()" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Produit -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Produit</label>
+                <select formControlName="productId" class="w-full border rounded-lg p-2">
+                    <option value="">Tous les produits</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                        {{ product.referenceCode }} - {{ product.libelle }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Type -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Type</label>
+                <select formControlName="type" class="w-full border rounded-lg p-2">
+                    <option value="">Tous les types</option>
+                    <option *ngFor="let type of movementTypes" [value]="type.value">
+                        {{ type.label }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Date de début -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Date de début</label>
+                <input type="date" formControlName="startDate" class="w-full border rounded-lg p-2">
+            </div>
+
+            <!-- Date de fin -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Date de fin</label>
+                <input type="date" formControlName="endDate" class="w-full border rounded-lg p-2">
+            </div>
+
+            <div class="md:col-span-4 flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg mr-2">
+                    <i class="fas fa-filter mr-2"></i> Filtrer
+                </button>
+                <button type="button" (click)="filterForm.reset(); onFilter()" class="border px-4 py-2 rounded-lg">
+                    Réinitialiser
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Liste -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-3 text-left">Date</th>
+                    <th class="px-4 py-3 text-left">Produit</th>
+                    <th class="px-4 py-3 text-left">Type</th>
+                    <th class="px-4 py-3 text-left">Quantité</th>
+                    <th class="px-4 py-3 text-left">Source/Référence</th>
+                    <th class="px-4 py-3 text-left">Motif</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let movement of movements" class="border-t hover:bg-gray-50">
+                    <td class="px-4 py-3">{{ movement.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="px-4 py-3">
+                        <span *ngIf="movement.product">
+                            {{ movement.product.referenceCode }} - {{ movement.product.libelle }}
+                        </span>
+                        <span *ngIf="!movement.product">Produit supprimé</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span [ngClass]="{
+              'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
+              'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS',
+              'text-blue-600': movement.type === 'TRANSFER',
+              'text-yellow-600': movement.type === 'ADJUSTMENT'
+            }">
+                            {{ getMovementTypeLabel(movement.type) }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span [ngClass]="{
+              'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
+              'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS'
+            }">
+                            {{ (movement.type === 'IMPORT' || movement.type === 'RETURN' ? '+' : '-') +
+                            movement.quantity }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">{{ movement.source || '-' }}</td>
+                    <td class="px-4 py-3">{{ movement.reason || '-' }}</td>
+                </tr>
+
+                <tr *ngIf="movements.length === 0">
+                    <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+                        Aucun mouvement trouvé
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="p-4 border-t flex justify-between items-center">
+            <div>
+                Total: {{ pagination.total }} mouvements
+            </div>
+            <div class="flex gap-1">
+                <button *ngFor="let page of getPageNumbers()" (click)="onPageChange(page)"
+                    [class.bg-blue-500]="page === pagination.page" [class.text-white]="page === pagination.page"
+                    class="px-3 py-1 border rounded">
+                    {{ page }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

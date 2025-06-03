@@ -1,0 +1,57 @@
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+  <!-- Facture Header -->
+  <div class="flex justify-between mb-6">
+      <!-- Company Info (on the left) -->
+      <div>
+          <h2 class="text-2xl font-semibold text-gray-700">Company Name</h2>
+          <p class="text-gray-600">Company Address, City, Country</p>
+          <p class="text-gray-600">Phone: +123 456 789</p>
+          <p class="text-gray-600">Email: info.company.com</p>
+      </div>
+      
+      <!-- Client Info & Photo (on the right) -->
+      <div class="flex items-center">
+          <img class="w-16 h-16 rounded-full mr-4" src="path_to_client_photo.jpg" alt="Client Photo">
+          <div>
+              <h3 class="text-lg font-semibold text-gray-700">Client Name: RAKOTO</h3>
+              <p class="text-gray-600">Client Address, City, Country</p>
+              <p class="text-gray-600">Email: client.example.com</p>
+              <p class="text-gray-600">Phone: +987 654 321</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Facture Table -->
+  <table class="min-w-full table-auto">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Article Code</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Description</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Quantity</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Unit Price</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Total Price</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of factureItems" class="border-t">
+        <td class="px-4 py-2 text-sm text-gray-600">{{ item.code_art }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600">{{ item.LIB1 }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600">{{ item.quantite }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600">{{ item.article_price | currency }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600">{{ item.total_article_price | currency }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600">
+          <span [ngClass]="{'text-green-500': item.status === 'Payée', 'text-red-500': item.status !== 'Payée'}">
+            {{ item.status }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Total Price Section -->
+  <div class="mt-6 flex justify-between text-lg font-semibold text-gray-700">
+    <span>Total: </span>
+    <span>{{ totalFacture | currency }}</span>
+  </div>
+</div>

@@ -1,0 +1,229 @@
+<div class="flex h-screen overflow-hidden">
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Header -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-800">Tableau de bord</h2>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Recherche..." class="pl-10 pr-4 py-2 border rounded-lg">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="rounded-full">
+                    <span>Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <main class="p-6">
+            <!-- KPI Cards -->
+            <!-- analytics.component.html -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <!-- Pièces en stock -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500">Pièces en stock</p>
+                            <h3 class="text-2xl font-bold">
+                                {{ isLoading ? 'Chargement...' : (analyticsData.totalStock | number) }}
+                            </h3>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-box-open text-blue-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-green-500 mt-2" *ngIf="!isLoading && analyticsData.trends.stockChange >= 0">
+                        <i class="fas fa-arrow-up"></i> {{ analyticsData.trends.stockChange }}% vs mois dernier
+                    </p>
+                    <p class="text-red-500 mt-2" *ngIf="!isLoading && analyticsData.trends.stockChange < 0">
+                        <i class="fas fa-arrow-down"></i> {{ analyticsData.trends.stockChange * -1 }}% vs mois dernier
+                    </p>
+                </div>
+
+                <!-- Valeur du stock -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500">Valeur du stock</p>
+                            <h3 class="text-2xl font-bold">
+                                {{ isLoading ? 'load...' : (analyticsData.stockValue | number:'1.0-0') }} MGA
+                            </h3>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-coins text-green-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-green-500 mt-2" *ngIf="!isLoading && analyticsData.trends.valueChange >= 0">
+                        <i class="fas fa-arrow-up"></i> {{ analyticsData.trends.valueChange }}% vs mois dernier
+                    </p>
+                    <p class="text-red-500 mt-2" *ngIf="!isLoading && analyticsData.trends.valueChange < 0">
+                        <i class="fas fa-arrow-down"></i> {{ analyticsData.trends.valueChange * -1 }}% vs mois dernier
+                    </p>
+                </div>
+
+                <!-- Commandes en cours -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500">Commandes en cours</p>
+                            <h3 class="text-2xl font-bold">
+                                {{ isLoading ? 'load...' : analyticsData.pendingOrders }}
+                            </h3>
+                        </div>
+                        <div class="bg-orange-100 p-3 rounded-full">
+                            <i class="fas fa-shipping-fast text-orange-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-green-500 mt-2" *ngIf="!isLoading && analyticsData.trends.newOrders > 0">
+                        <i class="fas fa-arrow-up"></i> {{ analyticsData.trends.newOrders }} nouvelles
+                    </p>
+                </div>
+
+                <!-- Marge moyenne -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500">Marge moyenne</p>
+                            <h3 class="text-2xl font-bold">
+                                {{ isLoading ? 'load...' : analyticsData.averageMargin }}%
+                            </h3>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-percentage text-purple-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-green-500 mt-2"><i class="fas fa-arrow-up"></i> 2% vs mois dernier</p>
+                </div>
+            </div>
+
+            <!-- Two Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Stock et Calculatrice -->
+                <div class="lg:col-span-2">
+                    <!-- Stock Alert -->
+                    <div class="bg-white p-6 rounded-lg shadow mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg">Alertes Stock</h3>
+                            <a href="/admin-stocks" class="text-blue-600 text-sm">Voir tout</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium">Plaquettes de frein BOSCH</p>
+                                    <p class="text-sm text-gray-500">Référence: FR-BO-2342</p>
+                                </div>
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">2 restants</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium">Filtre à air K&N</p>
+                                    <p class="text-sm text-gray-500">Référence: FA-KN-1298</p>
+                                </div>
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">5
+                                    restants</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculatrice de Prix -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="font-semibold text-lg mb-4">Calculatrice de Prix</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-700 mb-1">Pièce</label>
+                                <select class="w-full p-2 border rounded">
+                                    <option>Sélectionner une pièce</option>
+                                    <option>Plaquettes de frein BOSCH</option>
+                                    <option>Filtre à air K&N</option>
+                                    <option>Amortisseur KYB</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Prix d'achat (€)</label>
+                                    <input type="number" class="w-full p-2 border rounded" value="45.00">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Taux de change</label>
+                                    <input type="number" class="w-full p-2 border rounded" value="4800">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Frais de port</label>
+                                    <input type="number" class="w-full p-2 border rounded" value="12.50">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Douane (%)</label>
+                                    <input type="number" class="w-full p-2 border rounded" value="20">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Marge (%)</label>
+                                    <input type="number" class="w-full p-2 border rounded" value="25">
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-gray-700 mb-1">Prix de vente conseillé</p>
+                                <p class="text-2xl font-bold text-blue-800">342,000 MGA</p>
+                                <p class="text-sm text-gray-500">Marge: 87,000 MGA (25%)</p>
+                            </div>
+                            <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Enregistrer
+                                le prix</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dernières Importations -->
+                <div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg">Dernières Importations</h3>
+                            <a href="/importation-historique" class="text-blue-600 text-sm">Voir tout</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium">CMD-2023-024</span>
+                                    <span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs">Livré</span>
+                                </div>
+                                <p class="text-sm text-gray-500">15 pièces</p>
+                                <p class="text-sm">Arrivé le 12/11/2023</p>
+                            </div>
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium">CMD-2023-025</span>
+                                    <span class="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs">En transit</span>
+                                </div>
+                                <p class="text-sm text-gray-500">8 pièces</p>
+                                <p class="text-sm">Est. arrivée 25/11/2023</p>
+                            </div>
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium">CMD-2023-026</span>
+                                    <span class="text-yellow-600 bg-yellow-50 px-2 py-1 rounded text-xs">En
+                                        préparation</span>
+                                </div>
+                                <p class="text-sm text-gray-500">22 pièces</p>
+                                <p class="text-sm">Expédition prévue 18/11/2023</p>
+                            </div>
+                        </div>
+                        <button
+                            class="w-full mt-4 border border-blue-600 text-blue-600 py-2 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-plus mr-2"></i>Nouvelle commande
+                        </button>
+                    </div>
+
+                    <!-- Graphique Ventes -->
+                    <div class="bg-white p-6 rounded-lg shadow mt-6">
+                        <h3 class="font-semibold text-lg mb-4">Ventes par catégorie</h3>
+                        <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                            [Graphique en camembert ici]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

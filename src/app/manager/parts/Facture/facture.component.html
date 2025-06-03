@@ -1,0 +1,36 @@
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <!-- En-tête -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-700">Liste des Factures</h2>
+    </div>
+  
+    <!-- Tableau -->
+    <table class="min-w-full table-auto">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">ID</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Réf. Commande</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Réf. Facture</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Prix Total</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let facture of factures" class="border-t">
+          <td class="px-4 py-2 text-sm text-gray-700">{{ facture.id }}</td>
+          <td class="px-4 py-2 text-sm text-gray-700">{{ facture.reference_commande }}</td>
+          <td class="px-4 py-2 text-sm text-gray-700">{{ facture.reference_fact }}</td>
+          <td class="px-4 py-2 text-sm text-gray-700">{{ facture.prix_total | currency }}</td>
+          <td class="px-4 py-2 text-sm">
+            <span [ngClass]="{
+              'text-green-600 font-semibold': facture.status === 1,
+              'text-yellow-600 font-semibold': facture.status === 0
+            }">
+              {{ facture.status === 1 ? 'Payée' : 'En attente' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

@@ -1,0 +1,126 @@
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-64 bg-red-800 text-white p-4">
+      <div class="flex items-center space-x-2 mb-8">
+        <i class="fas fa-car-side text-2xl"></i>
+        <h1 class="text-xl font-bold">AutoImport MG</h1>
+      </div>
+  
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/" class="flex items-center space-x-2 p-2 rounded hover:bg-red-700">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Tableau de bord</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/stock" class="flex items-center space-x-2 p-2 rounded hover:bg-red-700 bg-red-700">
+              <i class="fas fa-boxes"></i>
+              <span>Stock</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/importations" class="flex items-center space-x-2 p-2 rounded hover:bg-red-700">
+              <i class="fas fa-ship"></i>
+              <span>Importations</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/parametres" class="flex items-center space-x-2 p-2 rounded hover:bg-red-700">
+              <i class="fas fa-cog"></i>
+              <span>Paramètres</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+      <!-- Header -->
+      <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+        <h2 class="text-xl font-semibold text-gray-800">Détail Article</h2>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <input type="text" placeholder="Recherche..." class="pl-10 pr-4 py-2 border rounded-lg">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+          <div class="flex items-center space-x-2">
+            <img src="https://via.placeholder.com/40" alt="Profile" class="rounded-full">
+            <span>Admin</span>
+          </div>
+        </div>
+      </header>
+  
+      <!-- Detail Content -->
+      <main class="p-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Image -->
+            <div class="lg:w-1/3">
+              <div (click)="onSelectImage()" class="cursor-pointer">
+                <ng-container *ngIf="imagePreview || article.imageUrl; else noImage">
+                  <img [src]="imagePreview || article.imageUrl" alt="Article Image" class="rounded-lg shadow w-full h-auto" />
+                </ng-container>
+  
+                <ng-template #noImage>
+                  <div
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-64 bg-gray-50">
+                    <i class="fas fa-upload text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-500">Ajouter une image</p>
+                  </div>
+                </ng-template>
+              </div>
+              <input type="file" accept="image/*" #fileInput (change)="onFileSelected($event)" hidden />
+            </div>
+  
+            <!-- Infos -->
+            <div class="lg:w-2/3 space-y-4">
+              <h3 class="text-2xl font-bold text-gray-800">{{ article.nom }}</h3>
+              <p class="text-gray-500">Référence: <span class="font-semibold">{{ article.reference }}</span></p>
+  
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-gray-600">Prix d'achat (€)</p>
+                  <p class="font-semibold text-lg">{{ article.prixAchat | number:'1.2-2' }} €</p>
+                </div>
+                <div>
+                  <p class="text-gray-600">Taux de change</p>
+                  <p class="font-semibold text-lg">{{ article.tauxChange }} MGA/€</p>
+                </div>
+                <div>
+                  <p class="text-gray-600">Frais de port (€)</p>
+                  <p class="font-semibold text-lg">{{ article.fraisPort | number:'1.2-2' }} €</p>
+                </div>
+                <div>
+                  <p class="text-gray-600">Douane (%)</p>
+                  <p class="font-semibold text-lg">{{ article.douane }}%</p>
+                </div>
+                <div>
+                  <p class="text-gray-600">Marge (%)</p>
+                  <p class="font-semibold text-lg">{{ article.marge }}%</p>
+                </div>
+              </div>
+  
+              <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+                <p class="text-gray-700">Prix de vente conseillé</p>
+                <p class="text-3xl font-bold text-blue-800">{{ article.prixVente | number:'1.0-0' }} MGA</p>
+                <p class="text-sm text-gray-500">Marge: {{ article.margeMGA | number:'1.0-0' }} MGA ({{ article.marge }}%)</p>
+              </div>
+  
+              <div class="flex space-x-4 mt-6">
+                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">
+                  Modifier
+                </button>
+                <button class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg">
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  

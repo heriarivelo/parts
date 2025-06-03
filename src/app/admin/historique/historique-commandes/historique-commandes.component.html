@@ -1,0 +1,32 @@
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Historique des commandes</h2>
+
+    <!-- Filtres -->
+    <div class="flex flex-wrap gap-4 mb-4">
+        <select [(ngModel)]="filtreStatut" (change)="filtrerCommandes()" class="border rounded p-2">
+            <option value="">Tous les statuts</option>
+            <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
+        </select>
+        <input type="text" [(ngModel)]="recherche" (input)="filtrerCommandes()"
+            placeholder="Rechercher par référence..." class="border rounded p-2" />
+    </div>
+
+    <!-- Liste des commandes -->
+    <div class="grid gap-4">
+        <div *ngFor="let commande of commandesFiltrees"
+            class="bg-white rounded-xl p-4 shadow flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h3 class="text-lg font-semibold">Commande #{{ commande.reference }}</h3>
+                <p class="text-sm text-gray-500">Client : {{ commande.customer?.nom || '—' }} | {{ commande.createdAt |
+                    date:'short' }}</p>
+            </div>
+            <div class="flex items-center gap-4 mt-2 md:mt-0">
+                <span [ngClass]="getStatutColor(commande.status)" class="text-xs font-bold px-2 py-1 rounded-full">
+                    {{ commande.status }}
+                </span>
+                <span class="text-green-600 font-semibold">{{ commande.totalAmount | currency:'Ar' }}</span>
+                <button (click)="voirDetails(commande)" class="text-blue-600 hover:underline text-sm">Détails</button>
+            </div>
+        </div>
+    </div>
+</div>
