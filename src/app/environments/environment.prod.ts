@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://poetic-connection-production.up.railway.app/api'
+    apiUrl: 'https://back-parts-production.up.railway.app/api'
   };
   
