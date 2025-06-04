@@ -54,20 +54,52 @@ export class UserManagementComponent implements OnInit {
     this.isModalOpen = false;
   }
 
-  saveUser(): void {
-    const operation = this.isEditMode 
-      ? this.userService.updateUser(this.currentUser.id, this.currentUser)
-      : this.userService.createUser(this.currentUser);
-      console.log('users',this.currentUser );
+  // saveUser(): void {
+  //   const operation = this.isEditMode 
+  //     ? this.userService.updateUser(this.currentUser.id, this.currentUser)
+  //     : this.userService.createUser(this.currentUser);
+  //     console.log('users',this.currentUser );
 
-    operation.subscribe({
-      next: () => {
-        this.loadUsers();
-        this.closeModal();
-      },
-      error: (error) => console.error('Error saving user:', error)
-    });
-  }
+  //   operation.subscribe({
+  //     next: () => {
+  //       this.loadUsers();
+  //       this.closeModal();
+  //     },
+  //     error: (error) => console.error('Error saving user:', error)
+  //   });
+  // }
+
+  saveUser(): void {
+  const isEdit = this.isEditMode;
+
+  const userPayload = isEdit
+    ? {
+        name: this.currentUser.name,
+        email: this.currentUser.email,
+        role: this.currentUser.role
+      }
+    : {
+        name: this.currentUser.name,
+        email: this.currentUser.email,
+        role: this.currentUser.role,
+        password: this.currentUser.password // 🟡 requis uniquement à la création
+      };
+
+  const operation = isEdit
+    ? this.userService.updateUser(this.currentUser.id, userPayload)
+    : this.userService.createUser(userPayload);
+
+  console.log('Payload envoyé :', userPayload);
+
+  operation.subscribe({
+    next: () => {
+      this.loadUsers();
+      this.closeModal();
+    },
+    error: (error) => console.error('Erreur lors de la sauvegarde :', error)
+  });
+}
+
 
   deleteUser(id: number): void {
     if (confirm('Are you sure you want to delete this user?')) {

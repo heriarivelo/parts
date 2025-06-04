@@ -61,6 +61,8 @@ export class OrderCreateComponent {
   isLoading = false;
   currentManagerId = 1; // À remplacer par l'ID réel
 
+  today = new Date();
+
   constructor(
     private fb: FormBuilder,
     private managerService: ManagerService,
