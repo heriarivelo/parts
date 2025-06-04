@@ -28,7 +28,7 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
-  private apiUrl = `${environment.apiUrl}auth`; // À remplacer par votre URL
+  private apiUrl = `${environment.apiUrl}/auth`; // À remplacer par votre URL
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
