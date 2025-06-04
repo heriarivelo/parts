@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, map, catchError, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../environments/environment';
 
 // export type UserRole = 'ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'CLIENT';
 // export type CreateUserDto = Omit<User, '_id' | 'createdAt' | 'updatedAt'>;
@@ -27,7 +28,7 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
-  private apiUrl = 'http://localhost:8000/api/auth'; // À remplacer par votre URL
+  private apiUrl = `${environment.apiUrl}auth`; // À remplacer par votre URL
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
