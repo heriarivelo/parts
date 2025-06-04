@@ -43,7 +43,7 @@ import { ProClientService, ProClient, ClientStats } from '../../../service/pro-c
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './professional-clients.component.html',
-  styleUrls: ['./professional-clients.component.css']
+  styleUrls: ['./professional-clients.component.scss']
 })
 export class ProfessionalClientsComponent implements OnInit {
   clients: ProClient[] = [];

@@ -13,7 +13,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
   standalone: true,
   imports: [CurrencyPipe, DatePipe, CommonModule, FormsModule ],
   templateUrl: './invoice-list.component.html',
-  styleUrls: ['./invoice-list.component.css'],
+  styleUrls: ['./invoice-list.component.scss'],
   // providers: [DatePipe]
 })
 export class InvoiceListComponent implements OnInit {

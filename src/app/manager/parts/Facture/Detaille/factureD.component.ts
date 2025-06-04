@@ -22,7 +22,7 @@ export interface FactureItem {
     FormsModule
   ],
   templateUrl: './factureD.component.html',
-  styleUrls: ['./factureD.component.css']
+  styleUrls: ['./factureD.component.scss']
 })
 export class FactureMDComponent {
   // Données statiques de la facture

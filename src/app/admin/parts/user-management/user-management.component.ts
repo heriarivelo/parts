@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
     FormsModule, CommonModule // Ajoutez cette ligne
   ],
   templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.css']
+  styleUrls: ['./user-management.component.scss']
 })
 export class UserManagementComponent implements OnInit {
   users: any[] = [];

@@ -17,7 +17,7 @@ interface Facture {
     FormsModule
   ],
   templateUrl: './facture.component.html',
-  styleUrls: ['./facture.component.css']
+  styleUrls: ['./facture.component.scss']
 })
 export class FactureMComponent implements OnInit {
   factures: Facture[] = [];
