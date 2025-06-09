@@ -375,6 +375,20 @@ export class PieceService {
     return Math.floor(valeur / factor) * factor;
   }
 
+  getCurrentData(): any {
+
+  return {
+    importParts: this.pieces.map(piece => ({
+      CODE_ART: piece.code,
+      LIB1: piece.libelle,
+      marque: piece.marque,
+      oem: piece.reference,
+      prix_de_vente:  this.calculerPrixFinal(piece),
+      Qte: piece.quantite
+    }))
+  };
+}
+
   // getPiece(): Observable<any> {
   //   return this.http.get(`${this.apiUrl}/pieces`);
   // }

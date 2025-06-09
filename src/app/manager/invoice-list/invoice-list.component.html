@@ -68,9 +68,9 @@
                         <!-- Client -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div *ngIf="facture.commandeVente.customer; else noCustomer">
-                                <div class="font-medium">{{ facture.commandeVente.customer.name }}</div>
+                                <div class="font-medium">{{ facture.commandeVente.customer.nom }}</div>
                                 <div *ngIf="facture.commandeVente.customer.phone" class="text-xs text-gray-500">
-                                    {{ facture.commandeVente.customer.phone }}
+                                    {{ facture.commandeVente.customer.telephone }}
                                 </div>
                             </div>
                             <ng-template #noCustomer>
@@ -235,7 +235,8 @@
 
                     <!-- Date -->
                     <div class="text-right">
-                        <p><span class="font-semibold">Date :</span> ____________________</p>
+                        <p><span class="font-semibold">Date :</span> {{ selectedFacture.createdAt | date: 'dd/MM/yyyy à
+                            HH:mm:ss' }}</p>
                     </div>
                 </div>
 
@@ -246,14 +247,18 @@
                             FACTURE N° {{ selectedFacture.referenceFacture }}
                         </h4>
                         <p *ngIf="selectedFacture.commandeVente.customer; else noCustomer">
-                            {{ selectedFacture.commandeVente.customer.name }}
-                            <span *ngIf="selectedFacture.commandeVente.customer.phone">
-                                - {{ selectedFacture.commandeVente.customer.phone }}
+                            {{ selectedFacture.commandeVente.customer?.nom }}
+                            <span *ngIf="selectedFacture.commandeVente.customer.telephone">
+                                - {{ selectedFacture.commandeVente.customer?.telephone }}
                             </span>
                         </p>
-                        <p><span class="font-semibold">Adresse :</span></p>
-                        <p><span class="font-semibold">Contact :</span></p>
-                        <p><span class="font-semibold">NIF :</span></p>
+                        <p><span class="font-semibold">Adresse :</span> {{ selectedFacture.commandeVente.customer?.nom
+                            }}
+                        </p>
+                        <p><span class="font-semibold">Contact :</span> {{
+                            selectedFacture.commandeVente.customer?.telephone }}</p>
+                        <p><span class="font-semibold">NIF :</span> {{ selectedFacture.commandeVente.customer?.siret }}
+                        </p>
                         <ng-template #noCustomer>
                             <p class="text-gray-500">Aucun client associé</p>
                         </ng-template>
@@ -310,8 +315,8 @@
                 <!-- Récapitulatif financier -->
                 <div class="bg-gray-50 p-4 rounded-md">
                     <div class="flex justify-between mb-2">
-                        <span class="font-medium">Total HT:</span>
-                        <span>{{ selectedFacture.prixTotal | currency:'MGA':'symbol':'1.0-0' }}</span>
+                        <span class="font-medium">Total :</span>
+                        <span>{{ selectedFacture.commandeVente.totalAmount | currency:'MGA':'symbol':'1.0-0' }}</span>
                     </div>
                     <div *ngIf="selectedFacture.remises.length > 0" class="flex justify-between mb-2 text-red-600">
                         <span class="font-medium">Remise:</span>
@@ -319,7 +324,7 @@
                     </div>
                     <div class="flex justify-between font-bold border-t pt-2">
                         <span>Net à payer:</span>
-                        <span>{{ selectedFacture.prixTotal - calculateRemiseTotale(selectedFacture) |
+                        <span>{{ selectedFacture.prixTotal |
                             currency:'MGA':'symbol':'1.0-0' }}</span>
                     </div>
                 </div>

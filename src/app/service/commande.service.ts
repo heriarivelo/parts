@@ -44,7 +44,7 @@ export class CommandeService {
   // }
 
     getActiveOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.apiUrl}?status=EN_ATTENTE,VALIDE`);
+    return this.http.get<Order[]>(`${this.apiUrl}/all`);
   }
 
   cancelOrder(id: number): Observable<void> {

@@ -5,11 +5,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ManagerService } from '../../../service/manager.service';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { PdfService } from '../../../service/pdf.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-calculatrice',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './calculatrice.component.html',
   styleUrl: './calculatrice.component.scss'
 })
@@ -31,12 +34,35 @@ export class CalculatriceComponent {
   totauxMethode2 = { caPrevisionnel: 0, margeTotale: 0 };
   totauxFinaux = { caPrevisionnel: 0, margeTotale: 0 };
 
+   clientForm: FormGroup;
+
+  // constructor(private fb: FormBuilder, private pdfService: PdfService, private orderService: OrderService) {
+  //   this.clientForm = this.fb.group({
+  //     customerType: ['B2B'],
+  //     nom: ['', Validators.required],
+  //     telephone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+  //     email: ['', Validators.email],
+  //     adresse: [''],
+  //     nif: ['']
+  //   });
+  // }
+
   constructor(
     public pieceService: PieceService,
     public managerService : ManagerService,
-    private router: Router
+    private router: Router,
+    private fb: FormBuilder,
+    private pdfService: PdfService
   ) {
     this.parametres = this.pieceService.getParametres();
+    this.clientForm = this.fb.group({
+      customerType: ['B2B'],
+      nom: ['', Validators.required],
+      telephone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      email: ['', Validators.email],
+      adresse: [''],
+      nif: ['']
+    });
   }
 
   description = '';
@@ -204,49 +230,84 @@ randomId = Math.floor(Math.random() * 10000);
   };
 }
 
+  showClientModal = false;
+  selectedCustomerType = 'B2B';
+  currentManagerId = 1;
+  //  importData: any;
+  importData: any = {}; // Initialisation vide ou avec des valeurs par défaut
 
-  // Confirme le devis
- confirmDevis() {
-  if (!this.devisPreview) {
-    alert('Aucun devis à confirmer');
+  // Ouvre le modal client
+  openClientModal() {
+    this.showClientModal = true;
+  }
+
+  // Ferme le modal sans sauvegarder
+  cancelClientModal() {
+    this.showClientModal = false;
+    this.clientForm.reset();
+  }
+
+
+async confirmDevis() {
+  // 1. Récupérer les données actuelles du service
+  const currentData = this.pieceService.getCurrentData(); // À implémenter dans PieceService
+  
+  // 2. Formater les données
+  const orderData = this.formatDevisData(currentData || { importParts: [] });
+  
+  // 3. Vérifier qu'il y a des articles
+  if (!orderData.items.length) {
+    alert('Aucun article à commander');
     return;
   }
 
-  this.isLoading = true;
+  const clientInfo = this.clientForm.value;
 
-  // Formatage des données pour l'API
-  const orderData = {
-    customerType: 'B2B', // À adapter selon votre logique
-    // items: this.devisPreview.items.map(item => ({
-    //   productId: item.reference, // Ou l'identifiant réel du produit
-    //   quantity: item.quantity,
-    //   unitPrice: item.unitPrice
-    // })),
-    totalAmount: this.devisPreview.total,
-    notes: 'Devis confirmé via interface'
+  // 4. Générer la référence
+  const tempReference = `CMD-${Date.now()}`;
+  
+  // 5. Préparer les données pour le PDF
+  const pdfData = {
+    reference: tempReference,
+    clientInfo,
+    ...orderData,
+    customerType: this.selectedCustomerType,
+    date: new Date().toLocaleDateString('fr-FR')
   };
 
-  this.managerService.createOrder(orderData).subscribe({
-    next: (result) => {
-      this.isLoading = false;
-      
-      // Notification stylée (alternative à alert)
-      alert(
-        `Devis confirmé ! Référence: ${result.orderId}`,
-      );
+  try {
+    // 6. Générer le PDF
+    // await this.pdfService.generateAndExportPdf(pdfData, 'devis');
+    await this.pdfService.exportAsImage(pdfData, 'devis', 'png')
 
-      // Réinitialisation et redirection
-      this.closeModal();
-      this.router.navigate(['/liste-commandes', result.orderId]);
-    },
-    error: (err) => {
-      this.isLoading = false;
-      console.error('Erreur confirmation:', err);
-      
-      alert(
-        err.error?.message || 'Erreur lors de la confirmation',
-      );
-    }
-  });
+    // 7. Enregistrer en base
+    const orderPayload = {
+      reference: tempReference,
+      customerType: this.selectedCustomerType,
+      managerId: this.currentManagerId,
+      items: orderData.items.map((item :any) => ({
+        productReference: item.reference, // Utilisez le champ approprié
+        quantity: item.quantity,
+        unitPrice: item.unitPrice
+      })),
+      totalAmount: orderData.total,
+      clientInfo
+    };
+
+    // const result = await this.managerService.createOrder(orderPayload).toPromise();
+    // console.log('Commande enregistrée:', result);
+    
+    // 8. Fermer le modal et reset
+    this.showClientModal = false;
+    this.showModal = false;
+    this.clientForm.reset();
+
+    // 9. Feedback utilisateur
+    alert('Devis confirmé et PDF généré avec succès!');
+
+  } catch (error) {
+    console.error('Erreur:', error);
+    alert('Erreur lors de la confirmation: ');
+  }
 }
 }

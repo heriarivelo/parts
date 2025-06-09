@@ -55,7 +55,7 @@ showDetailsModal = false;
     this.filteredFactures = this.factures.filter(facture => {
       const matchesSearch = facture.referenceFacture.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         facture.commandeVente.reference.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (facture.commandeVente.customer?.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false);
+        (facture.commandeVente.customer?.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false);
       
       const matchesStatus = this.statusFilter === 'TOUS' || 
         facture.status === this.statusFilter;
@@ -64,9 +64,23 @@ showDetailsModal = false;
     });
   }
 
+  // calculateRemiseTotale(facture: Invoice): number {
+  //   return facture.remises.reduce((sum, remise) => sum + remise.montant, 0);
+  // }
+
   calculateRemiseTotale(facture: Invoice): number {
-    return facture.remises.reduce((sum, remise) => sum + remise.montant, 0);
-  }
+  return facture.remises.reduce((sum, remise) => {
+    if (remise.type === 'POURCENTAGE' && remise.taux) {
+      // Calculer le montant de la remise en pourcentage
+      const montantPourcentage = (facture.commandeVente.totalAmount * remise.taux) / 100;
+      return sum + montantPourcentage;
+    } else if (remise.montant) {
+      // Utiliser le montant fixe directement
+      return sum + remise.montant;
+    }
+    return sum;
+  }, 0);
+}
 
   updateStatus(facture: Invoice): void {
     // Logique pour mettre à jour le statut
