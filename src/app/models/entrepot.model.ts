@@ -42,11 +42,12 @@ export interface Box {
 export interface Item {
   id: number;
   referenceCode?: string;
-  // libelle?: string;
+  codeArt?: string;
   lib1?: string; 
   oem:string;
   marque:string;              // ← ajouté
   quantite: number;
+  qttsansEntrepot: number,
   quantiteVendu?: number;
   prixFinal?: number;          // ← ajouté
   status: string;

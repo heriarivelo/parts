@@ -74,4 +74,20 @@ getAllStocks(params: any): Observable<any> {
   //     throw error; // Important pour la gestion d'erreur dans le composant
   //   }
   // }
+
+    getProductDistribution(productId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/stocks/products/${productId}/distribution`);
+  }
+
+  updateDistribution(productId: number, distributions: any[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/stocks/distribution`, {
+      productId,
+      distributions
+    });
+  }
+
+   clearDatabase(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/tools/clear-database`);
+  }
+
 }

@@ -2,159 +2,242 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StockService } from '../../../service/stock.service';
 import {Stock} from '../../../models/stock.model';
-// import { StockFilterPipe } from './stock.pipe';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { FormsModule } from '@angular/forms';
+import { ReapproService } from '../../../service/reappro.service';
 
 @Component({
   selector: 'app-stocks',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './stocks.component.html',
   styleUrl: './stocks.component.scss'
 })
 export class StocksComponent implements OnInit {
-  // stocks: Stock[] = [];
-  analytics: any = {};
-  // isLoading = true;
-  // private _maxSold: number = 1;
+  lowStockProducts: any[] = [];
+  selectedProducts: any[] = [];
+  loading = false;
+  threshold = 5;
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
 
-  stocks: any[] = [];
-  searchForm: FormGroup;
-  isLoading = false;
-  pagination = {
-    page: 1,
-    limit: 20,
-    total: 0
-  };
-  private _totalPages = 0;
+  statuses = [
+    { value: 'DRAFT', label: 'Brouillon' },
+    { value: 'PENDING', label: 'En attente' }
+  ];
+  selectedStatus = 'DRAFT';
+  currentManagerId = 1;
 
+  Math = Math;
+
+  // Objet pour suivre les sélections entre les pages
+  selectedProductsMap: { [productId: number]: {
+    selected: boolean;
+    quantityToOrder: number;
+    unitPrice: number;
+    weightKg: number;
+  }} = {};
 
   constructor(
     private stockService: StockService,
-    private fb: FormBuilder
-  ) {
-    this.searchForm = this.fb.group({
-      search: ['']
-    });
-  }
+    private reapproService: ReapproService
+  ) {}
 
   ngOnInit(): void {
-    this.loadStocks();
+    this.loadLowStockProducts();
   }
 
-  loadStocks(): void {
-    this.isLoading = true;
-    const params = {
-      page: this.pagination.page,
-      limit: this.pagination.limit,
-      ...this.searchForm.value
-    };
-
-    this.stockService.getAllStocks(params).subscribe({
+  loadLowStockProducts(): void {
+    this.loading = true;
+    this.reapproService.getLowStock(this.threshold, this.currentPage, this.pageSize).subscribe({
       next: (response) => {
-        this.stocks = response.data;
-        this.pagination.total = response.meta.total;
-        this.isLoading = false;
+        this.lowStockProducts = response.data.map((p: any) => {
+          const productId = p.product.id;
+          const savedSelection = this.selectedProductsMap[productId];
+          
+          return {
+            ...p,
+            selected: savedSelection ? savedSelection.selected : false,
+            quantityToOrder: savedSelection ? savedSelection.quantityToOrder : Math.max(5 - p.quantite, 1),
+            unitPrice: savedSelection ? savedSelection.unitPrice : p.product.importDetails?.[0]?.purchasePrice,
+            weightKg: savedSelection ? savedSelection.weightKg : p.product.importDetails?.[0]?.poids
+          };
+        });
+        
+        this.totalItems = response.pagination.totalCount;
+        this.totalPages = response.pagination.totalPages;
+        this.updateSelectedProducts();
+        this.loading = false;
       },
       error: (err) => {
         console.error(err);
-        this.isLoading = false;
+        this.loading = false;
       }
     });
+  }
 
-       this.stockService.getStockAnalytics().subscribe({
-      next: (data) => {
-        this.analytics = data;
+  onPageChange(newPage: number): void {
+    if (newPage >= 1 && newPage <= this.totalPages) {
+      this.currentPage = newPage;
+      this.loadLowStockProducts();
+    }
+  }
+
+  onThresholdChange(): void {
+    this.currentPage = 1;
+    this.loadLowStockProducts();
+  }
+
+  getPageNumbers(): number[] {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  toggleProductSelection(product: any): void {
+    const productId = product.product.id;
+    
+    product.selected = !product.selected;
+    
+    this.selectedProductsMap[productId] = {
+      selected: product.selected,
+      quantityToOrder: product.quantityToOrder,
+      unitPrice: product.unitPrice,
+      weightKg: product.weightKg || 0
+    };
+    
+    this.updateSelectedProducts();
+  }
+
+  updateQuantityToOrder(product: any, newQuantity: number): void {
+    product.quantityToOrder = newQuantity;
+    
+    if (product.selected) {
+      const productId = product.product.id;
+      if (this.selectedProductsMap[productId]) {
+        this.selectedProductsMap[productId].quantityToOrder = newQuantity;
+      }
+      this.updateSelectedProducts();
+    }
+  }
+
+  updateSelectedProducts(): void {
+    this.selectedProducts = Object.keys(this.selectedProductsMap)
+      .filter(productId => this.selectedProductsMap[+productId].selected)
+      .map(productId => {
+        const p = this.selectedProductsMap[+productId];
+        const product = this.lowStockProducts.find(prod => prod.product.id === +productId) || {};
+        
+        return {
+          productId: +productId,
+          reference: product.product?.referenceCode || '',
+          name: product.product?.libelle || '',
+          quantity: p.quantityToOrder,
+          unitPrice: p.unitPrice,
+          weightKg: p.weightKg
+        };
+      });
+  }
+
+  submitReappro(): void {
+    if (this.selectedProducts.length === 0) return;
+
+    this.loading = true;
+    const items = this.selectedProducts.map(p => ({
+      productId: p.productId,
+      quantity: p.quantity,
+      unitPrice: p.unitPrice,
+      weightKg: p.weightKg
+    }));
+
+    this.reapproService.createReappro(items, this.selectedStatus, this.currentManagerId, this.totalValue).subscribe({
+      next: (response) => {
+        this.selectedProducts.forEach(p => {
+          delete this.selectedProductsMap[p.productId];
+        });
+        
+        this.loadLowStockProducts();
+        this.selectedProducts = [];
+        this.loading = false;
+        alert('Réapprovisionnement enregistré avec succès !');
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+        alert('Erreur lors de l\'enregistrement');
+      }
     });
   }
 
-  onPageChange(page: number): void {
-    this.pagination.page = page;
-    this.loadStocks();
-  }
+  // Ajoutez ces méthodes dans votre classe StocksComponent
 
-
-get pageNumbers(): number[] {
-  this._totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
-  return Array.from({ length: this._totalPages }, (_, i) => i + 1);
-}
-
-// Dans le template, utilisez : *ngFor="let page of pageNumbers"
-
-  onSearch(): void {
-    this.pagination.page = 1;
-    this.loadStocks();
-  }
-
-  // constructor(private stockService: StockService) {}
-
-  // ngOnInit(): void {
-  //   this.loadData();
-  // }
-
-  // loadData(): void {
-  //   this.isLoading = true;
-    
-  //   this.stockService.getStocks().subscribe({
-  //     next: (data) => {
-  //       this.stocks = data;
-  //       this.isLoading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.isLoading = false;
-  //     }
-  //   });
-
-  //   this.stockService.getStockAnalytics().subscribe({
-  //     next: (data) => {
-  //       this.analytics = data;
-  //     },
-  //     error: (err) => console.error(err)
-  //   });
-  // }
-
-  getStatusClass(status: string): string {
-    switch(status) {
-      case 'DISPONIBLE': return 'bg-green-100 text-green-800';
-      case 'RUPTURE': return 'bg-red-100 text-red-800';
-      case 'COMMANDE': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+updateQuantity(product: any): void {
+  if (product.selected) {
+    const productId = product.product.id;
+    if (this.selectedProductsMap[productId]) {
+      this.selectedProductsMap[productId].quantityToOrder = product.quantityToOrder;
     }
   }
-
-  getProgressWidth(quantity: number, alertThreshold = 5): string {
-    const percentage = Math.min((quantity / alertThreshold) * 100, 100);
-    return `${percentage}%`;
-  }
-
-  getProgressColor(quantity: number, alertThreshold = 5): string {
-    if (quantity === 0) return 'bg-red-600';
-    if (quantity < alertThreshold) return 'bg-yellow-400';
-    return 'bg-green-600';
-  }
-
-  // Dans stocks.component.ts
-get maxSold(): number {
-  if (!this.stocks?.length) return 1;
-  return Math.max(...this.stocks.map(s => s.quantiteVendu), 1);
+  this.updateSelectedProducts(); // Pour recalculer les totaux
 }
 
-  getStatusClas(status: string): string {
-    switch(status) {
-      case 'En stock':
-        return 'bg-green-100 text-green-800';
-      case 'Faible stock':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Épuisé':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+updateUnitPrice(product: any, newPrice: number): void {
+  product.unitPrice = newPrice; // Met à jour le produit local
+  if (product.selected) {
+    const productId = product.product.id;
+    if (this.selectedProductsMap[productId]) {
+      this.selectedProductsMap[productId].unitPrice = newPrice;
     }
   }
+  this.updateSelectedProducts(); // Pour recalculer les totaux
+}
 
+updateWeight(product: any, newWeight: number): void {
+  product.weightKg = newWeight; // Met à jour le produit local
+  if (product.selected) {
+    const productId = product.product.id;
+    if (this.selectedProductsMap[productId]) {
+      this.selectedProductsMap[productId].weightKg = newWeight;
+    }
+  }
+  this.updateSelectedProducts(); // Pour recalculer les totaux
+}
+
+get totalQuantity(): number {
+  return Object.values(this.selectedProductsMap)
+    .filter(item => item.selected)
+    .reduce((sum, p) => sum + p.quantityToOrder, 0);
+}
+
+get totalValue(): number {
+  return Object.values(this.selectedProductsMap)
+    .filter(item => item.selected)
+    .reduce((sum, p) => {
+      const price = p.unitPrice || 0;
+      const quantity = p.quantityToOrder || 0;
+      return sum + (quantity * price);
+    }, 0);
+}
+
+get totalWeightKg(): number {
+  return Object.values(this.selectedProductsMap)
+    .filter(item => item.selected)
+    .reduce((sum, p) => {
+      const weight = p.weightKg || 0;
+      const quantity = p.quantityToOrder || 0;
+      return sum + (quantity * weight);
+    }, 0);
+}
 }

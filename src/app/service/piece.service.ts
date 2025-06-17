@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 import { environment } from '../environments/environment';
 import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 
 interface ImportPayload {
@@ -370,6 +371,41 @@ export class PieceService {
     });
   }
 
+    // importFromBdd(): Promise<void> {
+  //   async fetchImportedParts(importId: number): Promise<any[]> {
+  //   const response = await fetch(`${this.apiUrl}/reappro/${importId}/parts`);
+  //   if (!response.ok) throw new Error("Erreur serveur");
+  //   return response.json();
+  // }
+
+  // Dans le service
+// getImportedParts(importId: number): Observable<Piece[]> {
+//   return this.http.get<Piece[]>(`${this.apiUrl}/reappro/${importId}/parts`);
+// }
+
+  loadPieces(importId: number): void {
+    this.http.get<any[]>(`${this.apiUrl}/reappro/${importId}/parts`).subscribe({
+      next: (dbParts) => {
+        this.pieces = dbParts.map((part: any) => ({
+          code: part.code,
+          marque: part.marque,
+          reference: part.reference,
+          autofinal: part.autofinal,
+          libelle: part.libelle,
+          quantite: part.quantite,
+          quantiteArrivee: part.quantiteArrivee,
+          prixUnitaireEur: part.prixUnitaireEur,
+          poidsKg: part.poidsKg
+        }));
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des pièces :', error);
+        alert('Erreur lors du chargement des pièces.');
+      }
+    });
+  }
+
+
   private arrondirInf(valeur: number, precision: number): number {
     const factor = Math.pow(10, -precision);
     return Math.floor(valeur / factor) * factor;
@@ -388,6 +424,11 @@ export class PieceService {
     }))
   };
 }
+
+getListeImportation(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/reappro/importation`); // adapte l'URL si nécessaire
+}
+
 
   // getPiece(): Observable<any> {
   //   return this.http.get(`${this.apiUrl}/pieces`);

@@ -1,4 +1,5 @@
-<div class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-6 flex flex-col">
+<div
+  class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-6 flex flex-col fixed h-screen overflow-y-auto">
   <!-- Logo & Titre -->
   <div class="flex items-center space-x-3 mb-10">
     <i class="fas fa-car-side text-3xl"></i>
@@ -37,6 +38,93 @@
             <span>Calculatrice de prix</span>
           </a>
         </li>
+      </ul>
+    </nav>
+  </ng-container>
+
+  <ng-container *ngIf="isModerator()">
+
+    <nav class="flex-1">
+      <ul class="flex flex-col space-y-3">
+        <li>
+          <a routerLink="/manager/tableau-de-bord" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-tachometer-alt text-lg"></i>
+            <span>Tableau de bord</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-newspaper text-lg"></i>
+            <span>Stocks-Pièces</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </ng-container>
+  <!-- </ng-template> -->
+  <nav class="flex-1">
+    <ul class="flex flex-col space-y-3">
+      <li class="group">
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold cursor-pointer"
+          (click)="showCommande = !showCommande">
+          <i class="fas fa-shopping-cart text-lg"></i>
+          <span>Commande</span>
+          <i class="fas fa-chevron-down ml-auto transform transition-transform duration-300"
+            [class.rotate-180]="showCommande"></i>
+        </div>
+        <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
+          <li>
+            <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
+              class="block px-3 py-2 rounded hover:bg-red-700 transition-all">
+              Commande Normal
+            </a>
+          </li>
+          <li *ngIf="isAdmin()">
+            <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
+              class="block px-3 py-2 rounded hover:bg-red-700 transition-all">
+              Commande Spécifique
+            </a>
+          </li>
+          <li>
+            <a routerLink="/liste-commandes" routerLinkActive="bg-red-700"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+              <span>Liste commandes</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li>
+      <li>
+        <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+          <i class="fas fa-file-invoice-dollar text-lg"></i>
+          <span>Listes des factures</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
+          <i class="fas fa-file-invoice text-lg"></i>
+          <span>Historique commandes</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+          <i class="fas fa-history text-lg"></i>
+          <span>Mouvement de stock</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <!-- Menu de navigation -->
+  <ng-container *ngIf="isAdmin()">
+    <nav class="flex-1">
+      <ul class="flex flex-col space-y-3">
         <li>
           <a routerLink="/admin-commande" routerLinkActive="bg-red-700"
             class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
@@ -77,84 +165,7 @@
     </nav>
   </ng-container>
   <!-- <ng-template #managerTemplate> -->
-  <ng-container *ngIf="isModerator()">
 
-    <nav class="flex-1">
-      <ul class="flex flex-col space-y-3">
-        <li>
-          <a routerLink="/manager/tableau-de-bord" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-tachometer-alt text-lg"></i>
-            <span>Tableau de bord</span>
-          </a>
-        </li>
-
-        <li>
-          <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-newspaper text-lg"></i>
-            <span>Stocks-Pièces</span>
-          </a>
-        </li>
-        <!--  <li>
-          <a routerLink="/manager/stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-boxes text-lg"></i>
-            <span>Stocks</span>
-          </a>
-        </li>-->
-        <li>
-          <a routerLink="/manager/order" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-clipboard-list text-lg"></i>
-            <span>Commande Client</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/liste-commandes" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-list-alt text-lg"></i>
-            <span>Liste commandes</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-history text-lg"></i>
-            <span>Mouvement de stock</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </ng-container>
-  <!-- </ng-template> -->
-  <nav class="flex-1">
-    <ul class="flex flex-col space-y-3">
-      <li>
-        <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-          <i class="fas fa-file-invoice-dollar text-lg"></i>
-          <span>Listes des factures</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
-          <i class="fas fa-file-invoice text-lg"></i>
-          <span>Historique commandes</span>
-        </a>
-      </li>
-
-
-      <li>
-        <a routerLink="/manager/stocks" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-          <i class="fas fa-newspaper text-lg"></i>
-          <span>Historique</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
 
   <!-- Déconnexion
   <div class="mt-auto pt-6">

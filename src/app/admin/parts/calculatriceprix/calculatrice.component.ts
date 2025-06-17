@@ -95,6 +95,7 @@ export class CalculatriceComponent {
 
   ngOnInit() {
     this.calculerTotaux();
+    this.loadListeImports();
   }
 
   calculerTotaux() {
@@ -137,6 +138,33 @@ export class CalculatriceComponent {
     }
   }
 
+selectedImportId: number | null = null;
+listeImports: any[] = [];
+
+// ngOnInit() {
+//   this.loadListeImports();
+// }
+
+loadListeImports() {
+  this.pieceService.getListeImportation().subscribe({
+    next: (data) => {
+      this.listeImports = data;
+    },
+    error: (err) => {
+      console.error("Erreur de chargement des imports :", err);
+    }
+  });
+}
+
+
+chargerPartsDepuisImport(): void {
+  if (!this.selectedImportId) {
+    alert("Veuillez entrer l'ID d'import");
+    return;
+  }
+  this.pieceService.loadPieces(this.selectedImportId);
+}
+
   confirmImport() {
     this.isSaving = true;
     this.error = '';
@@ -145,6 +173,7 @@ export class CalculatriceComponent {
       next: () => {
         this.isSaving = false;
         this.success = true;
+        this.showImportModal = false;
       },
       error: (err) => {
         this.isSaving = false;
@@ -277,7 +306,7 @@ async confirmDevis() {
 
   try {
     // 6. Générer le PDF
-    // await this.pdfService.generateAndExportPdf(pdfData, 'devis');
+    await this.pdfService.exportAsPdf(pdfData, 'devis');
     await this.pdfService.exportAsImage(pdfData, 'devis', 'png')
 
     // 7. Enregistrer en base

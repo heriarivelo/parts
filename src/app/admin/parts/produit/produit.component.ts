@@ -243,4 +243,60 @@ isAdmin(): boolean {
   return this.authService.hasRole('ADMIN');
 }
 
+// Component TS
+isOemModalOpen = false;
+// currentProduct: any = null;
+formattedOemList: string[] = [];
+
+formatOemTitle(oemString: string): string {
+  return oemString || 'Aucune référence OEM disponible';
+}
+
+// Nouvelle fonction de parsing des OEM
+parseOemString(oemString: string): string[] {
+  if (!oemString) return [];
+  
+  // Solution pour gérer les cas comme "65.26803.0002"
+ return oemString.split(', ')
+  .map(oem => oem.trim())
+  .filter(oem => oem.length > 0)
+  .reduce<string[]>((acc, oem) => {
+    // Vérifie si c'est un OEM avec point (comme "65.26803.0002")
+    if (oem.includes('.') && !oem.includes(' ')) {
+      return [...acc, oem];
+    }
+    // Sinon traitement normal
+    const subOems = oem.split(/(?<=[A-Za-z])\s*,\s*/);
+    return [...acc, ...subOems];
+  }, []);
+}
+
+formatOemDisplay(oemString: string): string {
+  if (!oemString) return '-';
+  const oems = this.parseOemString(oemString);
+  
+  if (oems.length === 0) return '-';
+  if (oems.length === 1) return oems[0];
+  
+  // Affiche le premier OEM + nombre d'autres
+  return `${oems[0]} (+${oems.length - 1})`;
+}
+
+openOemModal(stock: any) {
+  this.currentProduct = stock;
+  this.formattedOemList = this.parseOemString(stock.product.oem);
+  
+  if (this.formattedOemList.length === 0) {
+    this.formattedOemList = ['Aucune référence OEM'];
+  }
+  
+  this.isOemModalOpen = true;
+}
+
+closeOemModal() {
+  this.isOemModalOpen = false;
+  this.currentProduct = null;
+  this.formattedOemList = [];
+}
+
 }

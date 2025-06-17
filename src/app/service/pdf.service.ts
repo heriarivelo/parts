@@ -9,32 +9,15 @@ import { firstValueFrom } from 'rxjs';
 })
 export class PdfService {
 
-   private logoBase64: string | null = null;
+  private readonly logoUrl = '/logo/facture.png';
 
-  constructor(private http: HttpClient) {
-    this.loadLogo();
+  constructor() {
   }
 
-private async loadLogo(): Promise<void> {
-  try {
-    const logoBlob: Blob = await firstValueFrom(
-      this.http.get('/assets/logo.png', { responseType: 'blob' })
-    );
-    this.logoBase64 = await this.blobToBase64(logoBlob);
-  } catch (error) {
-    console.error('Erreur chargement logo:', error);
-    this.logoBase64 = null;
-  }
-}
-
-
-  private blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+  private getLogoHtml(): string {
+    // Version avec URL
+    return `<img src="${this.logoUrl}" alt="Logo" style="height:70px;" 
+                onerror="this.style.display='none'">`;
   }
 
   /**
@@ -88,10 +71,7 @@ private async loadLogo(): Promise<void> {
         <!-- En-tête -->
         <div style="border-bottom: 2px solid #f63b42; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 20px;">
-                    ${this.logoBase64 ? 
-            `<img src="${this.logoBase64}" alt="Logo" style="height: 60px; margin-right: 20px;">` : 
-            '<div style="height: 60px; width: 60px; background: #f63b42; color: white; display: flex; align-items: center; justify-content: center; margin-right: 20px;">KP</div>'
-          }
+            ${this.getLogoHtml()}
             <div>
               <h1 style="color: #f63b42; font-weight: 800; font-size: 22px; margin: 0 0 5px 0;">
                 kaleo<span style="color: #333;">PARTS</span>
@@ -103,31 +83,33 @@ private async loadLogo(): Promise<void> {
           </div>
           
           <div style="text-align: right;">
-            <h2 style="color: #f63b42; font-size: 20px; margin: 0 0 10px 0;">DEVIS</h2>
-            <p style="margin: 5px 0; font-size: 14px;"><strong>N°:</strong> ${devis.reference || 'TEMP'}</p>
             <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(devis.date || Date.now()).toLocaleDateString('fr-FR', dateOptions)}</p>
-            <p style="margin: 5px 0; font-size: 14px;"><strong>Validité:</strong> 30 jours</p>
           </div>
         </div>
 
-        <!-- Client -->
-        <div style="margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee;">
-          <h3 style="color: #333; font-size: 16px; margin: 0 0 10px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-            ${devis.customerType === 'B2B' ? 'CLIENT PROFESSIONNEL' : 'CLIENT'}
-          </h3>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-              <p style="margin: 8px 0;"><strong>Nom:</strong> ${devis.clientInfo?.nom || 'Non spécifié'}</p>
-              ${devis.clientInfo?.telephone ? `<p style="margin: 8px 0;"><strong>Téléphone:</strong> ${devis.clientInfo.telephone}</p>` : ''}
-            </div>
-            <div>
-              ${devis.clientInfo?.email ? `<p style="margin: 8px 0;"><strong>Email:</strong> ${devis.clientInfo.email}</p>` : ''}
-              ${devis.clientInfo?.adresse ? `<p style="margin: 8px 0;"><strong>Adresse:</strong> ${devis.clientInfo.adresse}</p>` : ''}
-              ${devis.customerType === 'B2B' && devis.clientInfo?.nif ? `<p style="margin: 8px 0;"><strong>NIF:</strong> ${devis.clientInfo.nif}</p>` : ''}
-            </div>
-          </div>
-        </div>
+    <!-- Client - Aligné à droite mais contenu à gauche (items-start) -->
+<div style="margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: flex-end;">
+  <!-- En-tête -->
+  <div style="text-align: left;">
+    <p style="margin: 0 0 10px 0; font-size: 14px;">
+      <strong>Devis N°:</strong> ${devis.reference || 'TEMP'}
+    </p>
+    
+    <!-- Type de client -->
+    <h3 style="color: #333; font-size: 16px; margin: 0 0 15px 0; padding-bottom: 5px; border-bottom: 1px solid #ddd;">
+      ${devis.customerType === 'B2B' ? 'CLIENT PROFESSIONNEL' : 'CLIENT PARTICULIER'}
+    </h3>
+    
+    <!-- Informations client -->
+    <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+      <p style="margin: 0;"><strong>Nom:</strong> ${devis.clientInfo?.nom || 'Non spécifié'}</p>
+      ${devis.clientInfo?.telephone ? `<p style="margin: 0;"><strong>Téléphone:</strong> ${devis.clientInfo.telephone}</p>` : ''}
+      ${devis.clientInfo?.email ? `<p style="margin: 0;"><strong>Email:</strong> ${devis.clientInfo.email}</p>` : ''}
+      ${devis.clientInfo?.adresse ? `<p style="margin: 0;"><strong>Adresse:</strong> ${devis.clientInfo.adresse}</p>` : ''}
+      ${devis.customerType === 'B2B' && devis.clientInfo?.nif ? `<p style="margin: 0;"><strong>NIF:</strong> ${devis.clientInfo.nif}</p>` : ''}
+    </div>
+  </div>
+</div>
 
         <!-- Articles -->
         <h3 style="color: #333; font-size: 16px; margin: 0 0 15px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px;">ARTICLES</h3>
@@ -202,24 +184,18 @@ private async loadLogo(): Promise<void> {
       <div id="pdf-content" style="padding: 20px; font-family: Arial; width: 210mm; background: white; box-sizing: border-box;">
         <!-- En-tête -->
         <div style="border: 1px solid #ddd; padding: 20px; display: flex; justify-content: space-between; margin-bottom: 20px;">
-          <div style="display: flex; gap: 20px; align-items: center;">
-                    ${this.logoBase64 ? 
-            `<img src="${this.logoBase64}" alt="Logo" style="height: 60px; margin-right: 20px;">` : 
-            '<div style="height: 60px; width: 60px; background: #f63b42; color: white; display: flex; align-items: center; justify-content: center; margin-right: 20px;">KP</div>'
-          }
+              <div style="display: flex; align-items: center; gap: 20px;">
+            ${this.getLogoHtml()}
             <div>
-              <h1 style="color: #f63b42; font-weight: 800; font-size: 18px; margin: 0 0 5px 0;">
-                kaleo<span style="color: black;">PARTS</span>
+              <h1 style="color: #f63b42; font-weight: 800; font-size: 22px; margin: 0 0 5px 0;">
+                kaleo<span style="color: #333;">PARTS</span>
               </h1>
-              <p style="margin: 2px 0;">Tél : 038 66 332 82</p>
-              <p style="margin: 2px 0;">Email : kaleoparts@gmail.com</p>
-              <p style="margin: 2px 0;">NIF 6018289282</p>
-              <p style="margin: 2px 0;">STAT 46101112023011160</p>
+              <p style="margin: 3px 0; font-size: 13px; color: #555;">Tél: 038 66 332 82</p>
+              <p style="margin: 3px 0; font-size: 13px; color: #555;">Email: kaleoparts@gmail.com</p>
+              <p style="margin: 3px 0; font-size: 13px; color: #555;">NIF: 6018289282</p>
             </div>
           </div>
           <div style="text-align: right;">
-            <p style="margin: 2px 0; font-weight: 600; font-size: 18px;">FACTURE</p>
-            <p style="margin: 2px 0;"><strong>N° :</strong> ${facture.referenceFacture || 'PRO-FORMA'}</p>
             <p style="margin: 2px 0;"><strong>Date :</strong> ${new Date(facture.createdAt || Date.now()).toLocaleDateString('fr-FR')}</p>
             ${facture.commandeVente?.reference ? `<p style="margin: 2px 0;"><strong>Commande :</strong> ${facture.commandeVente.reference}</p>` : ''}
           </div>
@@ -228,10 +204,10 @@ private async loadLogo(): Promise<void> {
         <!-- Bloc client -->
         <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
           <div style="width: 300px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #eee;">
-            <h4 style="font-size: 16px; font-weight: 600; margin: 0 0 10px 0; color: #333;">CLIENT</h4>
-            
+            <p style="margin: 2px 0;"><strong>Facture N° :</strong> ${facture.referenceFacture || 'PRO-FORMA'}</p>
+            <h4 style="font-size: 15px; font-weight: 600; margin: 0 0 10px 0; color: #333;">CLIENT</h4>
             ${facture.commandeVente?.customer ? `
-              <p style="margin: 5px 0; font-weight: 500;">${facture.commandeVente.customer.nom}</p>
+              <p style="margin: 5px 0; font-weight: 500;"><strong>Nom :</strong>${facture.commandeVente.customer.nom}</p>
               <p style="margin: 5px 0;"><strong>Contact :</strong> ${facture.commandeVente.customer.telephone || 'Non renseigné'}</p>
               ${facture.commandeVente.customer.email ? `<p style="margin: 5px 0;"><strong>Email :</strong> ${facture.commandeVente.customer.email}</p>` : ''}
               ${facture.commandeVente.customer.adresse ? `<p style="margin: 5px 0;"><strong>Adresse :</strong> ${facture.commandeVente.customer.adresse}</p>` : ''}
@@ -375,28 +351,16 @@ private async loadLogo(): Promise<void> {
     return methods[method] || method;
   }
 
-  //   private calculateRemiseTotale(facture: any): number {
-  //   if (!facture.remises?.length) return 0;
-    
-  //   return facture.remises.reduce((total: number, remise: any) => {
-  //     if (remise.type === 'POURCENTAGE' && remise.taux) {
-  //       return total + ((facture.prixTotal || 0) * remise.taux / 100);
-  //     }
-  //     return total + (remise.montant || 0);
-  //   }, 0);
-  // }
-
- private calculateRemiseTotale(discounts: any[], subtotal: number): number {
-  return discounts?.reduce((sum, discount) => {
-    if (discount.type === 'POURCENTAGE' || discount.type === 'percentage') {
-      // Pour les remises en pourcentage, on calcule sur le sous-total
-      const taux = discount.taux || discount.value; // Prend soit 'taux' (BDD) soit 'value' (composant)
-      return sum + (subtotal * (taux / 100));
-    } else {
-      // Pour les remises fixes, on prend soit 'montant' (BDD) soit 'value' (composant)
-      const montant = discount.montant || discount.value;
-      return sum + (montant || 0);
-    }
-  }, 0) || 0;
-}
+//  private calculateRemiseTotale(discounts: any[], subtotal: number): number {
+//   return discounts?.reduce((sum, discount) => {
+//     if (discount.type === 'POURCENTAGE' || discount.type === 'percentage') {
+//       const taux = discount.taux || discount.value; // Prend soit 'taux' (BDD) soit 'value' (composant)
+//       return sum + (subtotal * (taux / 100));
+//     } else {
+//       // Pour les remises fixes, on prend soit 'montant' (BDD) soit 'value' (composant)
+//       const montant = discount.montant || discount.value;
+//       return sum + (montant || 0);
+//     }
+//   }, 0) || 0;
+// }
 }

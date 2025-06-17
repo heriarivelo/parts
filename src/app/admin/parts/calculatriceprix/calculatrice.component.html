@@ -63,6 +63,21 @@
                     <i class="fas fa-file-import mr-2"></i>Importer Excel
                 </button>
             </div>
+
+            <div class="flex">
+                <select [(ngModel)]="selectedImportId" class="border rounded p-2 w-full">
+                    <option [ngValue]="null" disabled selected>Choisir une importation</option>
+                    <option *ngFor="let imp of listeImports" [ngValue]="imp.id">
+                        {{ imp.reference }} - {{ imp.status }} ({{ imp.createdAt | date:'shortDate' }})
+                    </option>
+                </select>
+
+                <button (click)="chargerPartsDepuisImport()" [disabled]="!selectedImportId"
+                    class="mt-2 bg-blue-600 text-white px-4 py-1 rounded">
+                    Charger
+                </button>
+            </div>
+
             <!-- Bouton pour ouvrir le modal -->
             <button (click)="previewDevis()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
                 [disabled]="isLoading">

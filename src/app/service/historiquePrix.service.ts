@@ -14,7 +14,7 @@ export class HistoriPrixService {
   constructor(private http: HttpClient) { }
 
   getPriceHistory(productId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${productId}/price-history`);
+    return this.http.get(`${this.apiUrl}/by-import/${productId}`);
   }
 
   updateProductPrice(productId: number, newPrice: number, reason: string): Observable<any> {

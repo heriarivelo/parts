@@ -17,13 +17,28 @@ export class HistoriqueCommandesComponent implements OnInit {
   recherche = '';
   statuts = ['EN_ATTENTE', 'TRAITEMENT', 'LIVREE', 'ANNULEE'];
 
+
+  pagination = {
+    currentPage: 1,
+    pageSize: 10,
+    totalCount: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false
+  };
+  isLoading = false;
+  Math = Math;
+
+
+  selectedCommande: any = null;
+showDetailsModal = false;
+
+
+
   constructor(private commandeService: CommandeService) {}
 
   ngOnInit() {
-    this.commandeService.getHistorique().subscribe(data => {
-      this.commandes = data;
-      this.commandesFiltrees = data;
-    });
+    this.loadCommandes();
   }
 
   filtrerCommandes() {
@@ -43,8 +58,87 @@ export class HistoriqueCommandesComponent implements OnInit {
     }
   }
 
-  voirDetails(commande: any) {
-    // Redirige ou ouvre un modal
-    console.log("Voir les détails de:", commande);
+   loadCommandes(page: number = 1): void {
+    this.isLoading = true;
+    this.commandeService.getHistorique(page, this.pagination.pageSize)
+      .subscribe({
+        next: (response) => {
+          this.commandes = response.data;
+          this.pagination = response.pagination;
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Erreur:', err);
+          this.isLoading = false;
+        }
+      });
   }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.pagination.totalPages) {
+      this.loadCommandes(page);
+    }
+  }
+
+  // Dans historique-commandes.component.ts
+calculateTotal(commande: any): number {
+  return commande.pieces?.reduce((sum: number, piece: any) => {
+    return sum + (piece.quantite * piece.prixArticle);
+  }, 0) || 0;
+}
+
+getPages(): number[] {
+  const pages = [];
+  const maxVisiblePages = 5;
+  let startPage = Math.max(1, this.pagination.currentPage - Math.floor(maxVisiblePages / 2));
+  const endPage = Math.min(this.pagination.totalPages, startPage + maxVisiblePages - 1);
+
+  // Adjust start page if we're at the end
+  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+}
+
+openDetailModal(commande: any) {
+  this.selectedCommande = commande;
+  this.showDetailsModal = true;
+
+}
+
+ closeModal() {
+    this.showDetailsModal = false;
+  }
+
+  calculatePieceTotal(piece: any): number {
+  return piece.quantite * piece.prixArticle;
+}
+
+getFactureStatus(facture: any): string {
+  switch(facture.status) {
+    case 'PAYEE':
+      return 'Payée';
+    case 'PARTIELLEMENT_PAYEE':
+      return 'Partiellement payée';
+    case 'NON_PAYEE':
+      return facture.montantPaye > 0 ? 'Partiellement payée' : 'Impayée';
+    default:
+      return facture.resteAPayer === 0 ? 'Payée' : 
+             facture.montantPaye > 0 ? 'Partiellement payée' : 'Impayée';
+  }
+}
+
+getStatusColor(facture: any): string {
+  if (facture.status === 'PAYEE' || facture.resteAPayer === 0) {
+    return 'bg-green-100 text-green-800';
+  }
+  if (facture.status === 'PARTIELLEMENT_PAYEE' || facture.montantPaye > 0) {
+    return 'bg-yellow-100 text-yellow-800';
+  }
+  return 'bg-red-100 text-red-800';
+}
+
 }

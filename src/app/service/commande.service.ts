@@ -1,5 +1,5 @@
 // commande.service.ts
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
@@ -27,8 +27,16 @@ export class CommandeService {
 
   constructor(private http: HttpClient) {}
 
-  getHistorique() {
+  getHistoriquesq() {
     return this.http.get<any[]>(this.apiUrl);
+  }
+
+    getHistorique(page: number = 1, pageSize: number = 10): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get(this.apiUrl, { params });
   }
 
   //   createOrder(orderData: any): Observable<Order> {
@@ -38,10 +46,6 @@ export class CommandeService {
   validateOrder(orderId: number, invoiceData: InvoiceData): Observable<any> {
     return this.http.post(`${this.apiUrl}/${orderId}/validate`, invoiceData);
   }
-
-  //  getCommandes(): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/all`);
-  // }
 
     getActiveOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(`${this.apiUrl}/all`);

@@ -29,6 +29,7 @@ export class StockHistoryComponent implements OnInit {
     { value: 'IMPORT', label: 'Import' },
     { value: 'SALE', label: 'Vente' },
     { value: 'RETURN', label: 'Retour' },
+    { value: 'COMMANDE', label: 'Commande' },
     { value: 'ADJUSTMENT', label: 'Ajustement' },
     { value: 'TRANSFER', label: 'Transfert' },
     { value: 'LOSS', label: 'Perte' }

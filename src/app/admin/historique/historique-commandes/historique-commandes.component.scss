@@ -1,0 +1,21 @@
+/* Modal styles */
+.modal-header {
+  @apply px-6 py-4 border-b flex justify-between items-center;
+}
+
+.modal-body {
+  @apply max-h-[70vh] overflow-y-auto;
+}
+
+/* Table styles */
+table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+th {
+  @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+td {
+  @apply px-6 py-4 whitespace-nowrap;
+}

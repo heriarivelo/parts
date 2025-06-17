@@ -90,11 +90,13 @@
         <!-- Pièces -->
         <div class="divide-y divide-gray-200">
             <div *ngFor="let stock of stocks" class="grid grid-cols-12 p-4 hover:bg-gray-50 items-center">
-                <div class="col-span-1 font-mono text-blue-600">{{ stock.entrepot?.libelle || 'Principal' }}</div>
+                <div class="col-span-1 font-mono text-blue-600">{{ stock.product.codeArt }}</div>
                 <div class="col-span-3">{{ stock.product.libelle }}</div>
                 <div class="col-span-2">{{ stock.product.marque || '-' }}</div>
-                <div class="col-span-2 h-10 overflow-y-auto" title="{{ stock.product.oem }}">{{ stock.product.oem || '-'
-                    }}</div>
+                <button class="col-span-2 h-10 overflow-y-auto truncate" [title]="formatOemTitle(stock.product.oem)"
+                    (click)="openOemModal(stock)">
+                    {{ formatOemDisplay(stock.product.oem) || '-' }}
+                </button>
                 <div class="col-span-1 text-center">
                     {{stock.quantite}}
                     <span class="px-2 py-1 text-xs rounded-full" [ngClass]="getStatusClass(getStockStatus(stock))">
@@ -153,25 +155,26 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Encien prix</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nouveau prix</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Raison</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qtté arrivée
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let history of priceHistory" class="hover:bg-gray-50">
 
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {{ history.createdAt | date:'dd/MM/yyyy' }}
+                            {{ history.importDate | date:'dd/MM/yyyy' }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {{ history.oldPrice | currency:'MGA':'symbol':'1.2-2' }}
+                            {{ history.importReference }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {{ history.newPrice | currency:'MGA':'symbol':'1.2-2' }}
+                            {{ history.unitPrice | currency:'MGA':'symbol':'1.2-2' }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {{history.changeType}}
+                            {{history.remainingQuantity}}
                         </td>
                     </tr>
                 </tbody>
@@ -247,5 +250,30 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal OEM -->
+<div *ngIf="isOemModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg w-full max-w-md max-h-[80vh] p-6 flex flex-col">
+        <!-- En-tête -->
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">Références OEM</h3>
+            <button (click)="closeOemModal()" class="text-gray-500 hover:text-gray-700 text-xl">
+                ✖
+            </button>
+        </div>
+
+        <!-- Liste des OEM avec scroll -->
+        <div class="flex-grow overflow-y-auto mb-4 space-y-2">
+            <div *ngFor="let oem of formattedOemList" class="p-2 bg-gray-100 rounded break-all">
+                {{ oem }}
+            </div>
+        </div>
+
+        <button type="button" (click)="closeOemModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 self-end">
+            Fermer
+        </button>
     </div>
 </div>

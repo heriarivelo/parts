@@ -11,7 +11,7 @@
             placeholder="Rechercher par référence..." class="border rounded p-2" />
     </div>
 
-    <!-- Liste des commandes -->
+    <!-- Liste des commandes 
     <div class="grid gap-4">
         <div *ngFor="let commande of commandesFiltrees"
             class="bg-white rounded-xl p-4 shadow flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -26,6 +26,335 @@
                 </span>
                 <span class="text-green-600 font-semibold">{{ commande.totalAmount | currency:'Ar' }}</span>
                 <button (click)="voirDetails(commande)" class="text-blue-600 hover:underline text-sm">Détails</button>
+            </div>
+        </div>
+    </div>-->
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-6">Historique des Commandes</h1>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center my-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+
+        <!-- Commandes Table -->
+        <div *ngIf="!isLoading" class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Client</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Manager</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let commande of commandes" class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ commande.id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ commande.customer?.nom || 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ commande.manager?.name || 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ commande.createdAt | date:'medium' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ commande.totalAmount | currency:'Ar' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <span [ngClass]="getStatutColor(commande.status)"
+                                class="text-xs font-bold px-2 py-1 rounded-full">
+                                {{ commande.status }}</span>
+                        </td>
+                        <!-- Dans la ligne du tableau, ajoutez une colonne action -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button (click)="openDetailModal(commande)" class="text-blue-600 hover:text-blue-900">
+                                Détails
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <button (click)="changePage(pagination.currentPage - 1)" [disabled]="!pagination.hasPrevious"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Précédent
+                    </button>
+                    <button (click)="changePage(pagination.currentPage + 1)" [disabled]="!pagination.hasNext"
+                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Suivant
+                    </button>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Affichage de <span class="font-medium">{{ (pagination.currentPage - 1) * pagination.pageSize
+                                + 1 }}</span>
+                            à <span class="font-medium">{{ Math.min(pagination.currentPage * pagination.pageSize,
+                                pagination.totalCount) }}</span>
+                            sur <span class="font-medium">{{ pagination.totalCount }}</span> résultats
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button (click)="changePage(1)" [disabled]="!pagination.hasPrevious"
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Première page</span>
+                                &laquo;
+                            </button>
+                            <button (click)="changePage(pagination.currentPage - 1)"
+                                [disabled]="!pagination.hasPrevious"
+                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Précédent
+                            </button>
+
+                            <!-- Page Numbers -->
+                            <ng-container *ngFor="let page of getPages()">
+                                <button (click)="changePage(page)" [class.bg-blue-50]="page === pagination.currentPage"
+                                    [class.text-blue-600]="page === pagination.currentPage"
+                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ page }}
+                                </button>
+                            </ng-container>
+
+                            <button (click)="changePage(pagination.currentPage + 1)" [disabled]="!pagination.hasNext"
+                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Suivant
+                            </button>
+                            <button (click)="changePage(pagination.totalPages)" [disabled]="!pagination.hasNext"
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Dernière page</span>
+                                &raquo;
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Ajoutez ce modal à la fin du fichier -->
+<div *ngIf="showDetailsModal && selectedCommande" class="fixed z-10 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+
+        <div
+            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="modal-header">
+                    <h3 class="text-lg font-bold">Détails de la commande #{{ selectedCommande?.id }}</h3>
+                    <button type="button" class="close" (click)="closeModal()">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-6">
+                    <!-- Informations client -->
+                    <div class="mb-8">
+                        <h4 class="text-md font-semibold mb-4 border-b pb-2">Informations Client</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Nom</p>
+                                <p class="font-medium">{{ selectedCommande?.customer?.nom || 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="font-medium">{{ selectedCommande?.customer?.email || 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Téléphone</p>
+                                <p class="font-medium">{{ selectedCommande?.customer?.telephone || 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des pièces -->
+                    <div class="mb-8">
+                        <h4 class="text-md font-semibold mb-4 border-b pb-2">Articles commandés</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Produit</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix
+                                            unitaire
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Quantité</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr *ngFor="let piece of selectedCommande?.pieces">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{
+                                                        piece.product?.codeArt }}</div>
+                                                    <div class="text-sm text-gray-500">{{ piece.product?.reference ||
+                                                        'N/A' }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ piece.prixArticle | currency:'Ar' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ piece.quantite }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            {{ calculatePieceTotal(piece) | currency:'Ar' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="bg-gray-50">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-500">
+                                            Total HT</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            {{ calculateTotal(selectedCommande) | currency:'Ar' }}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Section Facture -->
+                    <div *ngIf="selectedCommande?.factures?.length" class="mb-8">
+                        <h4 class="text-md font-semibold mb-4 border-b pb-2">Facture</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h5 class="font-medium text-gray-700 mb-3">Informations Facture</h5>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Référence:</span>
+                                        <span class="font-medium">{{ selectedCommande.factures[0].referenceFacture
+                                            }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Date création:</span>
+                                        <span class="font-medium">{{ selectedCommande.factures[0].createdAt |
+                                            date:'mediumDate' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Statut:</span>
+                                        <span [class]="getStatusColor(selectedCommande.factures[0])"
+                                            class="px-2 py-1 rounded-full text-xs font-medium">
+                                            {{ getFactureStatus(selectedCommande.factures[0]) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h5 class="font-medium text-gray-700 mb-3">Montants</h5>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Total HT:</span>
+                                        <span class="font-medium">{{ selectedCommande.factures[0].prixTotal |
+                                            currency:'Ar' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Montant payé:</span>
+                                        <span class="font-medium text-green-600">{{
+                                            selectedCommande.factures[0].montantPaye | currency:'Ar' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Reste à payer:</span>
+                                        <span class="font-medium text-red-600">{{
+                                            selectedCommande.factures[0].resteAPayer | currency:'Ar' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remise -->
+                        <div *ngIf="selectedCommande.factures[0].remises?.length" class="mb-6">
+                            <h5 class="font-medium text-gray-700 mb-2">Remise appliquée</h5>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">
+                                            {{ selectedCommande.factures[0].remises[0].type === 'MONTANT_FIXE' ?
+                                            (selectedCommande.factures[0].remises[0].montant | currency:'Ar') :
+                                            (selectedCommande.factures[0].remises[0].taux + '%') }}
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            {{ selectedCommande.factures[0].remises[0].description || 'Aucune
+                                            description' }}
+                                        </p>
+                                    </div>
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">
+                                        {{ selectedCommande.factures[0].remises[0].type === 'MONTANT_FIXE' ? 'Montant
+                                        fixe' : 'Pourcentage' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paiements -->
+                        <div class="mb-6">
+                            <h5 class="font-medium text-gray-700 mb-2">Paiements</h5>
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Date</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Mode</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Montant</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Référence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr *ngFor="let paiement of selectedCommande.factures[0].paiements"
+                                            class="hover:bg-gray-50">
+                                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ paiement.createdAt | date:'shortDate' }}
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <span class="capitalize">{{ paiement.mode.toLowerCase() }}</span>
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                                {{ paiement.montant | currency:'Ar' }}
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ paiement.reference || 'N/A' }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-gray-50 px-6 py-3 flex justify-end">
+                    <button type="button" class="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
+                        (click)="closeModal()">
+                        Fermer
+                    </button>
+                </div>
             </div>
         </div>
     </div>

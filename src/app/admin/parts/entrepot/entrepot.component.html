@@ -26,71 +26,223 @@
   <div class="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg flex flex-col gap-6">
     <h2 class="text-2xl font-bold text-red-600">Gestion des pièces</h2>
 
-    <div class="flex gap-2">
-      <input type="text" [(ngModel)]="articleCode" placeholder="Code de l'article"
-        class="flex-1 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-red-600">
-      <button (click)="addItem()" class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-semibold">
-        Rechercher
-      </button>
-    </div>
+    <div class="flex flex-col gap-4">
+      <!-- Votre recherche existante -->
 
-    <!-- Liste des articles -->
-    <div>
-      <h3 class="text-xl font-semibold text-gray-700 mb-3">Piéce sans entrepôt</h3>
-      <div class="space-y-3 max-h-96 overflow-y-auto">
-        <div *ngFor="let item of items" draggable="true" (dragstart)="drag($event, item)"
-          class="bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded shadow cursor-move transition-all">
-          <!-- <div class="font-medium">Code: {{ item.codeArt }}</div>-->
-          <div>Description: {{ item.lib1 }}</div>
-          <div>Quantité: {{ item.quantite }}</div>
-          <div>Prix: {{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</div>
-          <div class="overflow-hidden h-10 overflow-y-auto">OEM: {{ item.oem }}</div>
-          <div>Marque: {{ item.marque }}</div>
+
+      <div class="flex gap-2">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Code de l'article, ref ou libelle"
+          class="flex-1 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-red-600">
+        <button (click)="lancerRecherche()"
+          class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-semibold">
+          Rechercher
+        </button>
+      </div>
+
+
+      <div *ngIf="resultats.length > 0">
+        <h3>Résultats :</h3>
+        <ul class="space-y-2">
+          <li *ngFor="let item of resultats" class="bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded">
+            <strong>{{ item.product.referenceCode }}</strong> - {{ item.product.libelle }} - {{ item.quantite }} pièces
+            -
+            {{ item.prixFinal }} Ar
+
+            <div class="py-2 px-4 border text-center">
+              <button (click)="showDistribution(item.product)" class="text-blue-500 hover:text-blue-700">
+                Répartir
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Liste des articles -->
+      <div>
+        <h3 class="text-xl font-semibold text-gray-700 mb-3">Piéce sans entrepôt</h3>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <div *ngFor="let item of items" draggable="true" (dragstart)="drag($event, item)"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded shadow cursor-move transition-all">
+            <div class="font-medium">Code: {{ item.codeArt }}</div>
+            <div>Description: {{ item.lib1 }}</div>
+            <div>Sans entrepot: {{ item.qttsansEntrepot }}</div>
+            <div>Quantité: {{ item.quantite }}</div>
+            <div>Prix: {{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</div>
+            <div class="overflow-hidden h-10 overflow-y-auto">OEM: {{ item.oem }}</div>
+            <div>Marque: {{ item.marque }}</div>
+            <!--   <td class="py-2 px-4 border text-center">{{ item.unassignedStock }}</td> -->
+            <div class="py-2 px-4 border text-center">
+              <button (click)="showDistribution(item)" class="text-blue-500 hover:text-blue-700">
+                Répartir
+              </button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="notFound" class="text-red-600 mt-2">Aucun Piece trouvé avec ce code.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour détails -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl relative max-h-[90vh] overflow-y-auto">
+      <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+        ✖
+      </button>
+
+      <h2 class="text-2xl font-bold mb-6 text-red-600 text-center">
+        Piéce(s) dans l'entrepôt {{ selectedBox?.name }}
+      </h2>
+
+      <div *ngIf="selectedBox?.items.length > 0; else noItems">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let item of selectedBox.items">
+                <td class="px-4 py-3 whitespace-nowrap">{{ item.codeArt }}</td>
+                <td class="px-4 py-3">{{ item.lib1 }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ item.quantite }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</td>
+                <button (click)="openTransferModal(item)"
+                  class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
+                  Déplacer
+                </button>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div *ngIf="notFound" class="text-red-600 mt-2">Aucun Piece trouvé avec ce code.</div>
+
+      <ng-template #noItems>
+        <div class="text-center py-8 text-gray-500">
+          Aucun piéce dans cet entrepôt.
+        </div>
+      </ng-template>
     </div>
   </div>
-</div>
 
-<!-- Modal pour détails -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl relative max-h-[90vh] overflow-y-auto">
-    <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
-      ✖
-    </button>
+  <!-- Modal de répartition -->
+  <div *ngIf="selectedProduct && distribution"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Répartition du stock</h2>
+          <button (click)="closeDistribution()" class="text-gray-500 hover:text-gray-700">
+            &times;
+          </button>
+        </div>
 
-    <h2 class="text-2xl font-bold mb-6 text-red-600 text-center">
-      Piéce(s) dans l'entrepôt {{ selectedBox?.name }}
-    </h2>
+        <div class="mb-6 p-4 bg-blue-50 rounded">
+          <h3 class="font-semibold mb-2">{{ selectedProduct.referenceCode }} - {{ selectedProduct.libelle }}</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div>Quantité totale: <span class="font-bold">{{ distribution.total }}</span></div>
+            <div>Total affecté: <span class="font-bold">{{ getTotalAssigned() }}</span></div>
+          </div>
+        </div>
 
-    <div *ngIf="selectedBox?.items.length > 0; else noItems">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let item of selectedBox.items">
-              <td class="px-4 py-3 whitespace-nowrap">{{ item.productId }}</td>
-              <td class="px-4 py-3">{{ item.lib1 }}</td>
-              <td class="px-4 py-3 whitespace-nowrap">{{ item.quantite }}</td>
-              <td class="px-4 py-3 whitespace-nowrap">{{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="mb-4">
+          <table class="min-w-full">
+            <thead>
+              <tr>
+                <th class="py-2 px-4 border bg-gray-100">Entrepôt</th>
+                <th class="py-2 px-4 border bg-gray-100">Quantité</th>
+                <th class="py-2 px-4 border bg-gray-100"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of distribution.assigned; let i = index">
+                <td class="py-2 px-4 border">
+                  <select [(ngModel)]="item.entrepotId" class="w-full p-1 border rounded">
+                    <option [value]="null">Non affecté</option>
+                    <option *ngFor="let e of boxes" [value]="e.id">{{ e.name }}</option>
+                  </select>
+                </td>
+                <td class="py-2 px-4 border">
+                  <input type="number" [(ngModel)]="item.quantity" min="0" [max]="distribution.total"
+                    class="w-full p-1 border rounded">
+                </td>
+                <td class="py-2 px-4 border">
+                  <button (click)="removeDistributionRow(i)" class="text-red-500 hover:text-red-700">
+                    &times;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button (click)="addDistributionRow()" class="mt-2 text-sm text-blue-500 hover:text-blue-700">
+            + Ajouter une ligne
+          </button>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button (click)="closeDistribution()" class="px-4 py-2 border rounded">
+            Annuler
+          </button>
+          <button (click)="saveDistribution()" [disabled]="!isValidDistribution()"
+            class="px-4 py-2 bg-green-500 text-white rounded disabled:bg-gray-300">
+            Enregistrer
+          </button>
+        </div>
       </div>
     </div>
-
-    <ng-template #noItems>
-      <div class="text-center py-8 text-gray-500">
-        Aucun piéce dans cet entrepôt.
-      </div>
-    </ng-template>
   </div>
-</div>
+
+  <!-- Modal de transfert intégré -->
+  <div *ngIf="showTransferModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-xl font-semibold">Transfert de stock</h3>
+        <button (click)="closeTransferModal()" class="text-gray-500 hover:text-gray-700">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-4">
+        <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()">
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Depuis l'entrepôt</label>
+            <select formControlName="fromEntrepotId" class="w-full p-2 border rounded bg-gray-100">
+              <option [value]="selectedBox?.id">{{ selectedBox?.name }}</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Vers l'entrepôt</label>
+            <select formControlName="toEntrepotId" class="w-full p-2 border rounded" required>
+              <option value="">Sélectionner un entrepôt</option>
+              <option *ngFor="let entrepot of boxes" [value]="entrepot.id"
+                [disabled]="entrepot.id === selectedStock?.entrepotId">
+                {{ entrepot.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Quantité (max: {{ selectedStock?.quantite }})</label>
+            <input type="number" formControlName="quantity" class="w-full p-2 border rounded"
+              [max]="selectedStock?.quantite" min="0.01" step="0.01" required>
+          </div>
+
+          <div class="flex justify-end space-x-2 pt-4">
+            <button type="button" (click)="closeTransferModal()" class="px-4 py-2 border rounded hover:bg-gray-100">
+              Annuler
+            </button>
+            <button type="submit" [disabled]="transferForm.invalid || isLoading"
+              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50">
+              {{ isLoading ? 'Transfert en cours...' : 'Confirmer' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

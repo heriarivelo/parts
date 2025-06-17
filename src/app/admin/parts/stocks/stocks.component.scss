@@ -1,0 +1,18 @@
+/* Custom scrollbar pour le tableau */
+table {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+/* Animation pour les lignes sélectionnées */
+tr {
+  transition: background-color 0.2s ease;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+}

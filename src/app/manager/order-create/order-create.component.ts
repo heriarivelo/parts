@@ -186,7 +186,7 @@ export class OrderCreateComponent {
         alert(`Commande validée! Référence: ${result.orderId}`);
         this.closeModal();
         this.cancelOrder();
-        this.router.navigate(['/manager/invoices', result.invoiceId]);
+        this.router.navigate(['/liste-commandes', result.invoiceId]);
       },
       error: (err) => {
         console.error('Erreur confirmation:', err);

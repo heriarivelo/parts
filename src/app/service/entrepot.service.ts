@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -36,13 +36,23 @@ export class EntrepotService {
     return this.http.get(`${this.apiUrl}/entrepot`, { params: { entrepotId: entrepotId } });
   }
 
-  // Rechercher un article par code
-  getStock(code: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/one`, { 
-      params: { 
-        referenceCode: code 
-      } 
-    });
+
+
+  //     searchStocksWithoutEntrepot(searchQuery: any): Observable<any> {
+  //   let params = new HttpParams();
+    
+  //   // // Ajout des paramètres de filtrage
+  //   // if (filters.referenceCode) params = params.append('referenceCode', filters.referenceCode);
+  //   // if (filters.oem) params = params.append('oem', filters.oem);
+  //   // if (filters.libelle) params = params.append('libelle', filters.libelle);
+
+  //   return this.http.get(`${this.apiUrl}/one`, {params: searchQuery });
+  // }
+
+   searchStocksWithoutEntrepot(searchQuery: string): Observable<any[]> {
+    const params = new HttpParams().set('searchQuery', searchQuery);
+
+    return this.http.get<any[]>(`${this.apiUrl}/one`, { params });
   }
 
   updateStockEntrepot(data: { stockId: number; entrepotId: number | null }): Observable<any> {
@@ -63,5 +73,14 @@ export class EntrepotService {
   // Récupérer les articles sans entrepôt
   getArticlesWithoutEntrepot(): Observable<any> {
     return this.http.get(`${this.apiUrl}/entrepots/no`);
+  }
+
+    transferStock(transferData: {
+    stockId: number;
+    fromEntrepotId: number;
+    toEntrepotId: number;
+    quantity: number;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/transfer`, transferData);
   }
 }

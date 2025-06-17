@@ -46,17 +46,17 @@ export const routes: Routes = [
 
 
   { path: 'manager/article', component: ArcticlesMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/tableau-de-bord', component: DashboardsComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/commande', component: CommandeMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/commande/new', component: NewMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/facture', component: FactureMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/facture/D', component: FactureMDComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/stock' , component: StocksMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
+  { path: 'manager/tableau-de-bord', component: DashboardsComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'manager/commande', component: CommandeMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'commande/specifique', component: NewMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
+  { path: 'manager/facture', component: FactureMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'manager/facture/D', component: FactureMDComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'manager/stock' , component: StocksMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
 
 
-  { path: 'manager/invoice/:commandeId' , component: InvoiceCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/order' , component: OrderCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/stocks' , component: StockDashboardComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
+  { path: 'manager/invoice/:commandeId' , component: InvoiceCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'manager/order' , component: OrderCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
+  { path: 'manager/stocks' , component: StockDashboardComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
 
 
 

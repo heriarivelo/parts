@@ -1,64 +1,306 @@
-  <section class="py-16 bg-gray-100">
-    <div class="container mx-auto px-6">
-      <h2 class="text-2xl font-bold mb-4">Nouvelle Commande</h2>
-  
-      <!-- Informations commande -->
-      <div class="bg-white p-6 rounded shadow-md mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" [(ngModel)]="commande.reference" placeholder="Référence" class="border rounded px-3 py-2" />
-          <input type="text" [(ngModel)]="commande.mail_phone" placeholder="Téléphone ou Email" class="border rounded px-3 py-2" />
+<section class="py-16 bg-gray-100">
+  <div class="container mx-auto px-6">
+    <h2 class="text-2xl font-bold mb-4">Commande Particulier</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Formulaire de calcul -->
+      <div class="lg:col-span-2">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h3 class="font-semibold text-lg mb-4">Calculatrice de Prix</h3>
+          <form [formGroup]="pieceForm" class="space-y-4">
+            <div>
+              <label class="block text-gray-700 mb-1">Libellés</label>
+              <input type="text" formControlName="nom" class="w-full p-2 border rounded" placeholder="Nom du piece"
+                required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-gray-700 mb-1">Référence pièce</label>
+                <input type="text" formControlName="reference" class="w-full p-2 border rounded"
+                  placeholder="Référence du piece" required>
+              </div>
+              <div>
+                <label class="block text-gray-700 mb-1">Marque</label>
+                <input type="text" formControlName="marque" class="w-full p-2 border rounded"
+                  placeholder="Marque du piece" required>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-gray-700 mb-1">Poids Kg</label>
+                <input type="number" formControlName="poidsKg" class="w-full p-2 border rounded" min="0" step="0.01">
+              </div>
+              <div>
+                <label class="block text-gray-700 mb-1">Prix fret</label>
+                <input type="number" formControlName="fraisPort" class="w-full p-2 border rounded" min="0" step="0.01">
+              </div>
+              <div>
+                <label class="block text-gray-700 mb-1">Prix site pièce</label>
+                <input type="number" formControlName="prixAchat" class="w-full p-2 border rounded" min="0" step="0.01">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-gray-700 mb-1">Taux de change</label>
+                <input type="number" formControlName="tauxChange" class="w-full p-2 border rounded" min="0">
+              </div>
+              <div>
+                <label class="block text-gray-700 mb-1">Marge %</label>
+                <input type="number" formControlName="marge" class="w-full p-2 border rounded" min="0" step="1">
+              </div>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <p class="text-gray-700 mb-1">Prix de vente conseillé</p>
+              <p class="text-2xl font-bold text-blue-800">{{ prixVenteConseille | number:'1.0-0' }} MGA</p>
+              <p class="text-sm text-gray-500">
+                Marge: {{ getMarge() | number:'1.0-0' }} MGA ({{ pieceForm.value.marge }}%)
+              </p>
+            </div>
+            <button type="button" (click)="ajouterArticle()"
+              class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              [disabled]="!pieceForm.valid || !pieceForm.value.nom">
+              Ajouter au panier
+            </button>
+          </form>
         </div>
       </div>
-  
-      <!-- Formulaire ajout article -->
-      <div class="bg-white p-6 rounded shadow-md mb-6">
-        <h3 class="text-lg font-semibold mb-4">Ajouter un article</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="text" [(ngModel)]="nouvelArticle.code_art" placeholder="Code article" class="border rounded px-3 py-2" />
-          <input type="text" [(ngModel)]="nouvelArticle.lib1" placeholder="Libellé" class="border rounded px-3 py-2" />
-          <input type="number" [(ngModel)]="nouvelArticle.quantite" placeholder="Quantité" class="border rounded px-3 py-2" />
-          <input type="number" [(ngModel)]="nouvelArticle.prix_article" placeholder="Prix unitaire" class="border rounded px-3 py-2" />
-        </div>
-        <div class="mt-4 text-right">
-          <button (click)="ajouterArticle()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-            Ajouter Article
+
+      <!-- Panier -->
+      <div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-lg">Panier</h3>
+            <span class="font-bold">{{ getTotal() | number:'1.0-0' }} MGA</span>
+          </div>
+
+          <div *ngFor="let article of panier" class="space-y-4">
+            <div class="border-b pb-4">
+              <div class="flex justify-between mb-1">
+                <span class="font-medium">{{ article.nom }}</span>
+                <button (click)="supprimerArticle(article.id)" class="text-red-600 hover:text-red-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <div class="flex flex-1">{{ article.reference }}-{{ article.marque }}</div>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span class="text-gray-500">Prix unitaire:</span>
+                  <span class="font-medium ml-1">{{ article.prixVente | number:'1.0-0' }} MGA</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-gray-500 mr-2">Quantité:</span>
+                  <input type="number" [value]="article.quantite" (change)="updateQuantity(article, $event)" min="1"
+                    class="w-16 border rounded px-2 py-1 text-center">
+                </div>
+              </div>
+              <div class="mt-2">
+                <span class="text-gray-500">Total:</span>
+                <span class="font-medium ml-1">
+                  {{ (article.prixVente * article.quantite) | number:'1.0-0' }} MGA
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="panier.length === 0" class="text-center py-4 text-gray-500">
+            Votre panier est vide
+          </div>
+
+          <div *ngIf="panier.length > 0" class="mt-6 pt-4 border-t">
+            <div class="flex justify-between mb-2">
+              <span class="font-medium">Total HT</span>
+              <span>{{ getTotal() / 1.2 | number:'1.0-0' }} MGA</span>
+            </div>
+            <div class="flex justify-between mb-2">
+              <span class="font-medium">TVA (20%)</span>
+              <span>{{ getTotal() - (getTotal() / 1.2) | number:'1.0-0' }} MGA</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold mt-4">
+              <span>Total TTC</span>
+              <span>{{ getTotal() | number:'1.0-0' }} MGA</span>
+            </div>
+          </div>
+
+          <button (click)="openModal()"
+            class="w-full mt-6 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium"
+            [disabled]="panier.length === 0">
+            Valider la commande
           </button>
         </div>
       </div>
-  
-      <!-- Liste des articles -->
-      <div class="bg-white p-6 rounded shadow-md">
-        <h3 class="text-lg font-semibold mb-4">Articles sélectionnés</h3>
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Libellé</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let art of commande.articles_commande; let i = index">
-              <td class="px-6 py-4">{{ art.code_art }}</td>
-              <td class="px-6 py-4">{{ art.lib1 }}</td>
-              <td class="px-6 py-4">{{ art.quantite }}</td>
-              <td class="px-6 py-4">{{ art.prix_article }}</td>
-              <td class="px-6 py-4">
-                <button (click)="supprimerArticle(i)" class="text-red-600 hover:text-red-800">Supprimer</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    </div>
+  </div>
+</section>
+
+<!-- ... Votre code existant ... -->
+
+<!-- Modal Aperçu Devis -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg w-full max-w-4xl shadow-xl relative max-h-[90vh] overflow-y-auto">
+    <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+      ✖
+    </button>
+
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-6 text-center">Aperçu de Devis</h2>
+
+      <!-- En-tête -->
+      <div class="border p-4 flex justify-between items-start">
+        <!-- Logo et infos entreprise -->
+        <div class="flex gap-4">
+          <img src="/logo/facture.png" alt="Kaleo Parts" class="w-32 h-auto object-contain" />
+          <div class="text-sm leading-6">
+            <h1 class="text-primary font-extrabold text-lg">kaleo<span class="text-black font-extrabold">PARTS</span>
+            </h1>
+            <p>Tél : 038 66 332 82</p>
+            <p>e-mail : <a href="mailto:kaleoparts@gmail.com" class="text-blue-600">kaleoparts&#64;gmail.com</a>
+            </p>
+            <p>NIF 6018289282</p>
+            <p>STAT 46101112023011160</p>
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div class="text-right">
+          <p><span class="font-semibold">Date :</span> {{ today | date:'dd/MM/yyyy' }}</p>
+        </div>
       </div>
-  
-      <!-- Enregistrer la commande -->
-      <div class="mt-6 text-right">
-        <button (click)="enregistrerCommande()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-          Enregistrer Commande
-        </button>
+
+      <!-- Contenu du devis -->
+      <div *ngIf="devisPreview && !isLoading">
+        <!-- Détails Articles -->
+        <div class="mb-6">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Référence</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Description</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marque
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix
+                    Unitaire</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let item of devisPreview.items">
+                  <td class="px-4 py-3">{{ item.reference }}</td>
+                  <td class="px-4 py-3">{{ item.productName }}</td>
+                  <td class="px-4 py-3">{{ item.marque }}</td>
+                  <td class="px-4 py-3">{{ item.unitPrice | number:'1.0-0' }} MGA</td>
+                  <td class="px-4 py-3">{{ item.quantity }}</td>
+                  <td class="px-4 py-3">{{ item.total | number:'1.0-0' }} MGA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totaux -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="font-semibold">Total HT:</span>
+              <span class="font-semibold">{{ devisPreview.total | number:'1.0-0' }} MGA</span>
+            </div>
+            <div class="flex justify-between">
+              <span>TVA (20%):</span>
+              <span>{{ devisPreview.total * 0 | number:'1.0-0' }} MGA</span>
+            </div>
+            <div class="flex justify-between border-t border-gray-200 pt-2 mt-2 font-bold text-lg">
+              <span>Total TTC:</span>
+              <span>{{ devisPreview.total | number:'1.0-0' }} MGA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end space-x-4">
+          <button (click)="closeModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Retour
+          </button>
+          <button (click)="openClientModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            Confirmer le Devis
+          </button>
+        </div>
+      </div>
+
+      <!-- Chargement -->
+      <div *ngIf="isLoading" class="text-center py-8">
+        <p>Génération de l'aperçu en cours...</p>
       </div>
     </div>
-  </section>
-  
+  </div>
+</div>
+
+<!-- Modal Client -->
+<div *ngIf="showClientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Informations du Client</h3>
+
+      <form [formGroup]="clientForm">
+        <!-- Type de Client -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Type de Client</label>
+          <select formControlName="customerType" class="w-full px-3 py-2 border rounded-md">
+            <option value="B2B">Professionnel</option>
+            <option value="RETAIL">Particulier</option>
+          </select>
+        </div>
+
+        <!-- Nom Complet -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom Complet*</label>
+          <input type="text" formControlName="nom" required class="w-full px-3 py-2 border rounded-md">
+        </div>
+
+        <!-- Téléphone -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone*</label>
+          <input type="tel" formControlName="telephone" required class="w-full px-3 py-2 border rounded-md">
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" formControlName="email" class="w-full px-3 py-2 border rounded-md">
+        </div>
+
+        <!-- Adresse -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+          <textarea formControlName="adresse" rows="2" class="w-full px-3 py-2 border rounded-md"></textarea>
+        </div>
+
+        <!-- NIF/STAT (visible seulement pour les pros) -->
+        <div class="mb-4" *ngIf="clientForm.get('customerType')?.value === 'B2B'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">NIF</label>
+          <input type="text" formControlName="nif" class="w-full px-3 py-2 border rounded-md">
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" (click)="cancelClientModal()"
+            class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50">
+            Annuler
+          </button>
+          <button type="button" (click)="confirmDevis()" [disabled]="!clientForm.valid"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300">
+            Enregistrer dans bdd et Générer PDF
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
