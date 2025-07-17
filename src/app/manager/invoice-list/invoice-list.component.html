@@ -110,15 +110,9 @@
 
                         <!-- Statut -->
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div [ngClass]="{
-                                'payee': facture.resteAPayer <= 0,
-                                'partielle': facture.resteAPayer > 0 && facture.montantPaye > 0,
-                                'non-payee': facture.montantPaye === 0
-                                }">
-                                <span *ngIf="facture.resteAPayer <= 0">Payée</span>
-                                <span *ngIf="facture.resteAPayer > 0 && facture.montantPaye > 0">Partielle</span>
-                                <span *ngIf="facture.montantPaye === 0">Non payée</span>
-                            </div>
+                            <span [ngClass]="getStatusClass(facture.status)"
+                                class="text-xs font-bold px-2 py-1 rounded-full">
+                                {{ facture.status }}</span>
                         </td>
 
                         <!-- Actions -->
@@ -131,6 +125,10 @@
                                 class="cursor-pointer text-gray-600 hover:text-gray-900">
                                 Détails
                             </a>
+                            <button *ngIf="canCancel(facture)" (click)="annulerFacture(facture.id)" type="button"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                Annuler
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -334,6 +332,10 @@
                 <button type="button" (click)="showDetailsModal = false"
                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                     Fermer
+                </button>
+                <button type="button" (click)="showDetailsModal = false"
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                    Annuler facture
                 </button>
             </div>
         </div>

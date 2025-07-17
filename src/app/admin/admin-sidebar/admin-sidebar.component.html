@@ -42,10 +42,9 @@
     </nav>
   </ng-container>
 
-  <ng-container *ngIf="isModerator()">
-
-    <nav class="flex-1">
-      <ul class="flex flex-col space-y-3">
+  <nav class="flex-1">
+    <ul class="flex flex-col space-y-3">
+      <div *ngIf="isModerator()">
         <li>
           <a routerLink="/manager/tableau-de-bord" routerLinkActive="bg-red-700"
             class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
@@ -61,12 +60,7 @@
             <span>Stocks-Pièces</span>
           </a>
         </li>
-      </ul>
-    </nav>
-  </ng-container>
-  <!-- </ng-template> -->
-  <nav class="flex-1">
-    <ul class="flex flex-col space-y-3">
+      </div>
       <li class="group">
         <div
           class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold cursor-pointer"
@@ -79,13 +73,13 @@
         <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
           <li>
             <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
-              class="block px-3 py-2 rounded hover:bg-red-700 transition-all">
+              class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
               Commande Normal
             </a>
           </li>
           <li *ngIf="isAdmin()">
             <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
-              class="block px-3 py-2 rounded hover:bg-red-700 transition-all">
+              class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
               Commande Spécifique
             </a>
           </li>
@@ -100,9 +94,9 @@
       <li>
       <li>
         <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
           <i class="fas fa-file-invoice-dollar text-lg"></i>
-          <span>Listes des factures</span>
+          <span>Listes factures</span>
         </a>
       </li>
       <li>
@@ -114,7 +108,7 @@
       </li>
       <li>
         <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
           <i class="fas fa-history text-lg"></i>
           <span>Mouvement de stock</span>
         </a>

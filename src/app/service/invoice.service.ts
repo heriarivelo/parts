@@ -60,13 +60,17 @@ export class InvoiceService {
     return this.http.get<Invoice[]>(this.apiUrls);
   }
 
-  //   getFactures(): Observable<Facture[]> {
-  //   return this.http.get<Facture[]>(this.apiUrl);
-  // }
 
   enregistrerPaiement(id: number, paymentData: any): Observable<Invoice> {
     return this.http.patch<Invoice>(`${this.apiUrls}/${id}/paiements`, 
       paymentData
+    );
+  }
+
+    annulerFacture(factureId: number, raison: string, userId: number): Observable<any> {
+    return this.http.patch(
+      `${this.apiUrls}/${factureId}/annuler`,
+      { raison, userId }
     );
   }
   

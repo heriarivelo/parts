@@ -26,7 +26,7 @@ export class StocksComponent implements OnInit {
 
   statuses = [
     { value: 'DRAFT', label: 'Brouillon' },
-    { value: 'PENDING', label: 'En attente' }
+    { value: 'SHIPPED', label: 'En attente' }
   ];
   selectedStatus = 'DRAFT';
   currentManagerId = 1;

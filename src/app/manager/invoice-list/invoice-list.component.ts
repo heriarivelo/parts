@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CommandeService } from '../../service/commande.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { AuthService } from '../../service/auth.service';
 // import { RouterLink } from '@angular/router';
 
 @Component({
@@ -30,7 +31,10 @@ export class InvoiceListComponent implements OnInit {
   statusFilter = 'TOUS';
 showDetailsModal = false;
 
-  constructor(private factureService: InvoiceService) {}
+  constructor(
+    private factureService: InvoiceService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadFactures();
@@ -171,16 +175,60 @@ submitPaiement(): void {
   });
 }
 
-  getStatusClass(status: string): string {
-    const classes: Record<string, string> = {
-      'PAYEE': 'bg-green-100 text-green-800',
-      'PARTIELLE': 'bg-blue-100 text-blue-800',
-      'NON_PAYEE': 'bg-red-100 text-red-800'
-    };
-    return classes[status] || 'bg-gray-100 text-gray-800';
+  // getStatusClass(status: string): string {
+  //   const classes: Record<string, string> = {
+  //     'PAYEE': 'bg-green-100 text-green-800',
+  //     'PARTIELLEMENT_PAYEE': 'bg-blue-100 text-blue-800',
+  //     'NON_PAYEE': 'bg-red-100 text-red-800',
+  //     'ANNULEE': 'bg-gray-100 text-gray-800',
+  //   };
+  //   return classes[status] || 'bg-gray-100 text-gray-800';
+  // }
+
+    getStatusClass(status: string): string {
+    switch (status) {
+      case 'ANNULEE': return 'bg-yellow-100 text-yellow-800';
+      case 'PARTIELLEMENT_PAYEE': return 'bg-blue-100 text-blue-800';
+      case 'PAYEE': return 'bg-green-100 text-green-800';
+      case 'NON_PAYEE': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   }
 
   getProgression(facture: Invoice): number {
     return (facture.montantPaye / facture.prixTotal) * 100;
   }
+  
+
+   canCancel(facture: any): boolean {
+    return facture?.status !== 'ANNULEE' && this.authService.hasRole('ADMIN');
+  }
+
+get userId(): number | null {
+  const id = this.authService.currentUserValue?.id;
+  return id ? Number(id) : null;
+}
+
+async annulerFacture(factureId: number, raison: string = 'Annulation par l\'admin'): Promise<void> {
+  const confirmation = confirm('Êtes-vous sûr de vouloir annuler cette facture ?');
+  if (!confirmation) {
+    return;
+  }
+
+  const userId = this.userId;
+  if (userId === null) {
+    alert('Utilisateur non identifié.');
+    return;
+  }
+
+  try {
+    await this.factureService.annulerFacture(factureId, raison, userId).toPromise();
+    alert('Facture annulée avec succès');
+    this.loadFactures();
+  } catch (error) {
+    console.error('Erreur lors de l\'annulation de la facture :', error);
+    alert('Une erreur est survenue lors de l\'annulation de la facture.');
+  }
+}
+
 }

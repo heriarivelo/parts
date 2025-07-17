@@ -88,147 +88,182 @@
                 </div>
             </div>
 
-            <!-- Section Remises -->
-            <div class="mb-6 p-4 bg-orange-50 rounded-xl shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">
-                    <i class="fas fa-tag mr-2"></i>
-                    Gestion des Remises
-                </h3>
 
-                <form [formGroup]="invoiceForm">
-                    <div class="flex flex-col md:flex-row gap-4 mb-4">
-                        <select formControlName="discountType"
-                            class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                            <option *ngFor="let type of discountTypes" [value]="type.value">{{ type.label }}</option>
-                        </select>
+            <!-- Formulaire -->
+            <div *ngIf="!isLoading" class="bg-white shadow rounded-lg p-6">
+                <!-- Liste des produits -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fa-solid fa-warehouse mr-2"></i>
+                        Gestion d' entrepot
+                    </h3>
+                    <form [formGroup]="invoiceForm">
+                        <div formArrayName="pieces" class="grid grid-cols-2 gap-4">
+                            <div *ngFor="let piece of piecesFormArray.controls; let i = index" [formGroupName]="i">
+                                <!-- Vos champs existants -->
 
-                        <input formControlName="discountValue" type="number" min="0" step="0.01" placeholder="Valeur"
-                            class="w-32 border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
+                                <select formControlName="entrepotId">
+                                    <option [ngValue]="null" disabled>Sélectionnez un entrepôt</option>
+                                    <option *ngFor="let e of piece.get('entrepotsDisponibles')?.value" [ngValue]="e.id">
+                                        {{ orderDetails.pieces[i]?.product.referenceCode }} - {{e.nom}}
+                                        ({{e.quantiteDisponible}}
+                                        disponibles)
+                                    </option>
+                                </select>
 
-                        <input formControlName="discountDescription" type="text" placeholder="Description (optionnel)"
-                            class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-
-                        <button (click)="addDiscount()"
-                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                            <i class="fas fa-plus mr-2"></i>Ajouter
-                        </button>
-                    </div>
-                </form>
-
-
-                <div *ngIf="discounts.length > 0" class="space-y-2">
-                    <div *ngFor="let discount of discounts; let i = index"
-                        class="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-tag text-gray-400"></i>
-                            <span class="text-sm">{{ discount.description }}</span>
+                                <div *ngIf="piece.get('entrepotId')?.invalid && piece.get('entrepotId')?.touched">
+                                    Sélection d'entrepôt obligatoire
+                                </div>
+                            </div>
                         </div>
+                    </form>
+                </div>
 
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm font-medium">
-                                {{ discount.type === 'percentage' ? discount.value + '%' : (discount.value |
-                                currency:'MGA':'symbol':'1.2-2') }}
-                            </span>
-                            <button (click)="removeDiscount(i)"
-                                class="text-red-400 hover:text-red-600 transition-colors">
-                                <i class="fas fa-trash-alt"></i>
+
+                <!-- Section Remises -->
+                <div class="mb-6 p-4 bg-orange-50 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-tag mr-2"></i>
+                        Gestion des Remises
+                    </h3>
+
+                    <form [formGroup]="invoiceForm">
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <select formControlName="discountType"
+                                class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                                <option *ngFor="let type of discountTypes" [value]="type.value">{{ type.label }}
+                                </option>
+                            </select>
+
+                            <input formControlName="discountValue" type="number" min="0" step="0.01"
+                                placeholder="Valeur"
+                                class="w-32 border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
+
+                            <input formControlName="discountDescription" type="text"
+                                placeholder="Description (optionnel)"
+                                class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+
+                            <button (click)="addDiscount()"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Ajouter
                             </button>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </form>
 
-            <!-- Section Paiement -->
-            <div class="mb-6 p-4 bg-indigo-50 rounded-xl shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">
-                    <i class="fas fa-credit-card mr-2"></i>
-                    Informations de Paiement
-                </h3>
+                    <div *ngIf="discounts.length > 0" class="space-y-2">
+                        <div *ngFor="let discount of discounts; let i = index"
+                            class="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-tag text-gray-400"></i>
+                                <span class="text-sm">{{ discount.description }}</span>
+                            </div>
 
-                <form [formGroup]="invoiceForm">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Mode de paiement</label>
-                            <select formControlName="paymentMethod"
-                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                                <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Montant payé</label>
-                            <input formControlName="paymentAmount" type="number" min="0" [max]="calculateTotals().total"
-                                class="w-full border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Référence</label>
-                            <input formControlName="paymentReference" type="text"
-                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                </form>
-
-            </div>
-
-            <!-- Récapitulatif -->
-            <div class="p-4 bg-gray-50 rounded-xl shadow-sm mb-6">
-                <h3 class="text-lg font-semibold mb-4">
-                    <i class="fas fa-calculator mr-2"></i>
-                    Récapitulatif
-                </h3>
-
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Sous-total :</span>
-                        <span class="font-medium">{{ calculateTotals().subtotal | currency:'MGA':'symbol':'1.2-2'
-                            }}</span>
-                    </div>
-
-                    <div *ngIf="calculateTotals().discountTotal > 0" class="flex justify-between items-center">
-                        <span class="text-gray-600">Remise :</span>
-                        <span class="text-red-500 font-medium">
-                            - {{ calculateTotals().discountTotal | currency:'MGA':'symbol':'1.2-2' }}
-                        </span>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-200">
-                        <span class="font-semibold">Total à payer :</span>
-                        <span class="text-xl font-bold text-blue-600">
-                            {{ calculateTotals().total | currency:'MGA':'symbol':'1.2-2' }}
-                        </span>
-                    </div>
-
-                    <div *ngIf="invoiceForm.value.paymentAmount > 0" class="pt-3 space-y-2">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">Montant payé :</span>
-                            <span class="font-medium">
-                                {{ invoiceForm.value.paymentAmount | currency:'MGA':'symbol':'1.2-2' }}
-                            </span>
-                        </div>
-
-                        <div *ngIf="invoiceForm.value.paymentAmount < calculateTotals().total"
-                            class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">Reste à payer :</span>
-                            <span class="font-medium text-red-600">
-                                {{ (calculateTotals().total - invoiceForm.value.paymentAmount) |
-                                currency:'MGA':'symbol':'1.2-2' }}
-                            </span>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm font-medium">
+                                    {{ discount.type === 'percentage' ? discount.value + '%' : (discount.value |
+                                    currency:'MGA':'symbol':'1.2-2') }}
+                                </span>
+                                <button (click)="removeDiscount(i)"
+                                    class="text-red-400 hover:text-red-600 transition-colors">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Actions -->
-            <div class="flex flex-col md:flex-row justify-end gap-3">
-                <button (click)="cancel()" class="px-6 py-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-times mr-2"></i>Annuler
-                </button>
-                <button (click)="submitInvoice()"
-                    class="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors">
-                    <i class="fas fa-check-circle mr-2"></i>Générer la Facture
-                </button>
+                <!-- Section Paiement -->
+                <div class="mb-6 p-4 bg-indigo-50 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Informations de Paiement
+                    </h3>
+
+                    <form [formGroup]="invoiceForm">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Mode de paiement</label>
+                                <select formControlName="paymentMethod"
+                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                                    <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Montant payé</label>
+                                <input formControlName="paymentAmount" type="number" min="0"
+                                    [max]="calculateTotals().total"
+                                    class="w-full border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Référence</label>
+                                <input formControlName="paymentReference" type="text"
+                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+                <!-- Récapitulatif -->
+                <div class="p-4 bg-gray-50 rounded-xl shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Récapitulatif
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Sous-total :</span>
+                            <span class="font-medium">{{ calculateTotals().subtotal | currency:'MGA':'symbol':'1.2-2'
+                                }}</span>
+                        </div>
+
+                        <div *ngIf="calculateTotals().discountTotal > 0" class="flex justify-between items-center">
+                            <span class="text-gray-600">Remise :</span>
+                            <span class="text-red-500 font-medium">
+                                - {{ calculateTotals().discountTotal | currency:'MGA':'symbol':'1.2-2' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                            <span class="font-semibold">Total à payer :</span>
+                            <span class="text-xl font-bold text-blue-600">
+                                {{ calculateTotals().total | currency:'MGA':'symbol':'1.2-2' }}
+                            </span>
+                        </div>
+
+                        <div *ngIf="invoiceForm.value.paymentAmount > 0" class="pt-3 space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Montant payé :</span>
+                                <span class="font-medium">
+                                    {{ invoiceForm.value.paymentAmount | currency:'MGA':'symbol':'1.2-2' }}
+                                </span>
+                            </div>
+
+                            <div *ngIf="invoiceForm.value.paymentAmount < calculateTotals().total"
+                                class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Reste à payer :</span>
+                                <span class="font-medium text-red-600">
+                                    {{ (calculateTotals().total - invoiceForm.value.paymentAmount) |
+                                    currency:'MGA':'symbol':'1.2-2' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col md:flex-row justify-end gap-3">
+                    <button (click)="cancel()" class="px-6 py-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Annuler
+                    </button>
+                    <button (click)="submitInvoice()"
+                        class="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors">
+                        <i class="fas fa-check-circle mr-2"></i>Générer la Facture
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>

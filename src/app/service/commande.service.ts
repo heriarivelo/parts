@@ -24,6 +24,8 @@ export interface InvoiceData {
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
   private apiUrl = `${environment.apiUrl}/orders`;
+  private apiUrls = environment.apiUrl;
+
 
   constructor(private http: HttpClient) {}
 
@@ -56,6 +58,10 @@ export class CommandeService {
   }
    getCommandeDetails(id: number) {
     return this.http.get(`${this.apiUrl}/${id}`);
+  }
+
+    getEntrepotsDisponibles(productId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrls}/entrepots/stock/${productId}`);
   }
 
   // getCommandeDetails(orderId: number): Observable<OrderDetails> {

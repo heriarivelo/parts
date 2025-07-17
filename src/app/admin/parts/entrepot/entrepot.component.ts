@@ -198,7 +198,7 @@ export class EntrepotComponent implements OnInit {
 
   showDistribution(product: any): void {
     this.selectedProduct = product;
-    const productId = product.productId ?? product.id;
+    const productId = product.productId;
     this.stockService.getProductDistribution(productId).subscribe({
       next: (data) => {
         this.distribution = data;
