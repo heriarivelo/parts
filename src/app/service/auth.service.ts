@@ -91,7 +91,7 @@ export class AuthService {
       name, 
       email, 
       password, 
-      role: role || 'CLIENT'
+      role: role || 'USER'
     }).pipe(
       map(response => {
         const user = this.handleAuthSuccess(response);

@@ -15,7 +15,7 @@ export class RegisterComponent {
   name: string = '';
   email: string = '';
   password: string = '';
-  role: string = 'CLIENT'; // Valeur par défaut
+  role: string = 'USER'; // Valeur par défaut
   error: string | null = null;
   isLoading: boolean = false;
   success: boolean = false;
