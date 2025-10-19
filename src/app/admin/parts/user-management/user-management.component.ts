@@ -6,9 +6,9 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-user-management',
-  standalone:true,
+  standalone: true,
   imports: [
-    FormsModule, CommonModule // Ajoutez cette ligne
+    FormsModule, CommonModule
   ],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss']
@@ -21,6 +21,8 @@ export class UserManagementComponent implements OnInit {
   isModalOpen = false;
   isEditMode = false;
   currentUser: any = {};
+  isLoading = false;
+  successMessage = '';
 
   constructor(private userService: UserService) {}
 
@@ -40,36 +42,31 @@ export class UserManagementComponent implements OnInit {
 
   openAddModal(): void {
     this.isEditMode = false;
-    this.currentUser = { name: '', email: '', role: 'USER' };
+    this.currentUser = { name: '', email: '', role: 'USER', password: '' };
     this.isModalOpen = true;
+    this.successMessage = ''; // Reset message
   }
 
   openEditModal(user: any): void {
     this.isEditMode = true;
     this.currentUser = { ...user };
     this.isModalOpen = true;
+    this.successMessage = ''; // Reset message
   }
 
   closeModal(): void {
     this.isModalOpen = false;
+    this.resetForm();
   }
 
-  // saveUser(): void {
-  //   const operation = this.isEditMode 
-  //     ? this.userService.updateUser(this.currentUser.id, this.currentUser)
-  //     : this.userService.createUser(this.currentUser);
-  //     console.log('users',this.currentUser );
+  resetForm(): void {
+    this.currentUser = { name: '', email: '', role: 'USER', password: '' };
+  }
 
-  //   operation.subscribe({
-  //     next: () => {
-  //       this.loadUsers();
-  //       this.closeModal();
-  //     },
-  //     error: (error) => console.error('Error saving user:', error)
-  //   });
-  // }
+saveUser(): void {
+  if (this.isLoading) return;
 
-  saveUser(): void {
+  this.isLoading = true;
   const isEdit = this.isEditMode;
 
   const userPayload = isEdit
@@ -82,29 +79,65 @@ export class UserManagementComponent implements OnInit {
         name: this.currentUser.name,
         email: this.currentUser.email,
         role: this.currentUser.role,
-        password: this.currentUser.password // 🟡 requis uniquement à la création
+        password: this.currentUser.password
       };
+
+  console.log('Payload envoyé :', userPayload);
 
   const operation = isEdit
     ? this.userService.updateUser(this.currentUser.id, userPayload)
     : this.userService.createUser(userPayload);
 
-  console.log('Payload envoyé :', userPayload);
-
   operation.subscribe({
-    next: () => {
-      this.loadUsers();
-      this.closeModal();
+    next: (response: any) => {
+      console.log('Réponse API:', response);
+      
+      // Gérer la réponse selon le format de votre API
+      if (response.user) {
+        // Si l'API retourne { message: "...", user: {...} }
+        this.loadUsers(); // Recharger la liste
+        this.closeModal();
+        this.showSuccessMessage(
+          isEdit 
+            ? 'Utilisateur modifié avec succès!' 
+            : 'Utilisateur créé avec succès!'
+        );
+      } else {
+        // Si l'API retourne l'utilisateur directement
+        this.loadUsers();
+        this.closeModal();
+        this.showSuccessMessage(
+          isEdit 
+            ? 'Utilisateur modifié avec succès!' 
+            : 'Utilisateur créé avec succès!'
+        );
+      }
+      this.isLoading = false;
     },
-    error: (error) => console.error('Erreur lors de la sauvegarde :', error)
+    error: (error) => {
+      console.error('Erreur lors de la sauvegarde :', error);
+      this.isLoading = false;
+      // Optionnel: afficher un message d'erreur
+      // this.showErrorMessage('Erreur lors de la sauvegarde');
+    }
   });
 }
 
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    // Optionnel: cacher le message après 3 secondes
+    setTimeout(() => {
+      this.successMessage = '';
+    }, 3000);
+  }
 
   deleteUser(id: number): void {
     if (confirm('Are you sure you want to delete this user?')) {
       this.userService.deleteUser(id).subscribe({
-        next: () => this.loadUsers(),
+        next: () => {
+          this.loadUsers();
+          this.showSuccessMessage('Utilisateur supprimé avec succès!');
+        },
         error: (error) => console.error('Error deleting user:', error)
       });
     }
@@ -116,14 +149,14 @@ export class UserManagementComponent implements OnInit {
   }
 
   getRoleBadgeClass(role: string): string {
-  const baseClass = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full';
-  switch(role) {
-    case 'ADMIN':
-      return `${baseClass} bg-red-100 text-red-800`;
-    case 'MANAGER':
-      return `${baseClass} bg-yellow-100 text-yellow-800`;
-    default:
-      return `${baseClass} bg-green-100 text-green-800`;
+    const baseClass = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full';
+    switch(role) {
+      case 'ADMIN':
+        return `${baseClass} bg-red-100 text-red-800`;
+      case 'MANAGER':
+        return `${baseClass} bg-yellow-100 text-yellow-800`;
+      default:
+        return `${baseClass} bg-green-100 text-green-800`;
+    }
   }
-}
 }
