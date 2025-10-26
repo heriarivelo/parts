@@ -7,6 +7,8 @@ import { AuthService } from '../../../service/auth.service';
 import { StockService } from '../../../service/stock.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 
 
 @Component({
@@ -32,7 +34,8 @@ export class ProduitComponent implements OnInit {
     private authService: AuthService,
     private prixService: HistoriPrixService,
     private stockService: StockService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.searchForm = this.fb.group({
       search: ['']
@@ -169,31 +172,6 @@ openPriceModal(stock: any) {
     this.errorMessage = null;
   }
 
-  // updatePrice() {
-  //   if (this.priceForm.invalid || !this.currentProduct) return;
-
-  //   this.isLoading = true;
-  //   this.errorMessage = null;
-
-  //   const { newPrice, reason } = this.priceForm.value;
-
-  //   this.prixService.updateProductPrice(
-  //     this.currentProduct.id, // Adaptez selon votre structure
-  //     newPrice,
-  //     reason
-  //   ).subscribe({
-  //     next: () => {
-  //       this.isLoading = false;
-  //       this.closePriceModal();
-  //       // Actualisez la liste ou le produit spécifique
-  //       this.loadStocks();
-  //     },
-  //     error: (err) => {
-  //       this.isLoading = false;
-  //       this.errorMessage = err.error?.error || 'Erreur lors de la mise à jour';
-  //     }
-  //   });
-  // }
 
   updatePrice() {
   if (this.priceForm.invalid || !this.currentProduct?.id) {
@@ -297,6 +275,45 @@ closeOemModal() {
   this.isOemModalOpen = false;
   this.currentProduct = null;
   this.formattedOemList = [];
+}
+
+  goToReapprovisionnement() {
+    this.router.navigate(['/admin-stocks']);
+  }
+
+exportToExcel() {
+  this.isLoading = true;
+
+  this.stockService.getAllStocksWithoutPagination().subscribe({
+    next: (data) => {
+      // Transformer les données pour l'export
+      const exportData = data.map((item: any) => ({
+        Code: item.product?.codeArt || '-',
+        Désignation: item.product?.libelle || '-',
+        Marque: item.product?.marque || '-',
+        OEM: item.product?.oem || '-',
+        Quantité: item.quantite ?? 0,
+        'Prix de vente (MGA)': item.prixFinal ?? 0,
+      }));
+
+      // Génération du fichier Excel
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Pièces');
+
+      // Nom de fichier avec timestamp
+      const now = new Date();
+      const fileName = `sauvegarde_stocks_${now.toISOString().slice(0, 19).replace(/[:T]/g, '-')}.xlsx`;
+
+      XLSX.writeFile(wb, fileName);
+
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('Erreur export:', err);
+      this.isLoading = false;
+    }
+  });
 }
 
 }

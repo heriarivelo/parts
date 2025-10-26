@@ -1,172 +1,177 @@
 <div
   class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-6 flex flex-col fixed h-screen overflow-y-auto">
-  <!-- Logo & Titre -->
+  
+  <!-- Logo & titre -->
   <div class="flex items-center space-x-3 mb-10">
     <i class="fas fa-car-side text-3xl"></i>
-    <h1 class="text-2xl font-extrabold tracking-wide">{{ getRoleLabel() }} </h1>
+    <h1 class="text-2xl font-extrabold tracking-wide">{{ getRoleLabel() }}</h1>
   </div>
 
-  <!-- Menu de navigation -->
-  <ng-container *ngIf="isAdmin()">
-    <nav class="flex-1">
-      <ul class="flex flex-col space-y-3">
-        <li>
-          <a routerLink="/admin-tableau-de-bord" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
-            <i class="fas fa-tachometer-alt text-lg"></i>
-            <span>Tableau de bord</span>
-          </a>
-        </li>
+  <!-- Navigation principale -->
+  <nav class="flex-1 space-y-6">
+
+    <!-- Tableau de bord -->
+    <div *ngIf="isAdmin()">
+      <a routerLink="/admin-tableau-de-bord" routerLinkActive="bg-red-700"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+        <i class="fas fa-tachometer-alt text-lg"></i>
+        <span>Tableau de bord</span>
+      </a>
+    </div>
+
+    <!-- Gestion des stocks -->
+    <div>
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Stocks & Réapprovisionnement</h2>
+      <ul class="space-y-2">
         <li>
           <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
-            <i class="fas fa-newspaper text-lg"></i>
-            <span>Stocks-Pièces</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
             <i class="fas fa-boxes text-lg"></i>
-            <span>Réapprovision(stock)</span>
+            <span>Stocks pièces</span>
+          </a>
+        </li>
+        <li *ngIf="isAdmin()">
+          <a routerLink="/admin-stocks" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-plus-circle text-lg"></i>
+            <span>Réapprovisionnement</span>
           </a>
         </li>
         <li>
-          <a routerLink="/admin-calculatrice-prix" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
-            <i class="fas fa-calculator text-lg"></i>
-            <span>Calculatrice de prix</span>
+          <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-history text-lg"></i>
+            <span>Mouvement de stock</span>
           </a>
         </li>
       </ul>
-    </nav>
-  </ng-container>
+    </div>
 
-  <nav class="flex-1">
-    <ul class="flex flex-col space-y-3">
-      <div *ngIf="isModerator()">
+    <!-- Commandes clients -->
+    <div>
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Commandes clients</h2>
+      <ul class="space-y-2">
         <li>
-          <a routerLink="/manager/tableau-de-bord" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-tachometer-alt text-lg"></i>
-            <span>Tableau de bord</span>
-          </a>
-        </li>
-
-        <li>
-          <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-            <i class="fas fa-newspaper text-lg"></i>
-            <span>Stocks-Pièces</span>
-          </a>
-        </li>
-      </div>
-      <li class="group">
-        <div
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold cursor-pointer"
-          (click)="showCommande = !showCommande">
-          <i class="fas fa-shopping-cart text-lg"></i>
-          <span>Commande</span>
-          <i class="fas fa-chevron-down ml-auto transform transition-transform duration-300"
-            [class.rotate-180]="showCommande"></i>
-        </div>
-        <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
-          <li>
-            <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
-              class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
-              Commande Normal
-            </a>
-          </li>
-          <li *ngIf="isAdmin()">
-            <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
-              class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
-              Commande Spécifique
-            </a>
-          </li>
-          <li>
-            <a routerLink="/liste-commandes" routerLinkActive="bg-red-700"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold">
-              <span>Liste commandes</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li>
-      <li>
-        <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
-          <i class="fas fa-file-invoice-dollar text-lg"></i>
-          <span>Listes factures</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
-          <i class="fas fa-file-invoice text-lg"></i>
-          <span>Historique commandes</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold text-nowrap">
-          <i class="fas fa-history text-lg"></i>
-          <span>Mouvement de stock</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <!-- Menu de navigation -->
-  <ng-container *ngIf="isAdmin()">
-    <nav class="flex-1">
-      <ul class="flex flex-col space-y-3">
-        <li>
-          <a routerLink="/admin-commande" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+          <div
+            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold cursor-pointer"
+            (click)="showCommande = !showCommande">
             <i class="fas fa-shopping-cart text-lg"></i>
             <span>Commandes</span>
+            <i class="fas fa-chevron-down ml-auto transform transition-transform duration-300"
+              [class.rotate-180]="showCommande"></i>
+          </div>
+          <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
+            <li>
+              <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                Commande normale
+              </a>
+            </li>
+            <li *ngIf="isAdmin()">
+              <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                Commande particulier
+              </a>
+            </li>
+            <li>
+              <a routerLink="/liste-commandes" routerLinkActive="bg-red-700"
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                Liste des commandes
+              </a>
+            </li>
+            <li>
+              <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                Historique
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Commandes fournisseurs -->
+    <div *ngIf="isAdmin()">
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Commandes fournisseurs</h2>
+      <ul class="space-y-2">
+        <li>
+          <a routerLink="/admin-commande" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-truck text-lg"></i>
+            <span>Mes commandes fournisseurs</span>
           </a>
         </li>
+      </ul>
+    </div>
+
+    <!-- Facturation -->
+    <div>
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Facturation</h2>
+      <ul class="space-y-2">
+        <li>
+          <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-file-invoice-dollar text-lg"></i>
+            <span>Liste des factures</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Logistique -->
+    <div *ngIf="isAdmin()">
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Logistique</h2>
+      <ul class="space-y-2">
         <li>
           <a routerLink="/entrepot" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
             <i class="fas fa-warehouse text-lg"></i>
-            <span>Entrepots</span>
+            <span>Entrepôts</span>
           </a>
         </li>
         <li>
           <a routerLink="/importation-historique" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
             <i class="fas fa-truck-loading text-lg"></i>
-            <span>Importation</span>
+            <span>Importations</span>
           </a>
         </li>
-        <li>
+      </ul>
+    </div>
+
+    <!-- Administration -->
+    <div *ngIf="isAdmin()">
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Administration</h2>
+      <ul class="space-y-2">
         <li>
           <a routerLink="/admin-gestion-users" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
-            <i class="fa-solid fa-users text-lg"></i>
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-users text-lg"></i>
             <span>Utilisateurs</span>
           </a>
         </li>
         <li>
           <a routerLink="/admin-clients-pro" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
             <i class="fas fa-building text-lg"></i>
-            <span>B2B</span>
+            <span>Clients B2B</span>
           </a>
         </li>
       </ul>
-    </nav>
-  </ng-container>
-  <!-- <ng-template #managerTemplate> -->
+    </div>
 
-
-  <!-- Déconnexion
-  <div class="mt-auto pt-6">
-    <button (click)="logout()"
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-red-700 hover:bg-red-700 font-semibold transition-all duration-300">
-      <i class="fas fa-sign-out-alt text-lg"></i>
-      <span>Déconnexion</span>
-    </button>
-  </div> -->
+    <!-- Outils -->
+    <div *ngIf="isAdmin()">
+      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Outils</h2>
+      <ul class="space-y-2">
+        <li>
+          <a routerLink="/admin-calculatrice-prix" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            <i class="fas fa-calculator text-lg"></i>
+            <span>Calculatrice de prix</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 </div>

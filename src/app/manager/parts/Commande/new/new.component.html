@@ -49,15 +49,15 @@
                 <input type="number" formControlName="marge" class="w-full p-2 border rounded" min="0" step="1">
               </div>
             </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="bg-red-50 p-4 rounded-lg">
               <p class="text-gray-700 mb-1">Prix de vente conseillé</p>
-              <p class="text-2xl font-bold text-blue-800">{{ prixVenteConseille | number:'1.0-0' }} MGA</p>
+              <p class="text-2xl font-bold text-red-800">{{ prixVenteConseille | number:'1.0-0' }} MGA</p>
               <p class="text-sm text-gray-500">
                 Marge: {{ getMarge() | number:'1.0-0' }} MGA ({{ pieceForm.value.marge }}%)
               </p>
             </div>
             <button type="button" (click)="ajouterArticle()"
-              class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              class="bg-red-200 text-primary font-bold px-6 py-2 rounded-lg hover:bg-red-300"
               [disabled]="!pieceForm.valid || !pieceForm.value.nom">
               Ajouter au panier
             </button>
@@ -126,7 +126,7 @@
           </div>
 
           <button (click)="openModal()"
-            class="w-full mt-6 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium"
+            class="w-full mt-6 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-medium"
             [disabled]="panier.length === 0">
             Valider la commande
           </button>

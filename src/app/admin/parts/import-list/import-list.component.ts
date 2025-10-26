@@ -3,6 +3,7 @@ import { ImportService } from '../../../service/import.service';
 import { Import, ImportDetail } from '../../../models/import.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -19,7 +20,10 @@ export class ImportListComponent implements OnInit {
   isLoading = true;
   detailsLoading = false;
 
-  constructor(private importService: ImportService) {}
+  constructor(
+    private importService: ImportService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadImports();
@@ -66,5 +70,10 @@ export class ImportListComponent implements OnInit {
 
   calculateMargin(purchase: number, sale: number): number {
     return ((sale - purchase) / purchase) * 100;
+  }
+
+
+    goToCalculatrice() {
+    this.router.navigate(['/admin-calculatrice-prix']);
   }
 }

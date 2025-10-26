@@ -51,22 +51,40 @@ export class EntrepotComponent implements OnInit {
   }
 
   // Charger les entrepôts
-  async loadEntrepots() {
-    try {
-      // On précise qu’on attend un tableau d’Entrepot
-      const response = await this.entrepotService
-        .getEntrepots()
-        .toPromise() as Entrepot[];
-      this.boxes = response.map((entrepot: Entrepot) => ({
+  // async loadEntrepots() {
+  //   try {
+  //     // On précise qu’on attend un tableau d’Entrepot
+  //     const response = await this.entrepotService
+  //       .getEntrepots()
+  //       .toPromise() as Entrepot[];
+  //     this.boxes = response.map((entrepot: Entrepot) => ({
+  //       id: entrepot.id,
+  //       name: entrepot.libelle,
+  //       items: []
+  //     }));
+  //   } catch (error) {
+  //     console.error("Erreur lors du chargement des entrepôts", error);
+  //   }
+  // }
+
+async loadEntrepots() {
+  try {
+    const response = await this.entrepotService.getEntrepots().toPromise() as Entrepot[];
+
+    // Pour chaque entrepôt, on charge ses items
+    this.boxes = await Promise.all(response.map(async (entrepot: Entrepot) => {
+      const items = await this.entrepotService.getEntrepotStock(entrepot.id).toPromise();
+      return {
         id: entrepot.id,
         name: entrepot.libelle,
-        items: []
-      }));
-    } catch (error) {
-      console.error("Erreur lors du chargement des entrepôts", error);
-    }
-  }
+        items: items || []
+      };
+    }));
 
+  } catch (error) {
+    console.error("Erreur lors du chargement des entrepôts", error);
+  }
+}
 
 
     async loadArticlesWithoutEntrepot() {
@@ -306,4 +324,8 @@ export class EntrepotComponent implements OnInit {
       this.isLoading = false;
     });
   }
+
+  getItemCount(box: any): number {
+  return box.items && box.items.length ? box.items.length : 0;
+}
 }

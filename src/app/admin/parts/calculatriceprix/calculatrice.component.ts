@@ -4,6 +4,7 @@ import { PieceService } from '../../../service/piece.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ManagerService } from '../../../service/manager.service';
+import { ReapproService } from '../../../service/reappro.service';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PdfService } from '../../../service/pdf.service';
@@ -14,7 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './calculatrice.component.html',
-  styleUrl: './calculatrice.component.scss'
+  styleUrls: ['./calculatrice.component.scss']
 })
 export class CalculatriceComponent {
   title = 'gestion-pieces';
@@ -36,20 +37,10 @@ export class CalculatriceComponent {
 
    clientForm: FormGroup;
 
-  // constructor(private fb: FormBuilder, private pdfService: PdfService, private orderService: OrderService) {
-  //   this.clientForm = this.fb.group({
-  //     customerType: ['B2B'],
-  //     nom: ['', Validators.required],
-  //     telephone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-  //     email: ['', Validators.email],
-  //     adresse: [''],
-  //     nif: ['']
-  //   });
-  // }
-
   constructor(
     public pieceService: PieceService,
     public managerService : ManagerService,
+    private reapproService: ReapproService,
     private router: Router,
     private fb: FormBuilder,
     private pdfService: PdfService
@@ -141,10 +132,6 @@ export class CalculatriceComponent {
 selectedImportId: number | null = null;
 listeImports: any[] = [];
 
-// ngOnInit() {
-//   this.loadListeImports();
-// }
-
 loadListeImports() {
   this.pieceService.getListeImportation().subscribe({
     next: (data) => {
@@ -174,6 +161,13 @@ chargerPartsDepuisImport(): void {
         this.isSaving = false;
         this.success = true;
         this.showImportModal = false;
+
+        if (this.selectedImportId) {
+        this.reapproService.updateReapproStatus(this.selectedImportId, 'DELIVERED').subscribe({
+          next: () => console.log('Statut du réappro mis à jour à livré'),
+          error: (err) => console.error('Erreur MAJ statut:', err)
+        });
+      }
       },
       error: (err) => {
         this.isSaving = false;
@@ -188,8 +182,6 @@ chargerPartsDepuisImport(): void {
   // Dans votre classe component
 today = new Date();
 randomId = Math.floor(Math.random() * 10000);
-
-  // constructor(private devisService: DevisService) {}
 
   // Ouvre le modal et charge les données
   previewDevis() {
@@ -214,23 +206,6 @@ randomId = Math.floor(Math.random() * 10000);
     this.devisPreview = null;
   }
 
-  // Formate les données pour le template
-  // private formatDevisData(data: any): any {
-  //   return {
-  //     items: data.importParts.map((item: any) => ({
-  //       productName: item.LIB1 || 'Pièce sans nom',
-  //       reference: item.CODE_ART,
-  //       marque: item.marque || 'Non spécifiée',
-  //       oem: item.oem || '-',
-  //       unitPrice: item.prix_de_vente,
-  //       quantity: item.Qte,
-  //       total: item.prix_de_vente * item.Qte
-  //     })),
-  //     subtotal: data.importParts.reduce((sum: number, item: any) => sum + item.total, 0),
-  //     total: data.importParts.reduce((sum: number, item: any) => sum + item.total, 0),
-  //     discounts: []
-  //   };
-  // }
 
   private formatDevisData(data: any): any {
   const items = data.importParts.map((item: any) => {
@@ -323,10 +298,6 @@ async confirmDevis() {
       clientInfo
     };
 
-    // const result = await this.managerService.createOrder(orderPayload).toPromise();
-    // console.log('Commande enregistrée:', result);
-    
-    // 8. Fermer le modal et reset
     this.showClientModal = false;
     this.showModal = false;
     this.clientForm.reset();

@@ -1,9 +1,9 @@
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Historique des Mouvements de Stock</h2>
-        <button routerLink="/stock/add" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+        <!-- <button routerLink="/stock/add" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
             <i class="fas fa-plus mr-2"></i> Nouveau Mouvement
-        </button>
+        </button> -->
     </div>
 
     <!-- Filtres -->
@@ -44,10 +44,10 @@
             </div>
 
             <div class="md:col-span-4 flex justify-end">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg mr-2">
+                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg mr-2">
                     <i class="fas fa-filter mr-2"></i> Filtrer
                 </button>
-                <button type="button" (click)="filterForm.reset(); onFilter()" class="border px-4 py-2 rounded-lg">
+                <button type="button" (click)="filterForm.reset(); onFilter()" class="border px-4 py-2 rounded-lg text-white bg-secondary">
                     Réinitialiser
                 </button>
             </div>

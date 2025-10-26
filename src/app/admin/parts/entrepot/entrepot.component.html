@@ -1,251 +1,429 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="w-full md:w-100 bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold text-red-600 mb-3">Nouvel entrepôt</h2>
-    <div class="flex flex-row gap-6">
-      <input type="text" [(ngModel)]="entrepot_libelle" placeholder="Description de l'entrepôt"
-        class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-red-600">
-      <button (click)="NewEntrepot()"
-        class="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 font-semibold">Créer</button>
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <h1 class="text-2xl font-bold text-gray-900">Gestion des Entrepôts</h1>
     </div>
   </div>
 
-  <div class="flex flex-col md:flex-row p-6 gap-8 bg-gray-100 min-h-screen">
-    <!-- Grille des entrepôts -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 flex-1">
-      <div *ngFor="let box of boxes"
-        class="border-2 border-dashed border-gray-300 rounded-lg p-6 h-16 flex items-center justify-center bg-white shadow-md hover:border-red-600 cursor-pointer transition relative"
-        (click)="openBoxDetails(box)" (dragover)="allowDrop($event)" (drop)="drop($event, box)">
-        <div class="text-center text-gray-600 font-semibold text-lg">{{ box.name }}</div>
-        <button (click)="deleteEntrepot(box.id); $event.stopPropagation()"
-          class="absolute top-1 right-1 text-red-500 hover:text-red-700">
-          ✕
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Nouvel entrepôt card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div class="flex flex-col md:flex-row md:items-end gap-4">
+        <div class="flex-1">
+          <label for="entrepot-libelle" class="block text-sm font-medium text-gray-700 mb-2">
+            Nouvel entrepôt
+          </label>
+          <input 
+            id="entrepot-libelle"
+            type="text" 
+            [(ngModel)]="entrepot_libelle" 
+            placeholder="Saisir le nom de l'entrepôt"
+            class="w-full p-3 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors">
+        </div>
+        <button 
+          (click)="NewEntrepot()"
+          class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Créer l'entrepôt
         </button>
       </div>
     </div>
 
-    <!-- Formulaire + Articles -->
-    <div class="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg flex flex-col gap-6">
-      <h2 class="text-2xl font-bold text-red-600">Gestion des pièces</h2>
+    <!-- Layout principal -->
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Section entrepôts -->
+      <div class="lg:w-2/3">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Mes Entrepôts</h2>
+            <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              {{ boxes.length }} entrepôt(s)
+            </span>
+          </div>
 
-      <div class="flex flex-col gap-4">
-        <!-- Votre recherche existante -->
-
-
-        <div class="flex gap-2">
-          <input type="text" [(ngModel)]="searchQuery" placeholder="Code de l'article, ref ou libelle"
-            class="flex-1 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-red-600">
-          <button (click)="lancerRecherche()"
-            class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-semibold">
-            Rechercher
-          </button>
-        </div>
-
-
-        <div *ngIf="resultats.length > 0">
-          <h3>Résultats :</h3>
-          <ul class="space-y-2">
-            <li *ngFor="let item of resultats" class="bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded">
-              <strong>{{ item.product.referenceCode }}</strong> - {{ item.product.libelle }} - {{ item.quantite }}
-              pièces
-              -
-              {{ item.prixFinal }} Ar
-
-              <div class="py-2 px-4 border text-center">
-                <button (click)="showDistribution(item)" class="text-blue-500 hover:text-blue-700">
-                  Répartir
-                </button>
+          <!-- Grille des entrepôts -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div 
+              *ngFor="let box of boxes"
+              class="group border-2 border-dashed border-gray-300 rounded-xl p-5 h-28 flex items-center justify-center bg-white hover:border-red-400 hover:shadow-md cursor-pointer transition-all relative"
+              (click)="openBoxDetails(box)" 
+              (dragover)="allowDrop($event)" 
+              (drop)="drop($event, box)">
+              
+              <div class="text-center">
+                <div class="text-gray-800 font-semibold text-lg mb-1">{{ box.name }}</div>
+                <div *ngIf="box.items" class="text-sm text-gray-500">{{ getItemCount(box) }} pièce(s)</div>
               </div>
-            </li>
-          </ul>
+              
+              <button 
+                (click)="deleteEntrepot(box.id); $event.stopPropagation()"
+                class="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-red-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Empty state -->
+            <div 
+              *ngIf="boxes.length === 0"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-6 h-28 flex flex-col items-center justify-center text-gray-400">
+              <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <span class="text-sm">Aucun entrepôt créé</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Liste des articles -->
-        <div>
-          <h3 class="text-xl font-semibold text-gray-700 mb-3">Piéce sans entrepôt</h3>
-          <div class="space-y-3 max-h-96 overflow-y-auto">
-            <div *ngFor="let item of items" draggable="true" (dragstart)="drag($event, item)"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded shadow cursor-move transition-all">
-              <div class="font-medium">Code: {{ item.codeArt }}</div>
-              <div>Description: {{ item.lib1 }}</div>
-              <div>Sans entrepot: {{ item.qttsansEntrepot }}</div>
-              <div>Quantité: {{ item.quantite }}</div>
-              <div>Prix: {{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</div>
-              <div class="overflow-hidden h-10 overflow-y-auto">OEM: {{ item.oem }}</div>
-              <div>Marque: {{ item.marque }}</div>
-              <!--   <td class="py-2 px-4 border text-center">{{ item.unassignedStock }}</td> -->
-              <div class="py-2 px-3 border-2 border-primary rounded-xl text-center">
-                <button (click)="showDistribution(item)" class="text-primary hover:text-red-700">
-                  Répartir
-                </button>
+      <!-- Section recherche et pièces -->
+      <div class="lg:w-1/3">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Gestion des Pièces</h2>
+
+          <!-- Recherche -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Rechercher une pièce
+            </label>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                [(ngModel)]="searchQuery" 
+                placeholder="Code, référence ou libellé"
+                class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors">
+              <button 
+                (click)="lancerRecherche()"
+                class="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Résultats de recherche -->
+          <div *ngIf="resultats.length > 0" class="mb-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Résultats de recherche</h3>
+            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+              <div 
+                *ngFor="let item of resultats" 
+                class="bg-red-50 border border-red-100 rounded-lg p-3 hover:bg-red-100 transition-colors">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="font-medium text-red-800">{{ item.product.referenceCode }}</div>
+                  <span class="text-sm bg-red-200 text-red-800 px-2 py-1 rounded-full">
+                    {{ item.quantite }} pièce(s)
+                  </span>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">{{ item.product.libelle }}</div>
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-gray-800">{{ item.prixFinal }} Ar</span>
+                  <button 
+                    (click)="showDistribution(item)" 
+                    class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                    Répartir
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div *ngIf="notFound" class="text-red-600 mt-2">Aucun Piece trouvé avec ce code.</div>
+
+          <!-- Pièces sans entrepôt -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700">Pièces sans entrepôt</h3>
+              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                {{ items.length }} pièce(s)
+              </span>
+            </div>
+            
+            <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
+              <div 
+                *ngFor="let item of items" 
+                draggable="true" 
+                (dragstart)="drag($event, item)"
+                class="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 hover:shadow-sm transition-all cursor-move group">
+                
+                <div class="flex justify-between items-start mb-2">
+                  <div class="font-medium text-gray-800">{{ item.codeArt }}</div>
+                  <div class="flex gap-2">
+                    <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                      Sans entrepôt: {{ item.qttsansEntrepot }}
+                    </span>
+                    <span class="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full">
+                      Stock: {{ item.quantite }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="text-sm text-gray-600 mb-2 line-clamp-2">{{ item.lib1 }}</div>
+                
+                <div class="flex justify-between items-center mb-2">
+                  <div class="text-xs text-gray-500">
+                    <div>OEM: {{ item.oem }}</div>
+                    <div>Marque: {{ item.marque }}</div>
+                  </div>
+                  <span class="font-semibold text-gray-800">{{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</span>
+                </div>
+                
+                <button 
+                  (click)="showDistribution(item)" 
+                  class="w-full bg-white border border-red-500 text-red-600 py-2 rounded-lg hover:bg-red-50 font-medium transition-colors flex items-center justify-center gap-2 text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                  </svg>
+                  Répartir dans les entrepôts
+                </button>
+              </div>
+            </div>
+            
+            <div *ngIf="notFound" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              Aucune pièce trouvée avec ce code.
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal pour détails -->
-  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl relative max-h-[90vh] overflow-y-auto">
-      <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
-        ✖
-      </button>
-
-      <h2 class="text-2xl font-bold mb-6 text-red-600 text-center">
-        Piéce(s) dans l'entrepôt {{ selectedBox?.name }}
+<!-- Modal détails entrepôt -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+    <div class="flex justify-between items-center border-b border-gray-200 p-6">
+      <h2 class="text-2xl font-bold text-gray-900">
+        Pièces dans l'entrepôt <span class="text-red-600">{{ selectedBox?.name }}</span>
       </h2>
+      <button 
+        (click)="closeModal()" 
+        class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
 
-      <div *ngIf="selectedBox?.items.length > 0; else noItems">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let item of selectedBox.items">
-                <td class="px-4 py-3 whitespace-nowrap">{{ item.codeArt }}</td>
-                <td class="px-4 py-3">{{ item.lib1 }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ item.quantite }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</td>
-                <button (click)="openTransferModal(item)"
-                  class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
+    <div class="p-6 overflow-auto max-h-[calc(90vh-120px)]">
+      <div *ngIf="selectedBox?.items.length > 0; else noItems" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of selectedBox.items" class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.codeArt }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">{{ item.lib1 }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ item.quantite }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.prixFinal | currency:'MGA':'symbol':'1.2-2' }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <button 
+                  (click)="openTransferModal(item)"
+                  class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                  </svg>
                   Déplacer
                 </button>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <ng-template #noItems>
-        <div class="text-center py-8 text-gray-500">
-          Aucun piéce dans cet entrepôt.
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune pièce dans cet entrepôt</h3>
+          <p class="text-gray-500">Les pièces ajoutées à cet entrepôt apparaîtront ici.</p>
         </div>
       </ng-template>
     </div>
   </div>
+</div>
 
-  <!-- Modal de répartition -->
-  <div *ngIf="selectedProduct && distribution"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Répartition du stock</h2>
-          <button (click)="closeDistribution()" class="text-gray-500 hover:text-gray-700">
-            &times;
-          </button>
-        </div>
+<!-- Modal de répartition -->
+<div *ngIf="selectedProduct && distribution" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+    <div class="flex justify-between items-center border-b border-gray-200 p-6">
+      <h2 class="text-xl font-bold text-gray-900">Répartition du stock</h2>
+      <button (click)="closeDistribution()" class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
 
-        <div class="mb-6 p-4 bg-blue-50 rounded">
-          <h3 class="font-semibold mb-2">{{ selectedProduct.referenceCode }} - {{ selectedProduct.libelle }}</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div>Quantité totale: <span class="font-bold">{{ distribution.total }}</span></div>
-            <div>Total affecté: <span class="font-bold">{{ getTotalAssigned() }}</span></div>
+    <div class="p-6 overflow-auto max-h-[calc(90vh-160px)]">
+      <div class="mb-6 p-4 bg-red-50 rounded-xl border border-red-100">
+        <h3 class="font-semibold text-red-800 mb-2">{{ selectedProduct.referenceCode }} - {{ selectedProduct.libelle }}</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-sm">
+            <span class="text-gray-600">Quantité totale:</span>
+            <span class="font-bold text-gray-900 ml-2">{{ distribution.total }}</span>
+          </div>
+          <div class="text-sm">
+            <span class="text-gray-600">Total affecté:</span>
+            <span class="font-bold text-gray-900 ml-2">{{ getTotalAssigned() }}</span>
           </div>
         </div>
-
-        <div class="mb-4">
-          <table class="min-w-full">
-            <thead>
-              <tr>
-                <th class="py-2 px-4 border bg-gray-100">Entrepôt</th>
-                <th class="py-2 px-4 border bg-gray-100">Quantité</th>
-                <th class="py-2 px-4 border bg-gray-100"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of distribution.assigned; let i = index">
-                <td class="py-2 px-4 border">
-                  <select [(ngModel)]="item.entrepotId" class="w-full p-1 border rounded">
-                    <option [value]="null">Non affecté</option>
-                    <option *ngFor="let e of boxes" [value]="e.id">{{ e.name }}</option>
-                  </select>
-                </td>
-                <td class="py-2 px-4 border">
-                  <input type="number" [(ngModel)]="item.quantity" min="0" [max]="distribution.total"
-                    class="w-full p-1 border rounded">
-                </td>
-                <td class="py-2 px-4 border">
-                  <button (click)="removeDistributionRow(i)" class="text-red-500 hover:text-red-700">
-                    &times;
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <button (click)="addDistributionRow()" class="mt-2 text-sm text-blue-500 hover:text-blue-700">
-            + Ajouter une ligne
-          </button>
-        </div>
-
-        <div class="flex justify-end gap-2">
-          <button (click)="closeDistribution()" class="px-4 py-2 border rounded">
-            Annuler
-          </button>
-          <button (click)="saveDistribution()" [disabled]="!isValidDistribution()"
-            class="px-4 py-2 bg-green-500 text-white rounded disabled:bg-gray-300">
-            Enregistrer
-          </button>
-        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Modal de transfert intégré -->
-  <div *ngIf="showTransferModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-      <div class="flex justify-between items-center border-b p-4">
-        <h3 class="text-xl font-semibold">Transfert de stock</h3>
-        <button (click)="closeTransferModal()" class="text-gray-500 hover:text-gray-700">
-          ✕
+      <div class="mb-4">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrepôt</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of distribution.assigned; let i = index" class="hover:bg-gray-50">
+              <td class="py-3 px-4">
+                <select [(ngModel)]="item.entrepotId" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                  <option [value]="null">Sélectionner un entrepôt</option>
+                  <option *ngFor="let e of boxes" [value]="e.id">{{ e.name }}</option>
+                </select>
+              </td>
+              <td class="py-3 px-4">
+                <input 
+                  type="number" 
+                  [(ngModel)]="item.quantity" 
+                  min="0" 
+                  [max]="distribution.total"
+                  class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              </td>
+              <td class="py-3 px-4">
+                <button 
+                  (click)="removeDistributionRow(i)" 
+                  class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button 
+          (click)="addDistributionRow()" 
+          class="mt-3 text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Ajouter une ligne
         </button>
       </div>
 
-      <div class="p-4">
-        <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()">
-          <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Depuis l'entrepôt</label>
-            <select formControlName="fromEntrepotId" class="w-full p-2 border rounded bg-gray-100">
-              <option [value]="selectedBox?.id">{{ selectedBox?.name }}</option>
-            </select>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Vers l'entrepôt</label>
-            <select formControlName="toEntrepotId" class="w-full p-2 border rounded" required>
-              <option value="">Sélectionner un entrepôt</option>
-              <option *ngFor="let entrepot of boxes" [value]="entrepot.id"
-                [disabled]="entrepot.id === selectedStock?.entrepotId">
-                {{ entrepot.name }}
-              </option>
-            </select>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Quantité (max: {{ selectedStock?.quantite }})</label>
-            <input type="number" formControlName="quantity" class="w-full p-2 border rounded"
-              [max]="selectedStock?.quantite" min="0.01" step="0.01" required>
-          </div>
-
-          <div class="flex justify-end space-x-2 pt-4">
-            <button type="button" (click)="closeTransferModal()" class="px-4 py-2 border rounded hover:bg-gray-100">
-              Annuler
-            </button>
-            <button type="submit" [disabled]="transferForm.invalid || isLoading"
-              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50">
-              {{ isLoading ? 'Transfert en cours...' : 'Confirmer' }}
-            </button>
-          </div>
-        </form>
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button 
+          (click)="closeDistribution()" 
+          class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+          Annuler
+        </button>
+        <button 
+          (click)="saveDistribution()" 
+          [disabled]="!isValidDistribution()"
+          class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Enregistrer
+        </button>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Modal de transfert -->
+<div *ngIf="showTransferModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+    <div class="flex justify-between items-center border-b border-gray-200 p-6">
+      <h3 class="text-xl font-semibold text-gray-900">Transfert de stock</h3>
+      <button 
+        (click)="closeTransferModal()" 
+        class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Depuis l'entrepôt</label>
+          <select 
+            formControlName="fromEntrepotId" 
+            class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+            <option [value]="selectedBox?.id">{{ selectedBox?.name }}</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Vers l'entrepôt</label>
+          <select 
+            formControlName="toEntrepotId" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+            required>
+            <option value="">Sélectionner un entrepôt</option>
+            <option 
+              *ngFor="let entrepot of boxes" 
+              [value]="entrepot.id"
+              [disabled]="entrepot.id === selectedStock?.entrepotId">
+              {{ entrepot.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Quantité (max: {{ selectedStock?.quantite }})
+          </label>
+          <input 
+            type="number" 
+            formControlName="quantity" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            [max]="selectedStock?.quantite" 
+            min="0.01" 
+            step="0.01" 
+            required>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <button 
+            type="button" 
+            (click)="closeTransferModal()" 
+            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+            Annuler
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="transferForm.invalid || isLoading"
+            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            {{ isLoading ? 'Transfert en cours...' : 'Confirmer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

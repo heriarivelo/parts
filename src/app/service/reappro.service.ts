@@ -59,36 +59,10 @@ export class ReapproService {
     return this.http.post(this.apiUrl, { items, status, userId, totalValue });
   }
 
-  updateReapproStatus(reapproId: number, status: string): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${reapproId}/status`, { status });
-  }
-
-
-  // // Récupérer les stats
-  // getStats(): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/stats`);
-  // }
-
   // Liste des fournisseurs
   getSuppliers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrls}`);
   }
-
-  // Liste des réapprovisionnements avec filtres
-  // getReappros(params: {
-  //   supplierId?: number;
-  //   status?: string;
-  //   search?: string;
-  // } = {}): Observable<Reappro[]> {
-  //   return this.http.get<Reappro[]>(this.apiUrl, { params });
-  // }
-
-  // // Détails d'un réappro
-  // getReapproDetails(id: number): Observable<Reappro> {
-  //   return this.http.get<Reappro>(`${this.apiUrl}/${id}`);
-  // }
-
-    // constructor(private http: HttpClient) {}
 
   getOrders(
     supplierId: number | null,
@@ -125,9 +99,9 @@ export class ReapproService {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
-  // getSuppliers(): Observable<Supplier[]> {
-  //   return this.http.get<Supplier[]>(`${environment.apiUrl}/suppliers`);
-  // }
+  updateReapproStatus(id: number, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/status`, { status });
+  }
 
   exportToExcel(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/export`, { responseType: 'blob' });

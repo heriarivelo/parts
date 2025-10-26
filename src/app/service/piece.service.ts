@@ -371,18 +371,6 @@ export class PieceService {
     });
   }
 
-    // importFromBdd(): Promise<void> {
-  //   async fetchImportedParts(importId: number): Promise<any[]> {
-  //   const response = await fetch(`${this.apiUrl}/reappro/${importId}/parts`);
-  //   if (!response.ok) throw new Error("Erreur serveur");
-  //   return response.json();
-  // }
-
-  // Dans le service
-// getImportedParts(importId: number): Observable<Piece[]> {
-//   return this.http.get<Piece[]>(`${this.apiUrl}/reappro/${importId}/parts`);
-// }
-
   loadPieces(importId: number): void {
     this.http.get<any[]>(`${this.apiUrl}/reappro/${importId}/parts`).subscribe({
       next: (dbParts) => {
@@ -429,12 +417,4 @@ getListeImportation(): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/reappro/importation`); // adapte l'URL si nécessaire
 }
 
-
-  // getPiece(): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/pieces`);
-  // }
-
-  // searchPieces(term: string): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/pieces/search?q=${term}`);
-  // }
 }

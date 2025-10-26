@@ -41,6 +41,8 @@ export class CommandesFournisseursComponent implements OnInit {
   sortField = 'createdAt';
   sortDirection = 'desc';
 
+  isLoading = false;
+
   constructor(private orderService: ReapproService) {}
 
   ngOnInit(): void {
@@ -186,6 +188,30 @@ export class CommandesFournisseursComponent implements OnInit {
     }
     
     return pages;
+  }
+
+
+    validerReappro(order: Order): void {
+    if (!order.id) {
+      alert("ID du réapprovisionnement manquant !");
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.orderService.updateReapproStatus(order.id, 'SHIPPED').subscribe({
+      next: (res) => {
+        console.log('Réappro validé :', res);
+        alert('Réapprovisionnement validé avec succès ✅');
+      },
+      error: (err) => {
+        console.error('Erreur validation réappro :', err);
+        alert('Erreur lors de la validation ❌');
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
 
