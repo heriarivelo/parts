@@ -18,7 +18,7 @@ export interface Stock {
   id: number;
    reference: string;
   createdAt: string; 
-  status: 'PENDING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: 'DRAFT' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   totalAmount: number;
   supplier: Supplier;
   items: OrderItem[];

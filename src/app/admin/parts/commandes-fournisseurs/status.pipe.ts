@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class StatusFrPipe implements PipeTransform {
   transform(status: string): string {
     switch (status) {
-      case 'PENDING':
+      case 'DRAFT':
         return 'En attente';
       case 'SHIPPED':
         return 'Expédié';

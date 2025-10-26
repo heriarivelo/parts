@@ -51,7 +51,7 @@
         <div class="flex space-x-2">
             <!-- ... autres boutons ... -->
 
-            <button (click)="exporterExcel()" class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark">
+            <button (click)="exporterExcel()" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark">
                 <i class="fas fa-file-export mr-2"></i>Exporter Excel
             </button>
 
@@ -59,21 +59,21 @@
                 <input type="file" id="file-input" class="hidden" accept=".xlsx, .xls" (change)="importerExcel($event)"
                     #fileInput>
                 <button (click)="fileInput.click()"
-                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                     <i class="fas fa-file-import mr-2"></i>Importer Excel
                 </button>
             </div>
 
-            <div class="flex">
+            <div class="flex items-center justify-center gap-2">
                 <select [(ngModel)]="selectedImportId" class="border rounded p-2 w-full">
                     <option [ngValue]="null" disabled selected>Choisir une importation</option>
                     <option *ngFor="let imp of listeImports" [ngValue]="imp.id">
-                        {{ imp.reference }} - {{ imp.status }} ({{ imp.createdAt | date:'shortDate' }})
+                        {{ imp.reference }} - ({{ imp.createdAt | date:'shortDate' }})
                     </option>
                 </select>
 
                 <button (click)="chargerPartsDepuisImport()" [disabled]="!selectedImportId"
-                    class="mt-2 bg-blue-600 text-white px-4 py-1 rounded">
+                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                     Charger
                 </button>
             </div>

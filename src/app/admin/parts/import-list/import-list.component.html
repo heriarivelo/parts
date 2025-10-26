@@ -4,7 +4,9 @@
     <h1 class="text-3xl font-bold text-gray-800">Historique des Imports</h1>
     <div class="mt-2 flex justify-between items-center">
       <p class="text-gray-600">Gestion des imports de pièces automobiles</p>
-      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+      <button
+      (click)="goToCalculatrice()"
+      class="bg-primary hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center">
         <i class="fas fa-file-import mr-2"></i> Nouvel Import
       </button>
     </div>
