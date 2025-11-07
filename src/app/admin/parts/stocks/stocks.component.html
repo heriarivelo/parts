@@ -1,207 +1,331 @@
-<div class="container mx-auto px-4 py-6">
-  <!-- En-tête -->
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-800">Gestion des Réapprovisionnements</h1>
-      <p class="text-gray-600">Produits avec stock faible (≤ {{threshold}} unités)</p>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-      <div class="flex items-center gap-2">
-        <label for="threshold" class="whitespace-nowrap">Seuil d'alerte:</label>
-        <!-- <input id="threshold" type="number" [(ngModel)]="threshold" (change)="loadLowStockProducts()"
-          class="w-20 border rounded px-3 py-1"> -->
-        <input id="threshold" type="number" [(ngModel)]="threshold" (change)="onThresholdChange()"
-          class="w-20 border rounded px-3 py-1">
-      </div>
-
-      <select [(ngModel)]="selectedStatus" class="border rounded px-3 py-1">
-        <option *ngFor="let status of statuses" [value]="status.value">{{status.label}}</option>
-      </select>
-
-      <div class="mt-4 flex justify-between items-center">
-        <div class="text-sm text-gray-600">
-          Produits sélectionnés: {{selectedProducts.length}} |
-          Quantité totale: {{totalQuantity}} |
-          Valeur totale: {{totalValue | currency:'EUR'}} |
-          Poids total: {{totalWeightKg}} kg
-        </div>
-
-        <button (click)="submitReappro()" [disabled]="selectedProducts.length === 0 || loading"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50">
-          <span *ngIf="!loading">Enregistrer</span>
-          <span *ngIf="loading">Enregistrement...</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading && lowStockProducts.length === 0" class="flex justify-center py-12">
-    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-  </div>
-
-  <div *ngIf="!loading || lowStockProducts.length > 0"
-    class="bg-white rounded-lg shadow-sm overflow-hidden max-w-7xl mx-auto">
-    <!-- En-têtes -->
-    <div class="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 border-b">
-      <div class="col-span-1">Sélection</div>
-      <div class="col-span-1">Référence</div>
-      <div class="col-span-2">Marque</div>
-      <div class="col-span-3">Désignation</div>
-      <div class="col-span-1 text-center">Stock</div>
-      <div class="col-span-1 text-center">Qté à commander</div>
-      <div class="col-span-2 text-right">Prix Unitaire (€)</div>
-      <div class="col-span-1 text-right">Poids (kg)</div>
-    </div>
-
-    <!-- Loading -->
-    <ng-container *ngIf="loading && lowStockProducts.length === 0">
-      <div class="p-8 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    </ng-container>
-
-    <!-- Produits -->
-    <div class="divide-y divide-gray-200">
-      <div *ngFor="let product of lowStockProducts" class="grid grid-cols-12 p-4 hover:bg-gray-50 items-center"
-        [class.bg-blue-50]="product.selected">
-
-        <!-- Sélection -->
-        <div class="col-span-1">
-          <!--  <input type="checkbox" [(ngModel)]="product.selected" (change)="toggleProductSelection(product)"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-          <input type="checkbox" [(ngModel)]="product.selected"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">-->
-          <input type="checkbox" [checked]="product.selected" (click)="toggleProductSelection(product)"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-        </div>
-
-
-
-        <!-- Référence -->
-        <div class="col-span-1 font-mono text-blue-600">
-          {{ product.product.codeArt }}
-        </div>
-        <div class="col-span-2 font-mono text-blue-600">
-          {{ product.marque }}
-        </div>
-
-
-        <!-- Désignation -->
-        <div class="col-span-3">
-          {{ product.product.libelle }}
-        </div>
-
-        <!-- Stock -->
-        <div class="col-span-1 text-center text-sm" [class.text-red-600]="product.quantite <= threshold"
-          [class.font-bold]="product.quantite <= threshold">
-          {{ product.quantite }}
-        </div>
-
-        <!-- Qté à commander 
-        <div class="col-span-1 text-center">
-          <input type="number" [(ngModel)]="product.quantityToOrder" (change)="updateSelectedProducts()"
-            class="w-20 border rounded px-2 py-1 text-center" min="1">
-        </div>-->
-
-        <!-- Quantité à commander -->
-        <div class="col-span-1">
-          <input type="number" [(ngModel)]="product.quantityToOrder" (ngModelChange)="updateQuantity(product)" min="1"
-            class="w-full border rounded px-2 py-1">
-        </div>
-
-        <!-- Prix Unitaire -->
-        <div class="col-span-2 text-right">
-          <input type="number" [(ngModel)]="product.unitPrice" (ngModelChange)="updateUnitPrice(product, $event)"
-            class="w-24 border rounded px-2 py-1 text-right" step="0.01" min="0">
-        </div>
-
-        <!-- Poids -->
-        <div class="col-span-1 text-right">
-          <input type="number" [(ngModel)]="product.weightKg" (ngModelChange)="updateWeight(product, $event)"
-            class="w-20 border rounded px-2 py-1 text-right" step="0.001" min="0">
-        </div>
-      </div>
-    </div>
-
-    <!-- Après la div avec class="divide-y divide-gray-200" -->
-    <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-white">
-      <div class="flex-1 flex justify-between sm:hidden">
-        <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1"
-          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-          Précédent
-        </button>
-        <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages"
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-          Suivant
-        </button>
-      </div>
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            Affichage de <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
-            à <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
-            sur <span class="font-medium">{{ totalItems }}</span> résultats
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="flex-1">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des Réapprovisionnements</h1>
+          <p class="text-gray-600 text-lg">Produits avec stock faible 
+            <span class="font-semibold text-orange-600">(≤ {{threshold}} unités)</span>
           </p>
         </div>
-        <div>
-          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button (click)="onPageChange(1)" [disabled]="currentPage === 1"
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <span class="sr-only">Première page</span>
-              &laquo;
-            </button>
-            <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Précédent
-            </button>
 
-            <!-- Pages -->
-            <ng-container *ngFor="let page of getPageNumbers()">
-              <button (click)="onPageChange(page)" [class.bg-blue-50]="page === currentPage"
-                [class.text-blue-600]="page === currentPage"
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                {{ page }}
-              </button>
-            </ng-container>
+        <!-- Controls -->
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <!-- Seuil d'alerte -->
+          <div class="flex items-center gap-3 bg-red-50 rounded-lg px-4 py-3">
+            <label for="threshold" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Seuil d'alerte:
+            </label>
+            <input 
+              id="threshold" 
+              type="number" 
+              [(ngModel)]="threshold" 
+              (change)="onThresholdChange()"
+              class="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+          </div>
 
-            <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Suivant
-            </button>
-            <button (click)="onPageChange(totalPages)" [disabled]="currentPage === totalPages"
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <span class="sr-only">Dernière page</span>
-              &raquo;
-            </button>
-          </nav>
+          <!-- Filtre statut -->
+          <select 
+            [(ngModel)]="selectedStatus" 
+            class="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white">
+            <option *ngFor="let status of statuses" [value]="status.value">{{status.label}}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Summary Bar -->
+      <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex flex-wrap gap-6 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                {{selectedProducts.length}}
+              </span>
+              <span class="text-gray-700">produits sélectionnés</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+                {{totalQuantity}}
+              </span>
+              <span class="text-gray-700">quantité totale</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-medium">
+                {{totalValue | currency:'EUR':'symbol':'1.2-2'}}
+              </span>
+              <span class="text-gray-700">valeur totale</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">
+                {{totalWeightKg}} kg
+              </span>
+              <span class="text-gray-700">poids total</span>
+            </div>
+          </div>
+
+          <button 
+            (click)="submitReappro()" 
+            [disabled]="selectedProducts.length === 0 || loading"
+            class="bg-primary hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center">
+            <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>{{ loading ? 'Enregistrement...' : 'Enregistrer' }}</span>
+          </button>
         </div>
       </div>
     </div>
-  </div>
-  <!-- Récapitulatif -->
-  <div *ngIf="selectedProducts.length > 0" class="mt-6 bg-white shadow rounded-lg p-6">
-    <h2 class="text-lg font-semibold mb-4">Récapitulatif ({{selectedProducts.length}} produits sélectionnés)</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div class="bg-gray-50 p-4 rounded">
-        <h3 class="text-sm font-medium text-gray-500">Quantité totale</h3>
-        <p class="text-xl font-semibold">
-          {{ totalQuantity }}
-        </p>
+    <!-- Loading State -->
+    <div *ngIf="loading && lowStockProducts.length === 0" class="flex justify-center items-center py-20">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p class="text-gray-600">Chargement des produits...</p>
       </div>
-      <div class="bg-gray-50 p-4 rounded">
-        <h3 class="text-sm font-medium text-gray-500">Montant total</h3>
-        <p class="text-xl font-semibold">
-          {{ totalValue | currency:'EUR':'symbol':'1.2-2' }}
-        </p>
+    </div>
+
+    <!-- Products Table -->
+    <div *ngIf="!loading || lowStockProducts.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <!-- Table Header -->
+      <div class="grid grid-cols-12 bg-gray-50 p-6 font-semibold text-gray-700 border-b border-gray-200 text-sm uppercase tracking-wide">
+        <div class="col-span-1 flex items-center">
+          <span class="ml-2">Sélection</span>
+        </div>
+        <div class="col-span-1">Référence</div>
+        <div class="col-span-2">Marque</div>
+        <div class="col-span-3">Désignation</div>
+        <div class="col-span-1 text-center">Stock</div>
+        <div class="col-span-1 text-center">Qté à commander</div>
+        <div class="col-span-2 text-right">Prix Unitaire (€)</div>
+        <div class="col-span-1 text-right">Poids (kg)</div>
       </div>
-      <div class="bg-gray-50 p-4 rounded">
-        <h3 class="text-sm font-medium text-gray-500">Poids total</h3>
-        <p class="text-xl font-semibold">
-          {{ totalWeightKg }} kg
-        </p>
+
+      <!-- Products List -->
+      <div class="divide-y divide-gray-100">
+        <div 
+          *ngFor="let product of lowStockProducts" 
+          class="grid grid-cols-12 p-6 hover:bg-red-50/30 transition-all duration-200 items-center group"
+          [class.bg-red-50]="product.selected"
+          [class.border-l-4]="product.selected"
+          [class.border-l-red-500]="product.selected">
+          
+          <!-- Sélection -->
+          <div class="col-span-1">
+            <label class="flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                [checked]="product.selected" 
+                (click)="toggleProductSelection(product)"
+                class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded transition-all">
+            </label>
+          </div>
+
+          <!-- Référence -->
+          <div class="col-span-1">
+            <span class="font-mono text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              {{ product.product.codeArt }}
+            </span>
+          </div>
+
+          <!-- Marque -->
+          <div class="col-span-2">
+            <span class="text-sm font-medium text-gray-700">{{ product.marque }}</span>
+          </div>
+
+          <!-- Désignation -->
+          <div class="col-span-3">
+            <div class="text-sm font-medium text-gray-900 line-clamp-2">{{ product.product.libelle }}</div>
+          </div>
+
+          <!-- Stock -->
+          <div class="col-span-1 text-center">
+            <span 
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              [class.bg-amber-100]="product.quantite <= threshold"
+              [class.text-amber-800]="product.quantite <= threshold"
+              [class.bg-green-100]="product.quantite > threshold"
+              [class.text-green-800]="product.quantite > threshold">
+              {{ product.quantite }}
+            </span>
+          </div>
+
+          <!-- Quantité à commander -->
+          <div class="col-span-1">
+            <input 
+              type="number" 
+              [(ngModel)]="product.quantityToOrder" 
+              (ngModelChange)="updateQuantity(product)" 
+              min="1"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              placeholder="0">
+          </div>
+
+          <!-- Prix Unitaire -->
+          <div class="col-span-2">
+            <div class="flex items-center justify-end gap-2">
+              <span class="text-gray-500 text-sm">€</span>
+              <input 
+                type="number" 
+                [(ngModel)]="product.unitPrice" 
+                (ngModelChange)="updateUnitPrice(product, $event)"
+                class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                step="0.01" 
+                min="0"
+                placeholder="0.00">
+            </div>
+          </div>
+
+          <!-- Poids -->
+          <div class="col-span-1">
+            <div class="flex items-center justify-end gap-2">
+              <input 
+                type="number" 
+                [(ngModel)]="product.weightKg" 
+                (ngModelChange)="updateWeight(product, $event)"
+                class="w-20 border border-gray-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                step="0.001" 
+                min="0"
+                placeholder="0.000">
+              <span class="text-gray-500 text-sm">kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-white">
+        <!-- Mobile Pagination -->
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button 
+            (click)="onPageChange(currentPage - 1)" 
+            [disabled]="currentPage === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Précédent
+          </button>
+          <button 
+            (click)="onPageChange(currentPage + 1)" 
+            [disabled]="currentPage === totalPages"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Suivant
+          </button>
+        </div>
+
+        <!-- Desktop Pagination -->
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Affichage de <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+              à <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
+              sur <span class="font-medium">{{ totalItems }}</span> résultats
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+              <!-- First Page -->
+              <button 
+                (click)="onPageChange(1)" 
+                [disabled]="currentPage === 1"
+                class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                <span class="sr-only">Première page</span>
+                &laquo;
+              </button>
+              
+              <!-- Previous Page -->
+              <button 
+                (click)="onPageChange(currentPage - 1)" 
+                [disabled]="currentPage === 1"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Précédent
+              </button>
+
+              <!-- Page Numbers -->
+              <ng-container *ngFor="let page of getPageNumbers()">
+                <button 
+                  (click)="onPageChange(page)" 
+                  [class.bg-blue-600]="page === currentPage"
+                  [class.text-white]="page === currentPage"
+                  [class.border-blue-600]="page === currentPage"
+                  [class.hover:bg-blue-700]="page === currentPage"
+                  [class.hover:bg-gray-50]="page !== currentPage"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all">
+                  {{ page }}
+                </button>
+              </ng-container>
+
+              <!-- Next Page -->
+              <button 
+                (click)="onPageChange(currentPage + 1)" 
+                [disabled]="currentPage === totalPages"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Suivant
+              </button>
+              
+              <!-- Last Page -->
+              <button 
+                (click)="onPageChange(totalPages)" 
+                [disabled]="currentPage === totalPages"
+                class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                <span class="sr-only">Dernière page</span>
+                &raquo;
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Récapitulatif détaillé -->
+    <div *ngIf="selectedProducts.length > 0" class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-900">
+          Récapitulatif de commande
+          <span class="text-blue-600">({{selectedProducts.length}} produits)</span>
+        </h2>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Détails de la commande
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="p-2 bg-blue-600 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600">Quantité totale</h3>
+          </div>
+          <p class="text-3xl font-bold text-gray-900">{{ totalQuantity }} unités</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="p-2 bg-green-600 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600">Montant total</h3>
+          </div>
+          <p class="text-3xl font-bold text-gray-900">{{ totalValue | currency:'EUR':'symbol':'1.2-2' }}</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="p-2 bg-orange-600 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+              </svg>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600">Poids total</h3>
+          </div>
+          <p class="text-3xl font-bold text-gray-900">{{ totalWeightKg }} kg</p>
+        </div>
       </div>
     </div>
   </div>

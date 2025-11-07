@@ -40,6 +40,7 @@ interface Discount {
 export class InvoiceCreateComponent implements OnInit {
   orderId!: number;
   isLoading = true;
+  isSubmitting = false;
   orderDetails: any = null;
   currentManagerId = 2;
   
@@ -68,7 +69,7 @@ export class InvoiceCreateComponent implements OnInit {
       discountValue: [0, [Validators.min(0)]],
       discountDescription: [''],
       paymentMethod: ['CASH', Validators.required],
-      paymentAmount: [0, [Validators.min(0)]],
+      paymentAmount: [null, [Validators.required, Validators.min(0)]],
       paymentReference: [''],
       pieces: this.piecesFormArray
     });
@@ -216,6 +217,16 @@ submitInvoice() {
       return;
     }
   }
+
+if (
+  !this.invoiceForm.value.paymentAmount ||
+  this.invoiceForm.value.paymentAmount <= 0
+) {
+  alert('Veuillez entrer un montant valide.');
+  this.markAllAsTouched();
+  return;
+}
+
 
   // 2. Calcul des totaux (inchangé)
   const totals = this.calculateTotals();

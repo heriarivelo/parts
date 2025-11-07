@@ -76,7 +76,7 @@ export class ProfessionalClientsComponent implements OnInit {
   ) {
     this.clientForm = this.fb.group({
       name: ['', Validators.required],
-      siret: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
+      siret: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       address: ['', Validators.required],
       postalCode: ['', Validators.required],
       city: ['', Validators.required],

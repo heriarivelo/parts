@@ -98,11 +98,12 @@
                         Gestion d' entrepot
                     </h3>
                     <form [formGroup]="invoiceForm">
-                        <div formArrayName="pieces" class="grid grid-cols-2 gap-4">
+                        <div formArrayName="pieces" class="grid grid-cols-3 gap-4">
                             <div *ngFor="let piece of piecesFormArray.controls; let i = index" [formGroupName]="i">
                                 <!-- Vos champs existants -->
 
-                                <select formControlName="entrepotId">
+                                <select formControlName="entrepotId"
+                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-gray-500">
                                     <option [ngValue]="null" disabled>Sélectionnez un entrepôt</option>
                                     <option *ngFor="let e of piece.get('entrepotsDisponibles')?.value" [ngValue]="e.id">
                                         {{ orderDetails.pieces[i]?.product.referenceCode }} - {{e.nom}}
@@ -111,7 +112,8 @@
                                     </option>
                                 </select>
 
-                                <div *ngIf="piece.get('entrepotId')?.invalid && piece.get('entrepotId')?.touched">
+                                <div *ngIf="piece.get('entrepotId')?.invalid && piece.get('entrepotId')?.touched"
+                                    class="text-red-500 text-xs">
                                     Sélection d'entrepôt obligatoire
                                 </div>
                             </div>
@@ -187,6 +189,12 @@
                                     class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                                     <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
                                 </select>
+                                <div *ngIf="
+                                    invoiceForm.get('paymentMethod')?.invalid &&
+                                    invoiceForm.get('paymentMethod')?.touched
+                                    " class="text-red-500 text-xs mt-1">
+                                    Mode de paiement obligatoire.
+                                </div>
                             </div>
 
                             <div>
@@ -194,6 +202,12 @@
                                 <input formControlName="paymentAmount" type="number" min="0"
                                     [max]="calculateTotals().total"
                                     class="w-full border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
+                                <div *ngIf="
+                                    invoiceForm.get('paymentAmount')?.invalid &&
+                                    invoiceForm.get('paymentAmount')?.touched
+                                    " class="text-red-500 text-xs mt-1">
+                                    Montant payé obligatoire.
+                                </div>
                             </div>
 
                             <div>

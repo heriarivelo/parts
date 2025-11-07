@@ -248,6 +248,8 @@
             <tr>
               <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
               <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Marque</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Oem1 + oem2</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Auto_final</th>
               <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
               <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
             </tr>
@@ -256,6 +258,8 @@
             <tr *ngFor="let item of selectedOrder.items">
               <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{item.product?.codeArt}}</td>
               <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{item.product?.marque}}</td>
+              <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{item.product?.oem}}</td>
+              <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{item.product?.autoFinal}}</td>
               <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{item.product?.libelle}}</td>
               <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{item.quantity}}</td>
             </tr>

@@ -37,6 +37,8 @@ export interface OrderItem {
     id: number;
     codeArt:string;
     marque: string;
+    oem?: string;
+    autoFinal?: string;
     referenceCode?: string;
     libelle: string;
     // autres propriétés du produit...

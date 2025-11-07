@@ -76,11 +76,12 @@
         <!-- En-têtes -->
         <div class="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 border-b">
             <div class="col-span-1">Code</div>
-            <div class="col-span-3">Désignation</div>
+            <div class="col-span-2">Désignation</div>
             <div class="col-span-2">Marque</div>
-            <div class="col-span-2">OEM</div>
-            <div class="col-span-1 text-center">Stock</div>
-            <div class="col-span-2 text-right">Prix de vente</div>
+            <div class="col-span-1">OEM</div>
+            <div class="col-span-2">Auto_final</div>
+            <div class="col-span-2 text-center">Stock</div>
+            <div class="col-span-1 text-right">Prix de vente</div>
             <div *ngIf="isAdmin()" class="col-span-1 text-right">Action</div>
         </div>
 
@@ -95,20 +96,21 @@
         <div class="divide-y divide-gray-200">
             <div *ngFor="let stock of stocks" class="grid grid-cols-12 p-4 hover:bg-gray-50 items-center">
                 <div class="col-span-1 font-mono text-blue-600">{{ stock.product.codeArt }}</div>
-                <div class="col-span-3">{{ stock.product.libelle }}</div>
-                <div class="col-span-2">{{ stock.product.marque || '-' }}</div>
+                <div class="col-span-2">{{ stock.product.libelle }}</div>
+                <div class="col-span-1">{{ stock.product.marque || '-' }}</div>
                 <button class="col-span-2 h-10 overflow-y-auto truncate" [title]="formatOemTitle(stock.product.oem)"
                     (click)="openOemModal(stock)">
                     {{ formatOemDisplay(stock.product.oem) || '-' }}
                 </button>
-                <div class="col-span-1 text-center">
+                <div class="col-span-2">{{ stock.product.autoFinal }}</div>
+                <div class="col-span-2 text-center">
                     {{stock.quantite}}
                     <span class="px-2 py-1 text-xs rounded-full" [ngClass]="getStatusClass(getStockStatus(stock))">
                         {{ getStockStatus(stock) }}
                     </span>
                     {{stock.quantiteVendu}}
                 </div>
-                <div class="col-span-2 text-right font-medium">
+                <div class="col-span-1 text-right font-medium">
                     {{ stock.prixFinal ? (stock.prixFinal | currency:'MGA') : '-' }}
                 </div>
                 <div *ngIf="isAdmin()" class="col-span-1 text-right text-sm font-medium">

@@ -1,5 +1,5 @@
 <div
-  class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-6 flex flex-col fixed h-screen overflow-y-auto">
+  class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-4 flex flex-col fixed h-screen overflow-y-auto">
   
   <!-- Logo & titre -->
   <div class="flex items-center space-x-3 mb-10">
@@ -13,7 +13,7 @@
     <!-- Tableau de bord -->
     <div *ngIf="isAdmin()">
       <a routerLink="/admin-tableau-de-bord" routerLinkActive="bg-red-700"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-semibold">
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-medium">
         <i class="fas fa-tachometer-alt text-lg"></i>
         <span>Tableau de bord</span>
       </a>
@@ -25,21 +25,21 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-boxes text-lg"></i>
             <span>Stocks pièces</span>
           </a>
         </li>
         <li *ngIf="isAdmin()">
           <a routerLink="/admin-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-plus-circle text-lg"></i>
             <span>Réapprovisionnement</span>
           </a>
         </li>
         <li>
           <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-history text-lg"></i>
             <span>Mouvement de stock</span>
           </a>
@@ -53,7 +53,7 @@
       <ul class="space-y-2">
         <li>
           <div
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-semibold cursor-pointer"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-medium cursor-pointer"
             (click)="showCommande = !showCommande">
             <i class="fas fa-shopping-cart text-lg"></i>
             <span>Commandes</span>
@@ -63,25 +63,25 @@
           <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
             <li>
               <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
-                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
                 Commande normale
               </a>
             </li>
             <li *ngIf="isAdmin()">
               <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
-                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
                 Commande particulier
               </a>
             </li>
             <li>
               <a routerLink="/liste-commandes" routerLinkActive="bg-red-700"
-                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
                 Liste des commandes
               </a>
             </li>
             <li>
               <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
-                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-semibold text-nowrap">
+                class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
                 Historique
               </a>
             </li>
@@ -96,7 +96,7 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/admin-commande" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-truck text-lg"></i>
             <span>Mes commandes fournisseurs</span>
           </a>
@@ -110,7 +110,7 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-file-invoice-dollar text-lg"></i>
             <span>Liste des factures</span>
           </a>
@@ -124,14 +124,14 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/entrepot" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-warehouse text-lg"></i>
             <span>Entrepôts</span>
           </a>
         </li>
         <li>
           <a routerLink="/importation-historique" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-truck-loading text-lg"></i>
             <span>Importations</span>
           </a>
@@ -145,14 +145,14 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/admin-gestion-users" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-users text-lg"></i>
             <span>Utilisateurs</span>
           </a>
         </li>
         <li>
           <a routerLink="/admin-clients-pro" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-building text-lg"></i>
             <span>Clients B2B</span>
           </a>
@@ -166,7 +166,7 @@
       <ul class="space-y-2">
         <li>
           <a routerLink="/admin-calculatrice-prix" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-semibold">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
             <i class="fas fa-calculator text-lg"></i>
             <span>Calculatrice de prix</span>
           </a>
