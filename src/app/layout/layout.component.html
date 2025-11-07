@@ -9,37 +9,73 @@
 
       <!-- Contenu principal avec marge pour la sidebar -->
       <main class="flex-1 p-4">
-        <nav
-          class="px-6 py-4 mx-auto max-w-screen-xl flex justify-between items-center rounded-lg shadow-md bg-white mb-4">
-          <!-- Logo + Titre -->
-          <div class="flex items-center gap-3 ">
-            <img class="h-10 w-10" src="logo/android-chrome-192x192.png" alt="Logo Kaleocar">
-            <a routerLink="/"
-              class="text-2xl font-extrabold text-gray-800 hover:text-primary transition-colors duration-300">
-              <span class="text-primary">Kaleo</span>Parts
-            </a>
-          </div>
+<nav
+  class="mx-auto max-w-screen-xl flex justify-between items-center bg-white shadow-md rounded-xl px-6 py-4 mb-6 border border-gray-100">
+  
+  <!-- 🧩 Logo + Titre -->
+  <div class="flex items-center gap-3">
+    <img class="h-10 w-10 rounded-lg shadow-sm" src="logo/android-chrome-192x192.png" alt="Logo Kaleocar" />
+    <a 
+      routerLink="/"
+      class="text-2xl font-extrabold tracking-tight text-gray-800 hover:text-primary transition-colors duration-300"
+    >
+      <span class="text-primary">Kaleo</span><span class="text-gray-800">Parts</span>
+    </a>
+  </div>
 
-          <!-- Bouton Déconnexion amélioré -->
-          <div class="grid grid-cols-2 gap-2">
+  <!-- 👤 Profil + Menu utilisateur -->
+  <div class="relative">
+    <button 
+      (click)="toggleProfileMenu()"
+      class="flex items-center gap-3 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-full border border-gray-200 shadow-sm transition-all duration-200"
+    >
+      <img 
+        src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
+        alt="Profil" 
+        class="h-9 w-9 rounded-full object-cover"
+      />
+      <span class="hidden sm:inline text-gray-700 font-medium">Admin</span>
+      <i class="fa-solid fa-chevron-down text-gray-500 text-sm"></i>
+    </button>
 
-            <button *ngIf="isAdmin()" class="bg-secondary text-white px-4 py-2 rounded hover:bg-red-700"
-              (click)="clearDatabase()" [disabled]="loading">
-              <i class="fa-solid fa-trash"></i> {{ loading ? 'Suppression...' : 'Supprimer toutes' }}
-            </button>
-            <button (click)="logout()"
-              class="flex items-center gap-2 bg-secondary text-white px-5 py-2 rounded-lg font-semibold shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300">
+    <!-- Menu déroulant -->
+    <div 
+      *ngIf="showProfileMenu"
+      class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 animate-fade-in"
+    >
+      <div class="px-4 py-2 border-b border-gray-100">
+        <p class="text-sm font-semibold text-gray-800">Admin</p>
+        <p class="text-xs text-gray-500">admin&#64;kaleoparts.com</p>
+      </div>
 
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 002 2h3a2 2 0 002-2v-1m0-8V7a2 2 0 00-2-2h-3a2 2 0 00-2 2v1" />
-              </svg>
+      <button routerLink="/profile" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+        <i class="fa-solid fa-user text-gray-500"></i> Mon profil
+      </button>
 
-              <span class="hidden sm:inline">Déconnexion</span>
-            </button>
-          </div>
-        </nav>
+      <div *ngIf="isAdmin()">
+        <button (click)="toggleParamMenu()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+          <i class="fa-solid fa-gear text-gray-500"></i> Paramètres
+        </button>
+
+        <button 
+          *ngIf="showParamMenu"
+          (click)="clearDatabase()"
+          [disabled]="loading"
+          class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+        >
+          <i class="fa-solid fa-trash"></i> 
+          {{ loading ? 'Suppression...' : 'Supprimer toutes les données' }}
+        </button>
+      </div>
+
+      <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+        <i class="fa-solid fa-arrow-right-from-bracket text-gray-500"></i> Déconnexion
+      </button>
+    </div>
+  </div>
+</nav>
+
+
         <router-outlet></router-outlet>
       </main>
     </div>

@@ -220,9 +220,10 @@ exportToExcel() {
   const data = this.selectedOrder?.items.map(item => ({
     CODE_ART: item.product?.codeArt,
     Marque: item.product?.marque,
+    "Oem1+oem2": item.product?.oem,
+    'Auto_final': item.product?.autoFinal,
     Désignation: item.product?.libelle,
     Quantité: item.quantity
-    // On exclut unitPrice et le total
   }));
   if (!data) {
   console.warn("Aucune donnée à exporter");

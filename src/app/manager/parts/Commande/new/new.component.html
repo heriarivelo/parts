@@ -111,16 +111,16 @@
           </div>
 
           <div *ngIf="panier.length > 0" class="mt-6 pt-4 border-t">
-            <div class="flex justify-between mb-2">
+            <!-- <div class="flex justify-between mb-2">
               <span class="font-medium">Total HT</span>
               <span>{{ getTotal() / 1.2 | number:'1.0-0' }} MGA</span>
-            </div>
-            <div class="flex justify-between mb-2">
+            </div> -->
+            <!-- <div class="flex justify-between mb-2">
               <span class="font-medium">TVA (20%)</span>
               <span>{{ getTotal() - (getTotal() / 1.2) | number:'1.0-0' }} MGA</span>
-            </div>
+            </div> -->
             <div class="flex justify-between text-lg font-bold mt-4">
-              <span>Total TTC</span>
+              <span>Total à payer</span>
               <span>{{ getTotal() | number:'1.0-0' }} MGA</span>
             </div>
           </div>
@@ -209,16 +209,16 @@
         <!-- Totaux -->
         <div class="bg-gray-50 p-4 rounded-lg mb-6">
           <div class="space-y-2">
-            <div class="flex justify-between">
+            <!-- <div class="flex justify-between">
               <span class="font-semibold">Total HT:</span>
               <span class="font-semibold">{{ devisPreview.total | number:'1.0-0' }} MGA</span>
             </div>
             <div class="flex justify-between">
               <span>TVA (20%):</span>
               <span>{{ devisPreview.total * 0 | number:'1.0-0' }} MGA</span>
-            </div>
+            </div> -->
             <div class="flex justify-between border-t border-gray-200 pt-2 mt-2 font-bold text-lg">
-              <span>Total TTC:</span>
+              <span>Total à payer:</span>
               <span>{{ devisPreview.total | number:'1.0-0' }} MGA</span>
             </div>
           </div>

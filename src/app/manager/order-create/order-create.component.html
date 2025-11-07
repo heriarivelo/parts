@@ -174,9 +174,10 @@
                             <span class="font-semibold">Type:</span> {{
                             getCustomerTypeLabel(orderForm.value.customerType) }}
                         </p>
-                        <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{ orderForm.value.customerId ?
-                            'Client Enregistré' : 'Client Occasionnel' }}</p>
-                        <p><span class="font-semibold">Adresse :</span>{{orderForm.value.nom}}</p>
+                        <!-- <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{ orderForm.value.customerId ?
+                            'Client Enregistré' : 'Client Occasionnel' }}</p> -->
+                        <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{orderForm.value.nom}}</p>
+                        <p><span class="font-semibold">Adresse :</span>____</p>
                         <p><span class="font-semibold">Contact :</span>{{orderForm.value.contact}}</p>
                         <p><span class="font-semibold">NIF :</span>{{orderForm.value.nif}}</p>
                     </div>
