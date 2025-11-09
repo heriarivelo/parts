@@ -31,7 +31,7 @@ export class HistoriqueCommandesComponent implements OnInit {
 
 
   selectedCommande: any = null;
-showDetailsModal = false;
+  showDetailsModal = false;
 
 
 
@@ -43,10 +43,15 @@ showDetailsModal = false;
 
   filtrerCommandes() {
     this.commandesFiltrees = this.commandes.filter(c =>
+      c && // ✅ commande existe
       (!this.filtreStatut || c.status === this.filtreStatut) &&
-      (!this.recherche || c.reference.toLowerCase().includes(this.recherche.toLowerCase()))
+      (!this.recherche ||
+        (c.reference && c.reference.toLowerCase().includes(this.recherche.toLowerCase())) ||
+        (c.customer?.nom && c.customer.nom.toLowerCase().includes(this.recherche.toLowerCase()))
+      )
     );
   }
+
 
   getStatutColor(statut: string): string {
     switch (statut) {
@@ -65,6 +70,7 @@ showDetailsModal = false;
         next: (response) => {
           this.commandes = response.data;
           this.pagination = response.pagination;
+          this.filtrerCommandes();
           this.isLoading = false;
         },
         error: (err) => {

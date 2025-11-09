@@ -1,10 +1,11 @@
 // commande.service.ts
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Order } from '../models/order.model';
 import { OrderDetails } from '../models/order.model';
+import { catchError } from 'rxjs/operators';
 // import { Observable } from 'rxjs';
 export interface InvoiceData {
   orderId: number;
@@ -62,6 +63,10 @@ export class CommandeService {
 
     getEntrepotsDisponibles(productId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrls}/entrepots/stock/${productId}`);
+  }
+
+    getProClientCommandeDetails(orderId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${orderId}/details`);
   }
 
   // getCommandeDetails(orderId: number): Observable<OrderDetails> {

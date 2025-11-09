@@ -7,6 +7,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { PdfService } from '../../../../service/pdf.service';
+import { ManagerService } from '../../../../service/manager.service';
+import { ProClientService } from '../../../../service/pro-clients.service';
+
+enum CustomerType {
+  RETAIL = 'RETAIL',
+  B2B = 'B2B',
+  WHOLESALE = 'WHOLESALE'
+}
 
 @Component({
   selector: 'app-new',
@@ -31,9 +39,13 @@ export class NewMComponent implements OnInit {
   
   // Client form
   clientForm: FormGroup;
+  clientsB2B: any[] = [];
+  customerTypes = Object.values(CustomerType);
 
   constructor(
     private panierService: CommandeparticulierService,
+    private managerService: ManagerService,
+    private proClientService: ProClientService,
     private pdfService : PdfService,
     private fb: FormBuilder
   ) {
@@ -43,19 +55,25 @@ export class NewMComponent implements OnInit {
       marque: [''],
       poidsKg:[],
       fraisPort: [14.5],
-      prixAchat: [45.00],
+      prixAchat: [],
       tauxChange: [5000],
       marge: [40]
     });
 
     this.clientForm = this.fb.group({
       customerType: ['RETAIL'],
+      customerId: [null],
       nom: ['', { validators: [Validators.required] }],
-      telephone: ['', { validators: [Validators.required] }],
+      telephone: ['', { validators: [Validators.required, Validators.pattern(/^\d{10,}$/)] }],
       email: [''],
       adresse: [''],
       nif: ['']
     });
+
+          // S'abonner aux changements du type de client
+      this.clientForm.get('customerType')?.valueChanges.subscribe(type => {
+          this.onCustomerTypeChange();
+      });
   }
 
   ngOnInit(): void {
@@ -146,7 +164,7 @@ export class NewMComponent implements OnInit {
     this.showModal = true;
   }
 
-  async confirmDevis() {
+async confirmDevis() {
   // 1. Validation du formulaire
   if (this.clientForm.invalid) {
     alert('Veuillez remplir tous les champs obligatoires');
@@ -164,51 +182,46 @@ export class NewMComponent implements OnInit {
   const total = this.getTotal();
   const tempReference = `CMD-${Date.now()}`;
 
-  // 4. Préparation des données pour PDF
-  const pdfData = {
-    reference: tempReference,
-    clientInfo,
+  const orderPayload = {
+    customerType: clientInfo.customerType,
+    commandeType: 'PARTICULIERE',
+    managerId: 1,
+    customerId: clientInfo.customerId, // ⬅️ AJOUTEZ L'ID CLIENT SI B2B
     items: this.panier.map(item => ({
+      // productId: item.id, // ⬅️ ASSUREZ-VOUS D'AVOIR UN ID DE PRODUIT
       reference: item.reference,
       productName: item.nom,
-      marque: item.marque || 'N/A',
+      marque: item.marque || null,
       unitPrice: item.prixVente,
-      quantity: item.quantite,
-      total: item.prixVente * item.quantite
+      quantity: item.quantite
     })),
-    customerType: clientInfo.customerType,
-    date: this.today,
-    subtotal: total
-  };
-
-  // 5. Préparation du payload pour l'API
-  const orderPayload = {
-    reference: tempReference,
-    customerType: clientInfo.customerType,
-    // managerId: this.currentManagerId,
-    items: pdfData.items, // Réutilisation des mêmes données
-    totalAmount: total,
-    clientInfo: {
-      name: clientInfo.nom,
-      phone: clientInfo.telephone,
+    info: {
+      nom: clientInfo.nom,
+      telephone: clientInfo.telephone, // ⬅️ CORRIGEZ ICI
       email: clientInfo.email || null,
-      address: clientInfo.adresse || null,
-      nif: clientInfo.customerType === 'B2B' ? clientInfo.nif : null
+      adresse: clientInfo.adresse || null,
+      nif: clientInfo.nif || null
     },
-    status: 'PENDING' // Ajout d'un statut par défaut
+    totalAmount: total
   };
 
   try {
-    // 6. Génération des documents (en parallèle pour plus de performance)
-    // const [pdfResult, imageResult] = await Promise.all([
-    const [pdfResult] = await Promise.all([
-      // this.pdfService.exportAsPdf(pdfData, 'devis'),
-      this.pdfService.exportAsImage(pdfData, 'devis', 'png')
-    ]);
+    // Appel API
+    const result = await this.managerService.createOrder(orderPayload).toPromise();
 
-    // 7. Enregistrement en base de données
-    // const result = await this.managerService.createOrder(orderPayload).toPromise();
+    // Génération du PDF
+    const pdfData = {
+      reference: tempReference,
+      clientInfo,
+      items: this.panier,
+      customerType: clientInfo.customerType,
+      date: this.today,
+      subtotal: total
+    };
     
+    await this.pdfService.exportAsImage(pdfData, 'devis', 'png');
+    
+    // Réinitialisation
     this.panierService.viderPanier();
     this.showClientModal = false;
     this.clientForm.reset({
@@ -217,36 +230,95 @@ export class NewMComponent implements OnInit {
 
     alert(`Devis ${tempReference} confirmé!\nPDF et image générés avec succès.`);
     
-    console.log('Commande enregistrée:', {
-      // dbResult: result,
-      pdfResult,
-      // imageResult
-    });
-
   } catch (error) {
     console.error('Erreur complète:', error);
     
-   let errorMessage = 'Erreur lors de la confirmation';
-
-if (typeof error === 'object' && error !== null) {
-  const errObj = error as { error?: any; message?: string };
-
-  if (errObj.error?.message) {
-    errorMessage += ` : ${errObj.error.message}`;
-  } else if (typeof errObj.message === 'string') {
-    errorMessage += ` : ${errObj.message}`;
-  } else {
-    errorMessage += ` : ${JSON.stringify(errObj)}`;
-  }
-} else {
-  errorMessage += ` : ${String(error)}`;
-}
+    let errorMessage = 'Erreur lors de la confirmation';
+    if (typeof error === 'object' && error !== null) {
+      const errObj = error as { error?: any; message?: string };
+      errorMessage += errObj.error?.message ? ` : ${errObj.error.message}` : 
+                     errObj.message ? ` : ${errObj.message}` : 
+                     ` : ${JSON.stringify(errObj)}`;
+    } else {
+      errorMessage += ` : ${String(error)}`;
+    }
     
     alert(errorMessage);
-    
-    // Optionnel: Recharger les données si échec
-    // this.panierService.panier$.next([...this.panier]);
   }
 }
+
+
+  getCustomerTypeLabel(type: CustomerType): string {
+    switch(type) {
+      case CustomerType.RETAIL: return 'Client détail';
+      case CustomerType.B2B: return 'Professionnel';
+      case CustomerType.WHOLESALE: return 'Grossiste';
+      default: return '';
+    }
+  }
+
+onCustomerTypeChange(): void {
+  const type = this.clientForm.get('customerType')?.value;
+  console.log('Type de client changé:', type);
+
+  if (type === 'B2B') {
+    this.proClientService.getProClients('', 'ACTIVE').subscribe({
+      next: (clients) => {
+        // Filtrer uniquement les B2B
+        this.clientsB2B = clients.filter((c: any) => c.type === 'B2B');
+        console.log('Clients B2B chargés:', this.clientsB2B);
+      },
+      error: (err) => console.error('Erreur chargement clients B2B :', err)
+    });
+  } else {
+    this.clientsB2B = [];
+    this.clientForm.patchValue({ 
+      customerId: null,
+      nom: '', 
+      telephone: '', // ⬅️ CORRIGEZ ICI
+      email: '',
+      nif: '', 
+      adresse: '' 
+    });
+  }
+}
+
+onB2BClientSelected(): void {
+  const selectedClientId = this.clientForm.get('customerId')?.value;
+  console.log('ID client sélectionné:', selectedClientId);
+  
+  if (selectedClientId) {
+    const client = this.clientsB2B.find(c => c.id === selectedClientId);
+    console.log('Client trouvé:', client);
+    
+    if (client) {
+      this.clientForm.patchValue({
+        nom: client.nom || '',
+        telephone: client.telephone || client.phone || '', // ⬅️ CORRIGEZ ICI
+        email: client.email || '',
+        nif: client.nif || client.siret || '',
+        adresse: client.adresse || client.address || ''
+      });
+    }
+  } else {
+    // Réinitialiser si aucun client sélectionné
+    this.clientForm.patchValue({ 
+      nom: '', 
+      telephone: '', // ⬅️ CORRIGEZ ICI
+      email: '',
+      nif: '', 
+      adresse: '' 
+    });
+  }
+}
+
+  // Ajouter ces getters dans votre classe
+  get isB2B(): boolean {
+      return this.clientForm.get('customerType')?.value === 'B2B';
+  }
+
+  get isFormValid(): boolean {
+      return this.clientForm.valid && this.panier.length > 0;
+  }
 
 }

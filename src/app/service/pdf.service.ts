@@ -172,6 +172,7 @@ export class PdfService {
 
         <!-- Mentions -->
         <div style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
+          <p>Devis valable 10 jours .</p>
           <p style="margin-top: 5px;">kaleoPARTS - NIF 6018289282 - STAT 46101112023011160</p>
         </div>
       </div>

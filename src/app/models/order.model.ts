@@ -26,6 +26,18 @@ export interface Order {
   type: 'B2B' | 'RETAIL' | 'WHOLESALE';
   createdAt: string;
   updatedAt: string;
+    commandetype: 'STANDARD' | 'PARTICULIERE'; // ✅ ajouté
+  libelle?: string | null;
+
+  // Relations
+  customer?: {
+    id: number;
+    nom: string;
+    type: string;
+    telephone?: string;
+    email?: string | null;
+    adresse?: string | null;
+  } | null;
   manager: {
     name: string;
     email: string;

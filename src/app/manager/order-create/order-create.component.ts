@@ -1,16 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ManagerService } from '../../service/manager.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-
-// export class MonComposant {
-//   myForm = new FormGroup({
-//     customerType: new FormControl('')
-//   });
-// }
+import { ProClientService } from '../../service/pro-clients.service';
+import { AuthService, User } from '../../service/auth.service';
 
 
 enum CustomerType {
@@ -51,33 +47,46 @@ interface InvoicePreview {
   templateUrl: './order-create.component.html',
   styleUrls: ['./order-create.component.scss']
 })
-export class OrderCreateComponent {
-  orderForm: FormGroup;
+export class OrderCreateComponent implements OnInit {
+  orderForm!: FormGroup;
   searchResults: any[] = [];
   customerTypes = Object.values(CustomerType);
   cartItems: CartItem[] = [];
   invoicePreview?: InvoicePreview;
   showModal = false;
   isLoading = false;
-  currentManagerId = 1; // À remplacer par l'ID réel
+  currentUser: User | null = null;
+  clientsB2B: any[] = [];
 
   today = new Date();
 
-  constructor(
+    constructor(
     private fb: FormBuilder,
+    private proClientService: ProClientService,
+    private authService: AuthService,
     private managerService: ManagerService,
     private router: Router
-  ) {
-    this.orderForm = this.fb.group({
-      customerType: [CustomerType.RETAIL, Validators.required],
-      customerId: [null],
-      searchQuery: [''],
-      searchOem: [''],
-      searchMarque: [''],
-      nom: [''],
-      contact: [''],
-      nif: ['']
-    });
+  ) {}
+
+  ngOnInit(): void {
+      this.orderForm = this.fb.group({
+          customerType: [CustomerType.RETAIL, Validators.required],
+          customerId: [null],
+          searchQuery: [''],
+          searchOem: [''],
+          searchMarque: [''],
+          nom: [''],
+          contact: [''],
+          nif: [''],
+          adresse: ['']
+      });
+
+      // S'abonner aux changements du type de client
+      this.orderForm.get('customerType')?.valueChanges.subscribe(type => {
+          this.onCustomerTypeChange();
+      });
+
+      this.currentUser = this.authService.currentUserValue;
   }
 
   getCustomerTypeLabel(type: CustomerType): string {
@@ -87,6 +96,77 @@ export class OrderCreateComponent {
       case CustomerType.WHOLESALE: return 'Grossiste';
       default: return '';
     }
+  }
+
+onCustomerTypeChange(): void {
+    const type = this.orderForm.get('customerType')?.value;
+    // console.log('Type de client changé:', type);
+
+    if (type === 'B2B') {
+        this.proClientService.getProClients('', 'ACTIVE').subscribe({
+            next: (clients) => {
+                // console.log('Tous les clients reçus:', clients);
+                
+                // Filtrer uniquement les B2B
+                this.clientsB2B = clients.filter((c: any) => c.type === 'B2B');
+                // console.log('Clients B2B filtrés:', this.clientsB2B);
+                
+                // if (this.clientsB2B.length > 0) {
+                //     console.log('Premier client B2B:', this.clientsB2B[0]);
+                //     console.log('Propriétés disponibles:', Object.keys(this.clientsB2B[0]));
+                // }
+            },
+            error: (err) => console.error('Erreur chargement clients B2B :', err)
+        });
+    } else {
+        this.clientsB2B = [];
+        this.orderForm.patchValue({ 
+            customerId: null,
+            nom: '', 
+            contact: '', 
+            nif: '', 
+            adresse: '' 
+        });
+    }
+}
+
+onB2BClientSelected(): void {
+    const selectedClientId = this.orderForm.get('customerId')?.value;
+    // console.log('ID client sélectionné:', selectedClientId);
+    
+    if (selectedClientId) {
+        const client = this.clientsB2B.find(c => c.id === selectedClientId);
+        // console.log('Client trouvé:', client);
+        
+        if (client) {
+            this.orderForm.patchValue({
+                nom: client.nom || '',
+                contact: client.telephone || client.phone || '',
+                nif: client.nif || client.siret || '',
+                adresse: client.adresse || client.address || ''
+            });
+        }
+    } else {
+        // Réinitialiser si aucun client sélectionné
+        this.orderForm.patchValue({ 
+            nom: '', 
+            contact: '', 
+            nif: '', 
+            adresse: '' 
+        });
+    }
+    
+    // Force la détection des changements
+    this.orderForm.updateValueAndValidity();
+}
+
+  // Ajouter ces getters dans votre classe
+  get isB2B(): boolean {
+      return this.orderForm.get('customerType')?.value === 'B2B';
+  }
+
+  get isFormValid(): boolean {
+      return this.orderForm.valid && this.cartItems.length > 0;
   }
 
   searchParts() {
@@ -183,10 +263,11 @@ export class OrderCreateComponent {
 
     this.managerService.createOrder(orderData).subscribe({
       next: (result) => {
-        alert(`Commande validée! Référence: ${result.orderId}`);
+        alert(`Commande validée! Référence: ${result.id}`);
         this.closeModal();
         this.cancelOrder();
-        this.router.navigate(['/liste-commandes', result.invoiceId]);
+        this.router.navigate(['/liste-commandes']);
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Erreur confirmation:', err);
@@ -203,8 +284,9 @@ export class OrderCreateComponent {
   private prepareOrderData() {
     return {
       customerType: this.orderForm.value.customerType,
+      commandeType: 'STANDARD',
       customerId: this.orderForm.value.customerId,
-      managerId: this.currentManagerId,
+      managerId: this.currentUser?.id,
       items: this.cartItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,

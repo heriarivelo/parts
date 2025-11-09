@@ -1,14 +1,16 @@
 // src/app/services/pro-client.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { environment } from '../environments/environment';
+import { catchError } from 'rxjs/operators';
+
 
 export interface ProClient {
   id: number;
   nom: string;
   siret: string;
-  address: string;
+  adresse?: string;
   postalCode: string;
   city: string;
   activity: string;
@@ -18,7 +20,7 @@ export interface ProClient {
   email: string;
   paymentTerms: number;
   creditLimit: number;
-  revenue: number;
+  totalRevenue: number;
   lastOrderDate: string;
   status: string;
   balanceDue?: number;
@@ -63,7 +65,14 @@ export class ProClientService {
     return this.http.post<ProClient>(this.apiUrl, clientData);
   }
 
-  updateClient(id: number, clientData: any): Observable<ProClient> {
-    return this.http.put<ProClient>(`${this.apiUrl}/${id}`, clientData);
+// pro-clients.service.ts
+  updateClient(id: number, clientData: any): Observable<any> {
+    console.log('Updating client with ID:', id, 'Data:', clientData);
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, clientData).pipe(
+      catchError(error => {
+        console.error('API Error:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

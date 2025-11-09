@@ -1,4 +1,4 @@
-<div class="container mx-auto px-4 py-6">
+<div class="p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
@@ -6,7 +6,7 @@
             <p class="text-sm text-gray-600">Total: {{ filteredFactures.length }} facture(s)</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <div class="flex flex-col sm:flex-row gap-3">
             <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher..."
                 class="px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
@@ -20,37 +20,38 @@
         </div>
     </div>
 
+    <div class="container mx-auto px-2 py-8">
+
     <!-- Loading State -->
     <div *ngIf="isLoading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
     </div>
 
     <!-- Factures List -->
-    <div *ngIf="!isLoading" class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
+    <div *ngIf="!isLoading" class="overflow-x-auto bg-white shadow rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Référence</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Commande</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Client</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Montant</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Paiement</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Statut</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <tr *ngFor="let facture of filteredFactures" class="hover:bg-gray-50">
                         <!-- Référence -->
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-2 py-4 text-sm whitespace-nowrap">
                             <div class="font-medium text-blue-600">{{ facture.referenceFacture }}</div>
                             <div class="text-xs text-gray-500 mt-1">
                                 {{ facture.createdAt | date:'dd/MM/yy HH:mm' }}
@@ -58,7 +59,7 @@
                         </td>
 
                         <!-- Commande -->
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-2 py-4 text-sm whitespace-nowrap">
                             <div class="font-medium">{{ facture.commandeVente.reference }}</div>
                             <div class="text-xs text-gray-500 capitalize">
                                 {{ facture.commandeVente.type.toLowerCase() }}
@@ -66,7 +67,7 @@
                         </td>
 
                         <!-- Client -->
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             <div *ngIf="facture.commandeVente.customer; else noCustomer">
                                 <div class="font-medium">{{ facture.commandeVente.customer.nom }}</div>
                                 <div *ngIf="facture.commandeVente.customer.phone" class="text-xs text-gray-500">
@@ -79,7 +80,7 @@
                         </td>
 
                         <!-- Montant -->
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             <div class="font-medium">{{ facture.prixTotal | currency:'MGA':'symbol':'1.0-0' }}</div>
                             <div *ngIf="facture.remises.length > 0" class="text-xs text-red-500">
                                 Remise: -{{ calculateRemiseTotale(facture) | currency:'MGA':'symbol':'1.0-0' }}
@@ -109,16 +110,16 @@
                         </td>
 
                         <!-- Statut -->
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-1 py-4 text-sm whitespace-nowrap">
                             <span [ngClass]="getStatusClass(facture.status)"
-                                class="text-xs font-bold px-2 py-1 rounded-full">
+                                class="text-xs font-bold px-1.5 py-1 rounded-full">
                                 {{ facture.status }}</span>
                         </td>
 
                         <!-- Actions -->
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button *ngIf="facture.resteAPayer > 0 || facture.status === 'NON_PAYEE'"
-                                class="text-blue-600 hover:text-blue-900 mr-3" (click)="openPaiementModal(facture)">
+                                class="text-blue-600 hover:text-blue-900 mr-2" (click)="openPaiementModal(facture)">
                                 Payer
                             </button>
                             <a (click)="openDetailsModal(facture)"
@@ -126,14 +127,13 @@
                                 Détails
                             </a>
                             <button *ngIf="canCancel(facture)" (click)="annulerFacture(facture.id)" type="button"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-2 py-1.5 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                                 Annuler
                             </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
 
         <!-- Empty State -->
         <div *ngIf="filteredFactures.length === 0 && !isLoading" class="text-center py-12">
@@ -146,6 +146,7 @@
                 {{ searchTerm ? 'Aucun résultat pour votre recherche' : 'Aucune facture disponible' }}
             </p>
         </div>
+    </div>
     </div>
 </div>
 

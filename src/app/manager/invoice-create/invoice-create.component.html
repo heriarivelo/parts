@@ -74,8 +74,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             <tr *ngFor="let item of orderDetails.pieces" class="hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-3 text-sm">{{ item.product.referenceCode }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">{{ item.product.libelle || '-' }}</td>
+                                <td class="px-4 py-3 text-sm">{{ item.resolvedProduct?.referenceCode || item.resolvedProduct?.codeArt }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ item.resolvedProduct?.libelle || '-' }}</td>
                                 <td class="px-4 py-3 text-sm">{{ item.prixArticle | currency:'MGA':'symbol':'1.2-2' }}
                                 </td>
                                 <td class="px-4 py-3 text-sm">{{ item.quantite }}</td>
@@ -92,7 +92,7 @@
             <!-- Formulaire -->
             <div *ngIf="!isLoading" class="bg-white shadow rounded-lg p-6">
                 <!-- Liste des produits -->
-                <div class="mb-6 p-4 bg-gray-50 rounded-xl shadow-sm">
+                <div *ngIf="orderDetails.commandetype === 'STANDARD'" class="mb-6 p-4 bg-gray-50 rounded-xl shadow-sm">
                     <h3 class="text-lg font-semibold mb-4">
                         <i class="fa-solid fa-warehouse mr-2"></i>
                         Gestion d' entrepot
@@ -200,7 +200,7 @@
                             <div>
                                 <label class="block text-sm font-medium mb-1">Montant payé</label>
                                 <input formControlName="paymentAmount" type="number" min="0"
-                                    [max]="calculateTotals().total"
+                                    [max]="calculateTotals().total" (input)="limitPaymentAmount($event)"
                                     class="w-full border rounded-lg p-2 text-right focus:ring-2 focus:ring-blue-500">
                                 <div *ngIf="
                                     invoiceForm.get('paymentAmount')?.invalid &&
@@ -208,6 +208,13 @@
                                     " class="text-red-500 text-xs mt-1">
                                     Montant payé obligatoire.
                                 </div>
+                                <div *ngIf="
+                                invoiceForm.get('paymentAmount')?.hasError('exceedsTotal') &&
+                                invoiceForm.get('paymentAmount')?.touched
+                                " class="text-red-500 text-xs mt-1">
+                                Le montant payé ne peut pas dépasser le total à payer ({{ calculateTotals().total | currency:'MGA':'symbol':'1.2-2' }}).
+                                </div>
+
                             </div>
 
                             <div>
