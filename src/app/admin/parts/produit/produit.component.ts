@@ -9,6 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 
 @Component({
@@ -61,6 +62,15 @@ export class ProduitComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStocks();
+      this.searchForm.get('search')?.valueChanges
+    .pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    )
+    .subscribe(() => {
+      this.pagination.page = 1;
+      this.loadStocks();
+    });
   }
 
   loadStocks(): void {

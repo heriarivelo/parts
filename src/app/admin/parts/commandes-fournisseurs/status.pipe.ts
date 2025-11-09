@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({ name: 'statusFr' })
 export class StatusFrPipe implements PipeTransform {
-  transform(status: string): string {
+  transform(status?: string): string {
     switch (status) {
       case 'DRAFT':
         return 'En attente';
@@ -13,7 +13,7 @@ export class StatusFrPipe implements PipeTransform {
       case 'CANCELLED':
         return 'Annulé';
       default:
-        return status;
+        return status || '';
     }
   }
 }

@@ -49,18 +49,70 @@
 
         <div class="mb-4 p-4 bg-gray-50 rounded-lg">
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Type de Client</label>
                 <form [formGroup]="orderForm">
                     <div class="grid grid-cols-2 gap-3">
-                        <select formControlName="customerType" class="...">
-                            <option *ngFor="let type of customerTypes" [value]="type">{{ type }}</option>
-                        </select>
-                        <input formControlName="nom" placeholder="Nom complet" class="w-full p-2 border rounded">
-                        <input formControlName="contact" placeholder="Téléphone" class="w-full p-2 border rounded">
-                        <input formControlName="nif" placeholder="Nif" class="w-full p-2 border rounded">
+                        <!-- Type de client -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Type de client</label>
+                            <select
+                                formControlName="customerType"
+                                class="w-full p-2 border rounded"
+                            >
+                                <option *ngFor="let type of customerTypes" [value]="type">{{ type }}</option>
+                            </select>
+                        </div>
+
+                        <!-- Nom / Client -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nom / Client</label>
+
+                            <!-- 🧍 Si non-B2B -->
+                            <input
+                                *ngIf="!isB2B"
+                                formControlName="nom"
+                                placeholder="Nom complet"
+                                class="w-full p-2 border rounded"
+                            />
+
+                            <!-- 🏢 Si B2B -->
+                            <select
+                                *ngIf="isB2B"
+                                formControlName="customerId"
+                                (change)="onB2BClientSelected()"
+                                class="w-full p-2 border rounded"
+                            >
+                                <option [ngValue]="null">-- Sélectionner un client B2B --</option>
+                                <option *ngFor="let client of clientsB2B" [ngValue]="client.id">
+                                    {{ client.nom }} ({{ client.email || client.telephone }})
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Téléphone</label>
+                            <input
+                                formControlName="contact"
+                                placeholder="Téléphone"
+                                class="w-full p-2 border rounded"
+                                [readonly]="isB2B"
+                                [class.bg-gray-100]="isB2B"
+                            />
+                        </div>
+
+                        <!-- SIRET -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nif</label>
+                            <input
+                                formControlName="nif"
+                                placeholder="Nif"
+                                class="w-full p-2 border rounded"
+                                [readonly]="isB2B"
+                                [class.bg-gray-100]="isB2B"
+                            />
+                        </div>
                     </div>
                 </form>
-
             </div>
         </div>
 

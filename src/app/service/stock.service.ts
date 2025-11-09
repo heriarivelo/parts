@@ -14,19 +14,6 @@ export interface Produit {
   // Ajoutez d'autres propriétés selon votre API
 }
 
-interface RechercheParams {
-  lib1?: string;
-  marque?: string;
-  oem?: string;
-  auto?: string;
-  page: number;
-  limit: number;
-}
-
-interface ApiResponse {
-  results: Produit[];
-  // Ajoutez d'autres propriétés de pagination si nécessaire
-}
 
 @Injectable({
   providedIn: 'root'

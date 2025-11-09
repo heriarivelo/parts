@@ -8,6 +8,7 @@ import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PdfService } from '../../service/pdf.service';
 import { lastValueFrom } from 'rxjs';
+import { AuthService, User } from '../../service/auth.service';
 
 
 interface Piece {
@@ -42,7 +43,7 @@ export class InvoiceCreateComponent implements OnInit {
   isLoading = true;
   isSubmitting = false;
   orderDetails: any = null;
-  currentManagerId = 2;
+  currentUser: User | null = null;
   
   invoiceForm: FormGroup;
   discounts: Discount[] = [];
@@ -59,6 +60,7 @@ export class InvoiceCreateComponent implements OnInit {
     private route: ActivatedRoute,
     private orderService: CommandeService,
     private invoiceService: InvoiceService,
+    private authService: AuthService,
     private pdfService: PdfService,
     private fb: FormBuilder,
     private router: Router
@@ -69,13 +71,14 @@ export class InvoiceCreateComponent implements OnInit {
       discountValue: [0, [Validators.min(0)]],
       discountDescription: [''],
       paymentMethod: ['CASH', Validators.required],
-      paymentAmount: [null, [Validators.required, Validators.min(0)]],
+      paymentAmount: [null, [Validators.required, Validators.min(0),this.maxPaymentValidator(() => this.calculateTotals().total)]],
       paymentReference: [''],
       pieces: this.piecesFormArray
     });
   }
 
   ngOnInit(): void {
+    this.currentUser = this.authService.currentUserValue;
     const id = this.route.snapshot.paramMap.get('commandeId');
     if (id) {
       this.orderId = +id;
@@ -96,12 +99,21 @@ export class InvoiceCreateComponent implements OnInit {
         this.piecesFormArray.clear();
         
         for (const piece of this.orderDetails.pieces) {
+          const isParticuliere = this.orderDetails.commandetype === 'PARTICULIERE' || !piece.productId;
+
+          if (isParticuliere) {
+            console.warn(`Commande particulière détectée (pièce ${piece.id}) — pas d'entrepôt requis.`);
+            this.addPieceFormGroup(piece, [], true); // ← on indique que c’est particulier
+            continue;
+          }
+
           const entrepots = await lastValueFrom(
             this.orderService.getEntrepotsDisponibles(piece.productId)
           );
-          
-          this.addPieceFormGroup(piece, entrepots);
+          this.addPieceFormGroup(piece, entrepots, false);
         }
+
+
       }
     } catch (err) {
       console.error('Error loading order details', err);
@@ -111,23 +123,28 @@ export class InvoiceCreateComponent implements OnInit {
     }
   }
 
-  private addPieceFormGroup(piece: any, entrepots: any[]): void {
+    private addPieceFormGroup(piece: any, entrepots: any[], isParticuliere = false): void {
     const entrepotsDisponibles = (entrepots || []).map(e => ({
       id: e.id,
       nom: e.libelle,
       quantiteDisponible: e.quantite
     }));
 
+    const validators = isParticuliere
+      ? [] // ✅ pas d'entrepôt obligatoire
+      : [Validators.required, this.entrepotValidator(entrepotsDisponibles)];
+
     const pieceGroup = this.fb.group({
-      productId: [piece.productId, Validators.required],
-      productName: [piece.productName, Validators.required],
+      productId: [piece.productId],
+      productName: [piece.product?.libelle || piece.customProduct?.libelle || 'Produit particulier'],
       quantite: [piece.quantite, [Validators.required, Validators.min(1)]],
-      entrepotId: [null, [Validators.required, this.entrepotValidator(entrepotsDisponibles)]],
+      entrepotId: [null, validators],
       entrepotsDisponibles: [entrepotsDisponibles]
     });
 
     this.piecesFormArray.push(pieceGroup);
   }
+
 
   private entrepotValidator(entrepots: Entrepot[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -206,7 +223,7 @@ export class InvoiceCreateComponent implements OnInit {
 
 submitInvoice() {
   // 1. Vérification des entrepôts (nouvelle partie)
-  if (this.piecesFormArray) {
+  if (this.orderDetails.commandetype === 'STANDARD') {
     const missingWarehouse = this.piecesFormArray.controls.some(control => {
       return !control.get('entrepotId')?.value;
     });
@@ -217,6 +234,7 @@ submitInvoice() {
       return;
     }
   }
+
 
 if (
   !this.invoiceForm.value.paymentAmount ||
@@ -232,12 +250,18 @@ if (
   const totals = this.calculateTotals();
   const { paymentAmount, paymentMethod, paymentReference } = this.invoiceForm.value;
 
+  if (paymentAmount > totals.total) {
+  alert('Le montant payé ne peut pas dépasser le total à payer.');
+  this.invoiceForm.get('paymentAmount')?.setErrors({ exceedsTotal: true });
+  return;
+}
+
   // 3. Préparation du payload (adapté pour les entrepôts)
   const payload: any = {
     orderId: this.orderId,
     referenceFacture: `FAC-${Date.now()}`,
     prixTotal: totals.total,
-    managerId: this.currentManagerId
+    managerId: this.currentUser?.id
   };
 
   // Ajout des pièces avec entrepôts si disponibles
@@ -261,7 +285,7 @@ if (
       amount: paymentAmount,
       method: paymentMethod,
       reference: paymentReference,
-      managerId: this.currentManagerId
+      managerId: this.currentUser?.id
     };
   }
 
@@ -335,4 +359,26 @@ private markAllAsTouched(): void {
   cancel(): void {
     this.router.navigate(['/liste-commandes']);
   }
+
+  private maxPaymentValidator(getTotal: () => number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      const total = getTotal();
+      if (value != null && value > total) {
+        return { exceedsTotal: true };
+      }
+      return null;
+    };
+  }
+
+  limitPaymentAmount(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const max = this.calculateTotals().total;
+    if (+input.value > max) {
+      input.value = max.toString();
+      this.invoiceForm.get('paymentAmount')?.setValue(max);
+    }
+  }
+
+
 }
