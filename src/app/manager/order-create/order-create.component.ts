@@ -78,7 +78,9 @@ export class OrderCreateComponent implements OnInit {
           nom: [''],
           contact: [''],
           nif: [''],
-          adresse: ['']
+          adresse: [''],
+          telephone: ['', { validators: [Validators.required, Validators.pattern(/^\d{10,}$/)] }],
+          email: [''],
       });
 
       // S'abonner aux changements du type de client
@@ -125,7 +127,9 @@ onCustomerTypeChange(): void {
             nom: '', 
             contact: '', 
             nif: '', 
-            adresse: '' 
+            adresse: '' ,
+            telephone: '', // ⬅️ CORRIGEZ ICI
+            email: '',
         });
     }
 }
@@ -143,7 +147,9 @@ onB2BClientSelected(): void {
                 nom: client.nom || '',
                 contact: client.telephone || client.phone || '',
                 nif: client.nif || client.siret || '',
-                adresse: client.adresse || client.address || ''
+                adresse: client.adresse || client.address || '',
+                telephone: client.telephone, // ⬅️ CORRIGEZ ICI
+                email: client.email || null,
             });
         }
     } else {
@@ -152,7 +158,9 @@ onB2BClientSelected(): void {
             nom: '', 
             contact: '', 
             nif: '', 
-            adresse: '' 
+            adresse: '',
+            telephone: '', // ⬅️ CORRIGEZ ICI
+            email: '',
         });
     }
     

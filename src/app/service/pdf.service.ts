@@ -95,11 +95,6 @@ export class PdfService {
       <strong>Devis N°:</strong> ${devis.reference || 'TEMP'}
     </p>
     
-    <!-- Type de client -->
-    <h3 style="color: #333; font-size: 16px; margin: 0 0 15px 0; padding-bottom: 5px; border-bottom: 1px solid #ddd;">
-      ${devis.customerType === 'B2B' ? 'CLIENT PROFESSIONNEL' : 'CLIENT PARTICULIER'}
-    </h3>
-    
     <!-- Informations client -->
     <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
       <p style="margin: 0;"><strong>Nom:</strong> ${devis.clientInfo?.nom || 'Non spécifié'}</p>
@@ -172,7 +167,6 @@ export class PdfService {
 
         <!-- Mentions -->
         <div style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
-          <p>Devis valable 10 jours .</p>
           <p style="margin-top: 5px;">kaleoPARTS - NIF 6018289282 - STAT 46101112023011160</p>
         </div>
       </div>
@@ -292,7 +286,6 @@ export class PdfService {
         <!-- Mentions légales -->
         <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 11px; color: #666; text-align: center;">
           <p>Facture établie par KaleoParts - NIF 6018289282 - STAT 46101112023011160</p>
-          <p>Paiement attendu sous 30 jours - Pas d'escompte pour paiement anticipé</p>
         </div>
       </div>
     `;
@@ -350,17 +343,4 @@ export class PdfService {
     };
     return methods[method] || method;
   }
-
-//  private calculateRemiseTotale(discounts: any[], subtotal: number): number {
-//   return discounts?.reduce((sum, discount) => {
-//     if (discount.type === 'POURCENTAGE' || discount.type === 'percentage') {
-//       const taux = discount.taux || discount.value; // Prend soit 'taux' (BDD) soit 'value' (composant)
-//       return sum + (subtotal * (taux / 100));
-//     } else {
-//       // Pour les remises fixes, on prend soit 'montant' (BDD) soit 'value' (composant)
-//       const montant = discount.montant || discount.value;
-//       return sum + (montant || 0);
-//     }
-//   }, 0) || 0;
-// }
 }

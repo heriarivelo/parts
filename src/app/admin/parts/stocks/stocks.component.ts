@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { ReapproService } from '../../../service/reappro.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-stocks',
@@ -19,10 +20,13 @@ export class StocksComponent implements OnInit {
   selectedProducts: any[] = [];
   loading = false;
   threshold = 5;
+  searchTerm: string = '';
   currentPage = 1;
   pageSize = 10;
   totalItems = 0;
   totalPages = 1;
+
+  private searchSubject = new Subject<string>();
 
   statuses = [
     { value: 'DRAFT', label: 'Brouillon' },
@@ -48,11 +52,18 @@ export class StocksComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLowStockProducts();
+
+        this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((term) => {
+        this.currentPage = 1; // reset pagination
+        this.loadLowStockProducts(term);
+      });
   }
 
-  loadLowStockProducts(): void {
+  loadLowStockProducts(search: string = this.searchTerm): void {
     this.loading = true;
-    this.reapproService.getLowStock(this.threshold, this.currentPage, this.pageSize).subscribe({
+    this.reapproService.getLowStock(this.threshold, this.currentPage, this.pageSize, search).subscribe({
       next: (response) => {
         this.lowStockProducts = response.data.map((p: any) => {
           const productId = p.product.id;
@@ -90,6 +101,19 @@ export class StocksComponent implements OnInit {
     this.currentPage = 1;
     this.loadLowStockProducts();
   }
+
+  onSearch(): void {
+    this.currentPage = 1;
+    this.loadLowStockProducts();
+  }
+
+  onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input?.value || '';
+    this.searchTerm = value;
+    this.searchSubject.next(value);
+  }
+
 
   getPageNumbers(): number[] {
     const pages = [];

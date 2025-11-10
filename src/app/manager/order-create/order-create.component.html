@@ -50,7 +50,7 @@
         <div class="mb-4 p-4 bg-gray-50 rounded-lg">
             <div class="mb-4">
                 <form [formGroup]="orderForm">
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-3 gap-2">
                         <!-- Type de client -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Type de client</label>
@@ -109,6 +109,29 @@
                                 class="w-full p-2 border rounded"
                                 [readonly]="isB2B"
                                 [class.bg-gray-100]="isB2B"
+                            />
+                        </div>
+                        <!-- Adresse -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Adresse</label>
+                            <input
+                            formControlName="adresse"
+                            placeholder="Adresse"
+                            class="w-full p-2 border rounded"
+                            [readonly]="isB2B"
+                            [class.bg-gray-100]="isB2B"
+                            />
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <input
+                            formControlName="email"
+                            placeholder="Email"
+                            class="w-full p-2 border rounded"
+                            [readonly]="isB2B"
+                            [class.bg-gray-100]="isB2B"
                             />
                         </div>
                     </div>
@@ -226,10 +249,8 @@
                             <span class="font-semibold">Type:</span> {{
                             getCustomerTypeLabel(orderForm.value.customerType) }}
                         </p>
-                        <!-- <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{ orderForm.value.customerId ?
-                            'Client Enregistré' : 'Client Occasionnel' }}</p> -->
                         <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{orderForm.value.nom}}</p>
-                        <p><span class="font-semibold">Adresse :</span>____</p>
+                        <p><span class="font-semibold">Adresse :</span>{{orderForm.value.adresse}}</p>
                         <p><span class="font-semibold">Contact :</span>{{orderForm.value.contact}}</p>
                         <p><span class="font-semibold">NIF :</span>{{orderForm.value.nif}}</p>
                     </div>

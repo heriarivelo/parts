@@ -46,14 +46,24 @@ export class ReapproService {
 
   constructor(private http: HttpClient) {}
 
-   getLowStock(threshold: number = 5, page: number = 1, pageSize: number = 10): Observable<any> {
+  getLowStock(
+    threshold: number = 5,
+    page: number = 1,
+    pageSize: number = 10,
+    search: string = ''
+  ): Observable<any> {
     let params = new HttpParams()
       .set('threshold', threshold.toString())
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
     return this.http.get(`${this.apiUrl}/low-stock`, { params });
   }
+
 
   createReappro(items: ReapproItem[], status: string , userId: number,totalValue: number): Observable<any> {
     return this.http.post(this.apiUrl, { items, status, userId, totalValue });
