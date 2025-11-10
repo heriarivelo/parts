@@ -50,23 +50,6 @@ export class EntrepotComponent implements OnInit {
     this.loadArticlesWithoutEntrepot(); // Nouvelle méthode
   }
 
-  // Charger les entrepôts
-  // async loadEntrepots() {
-  //   try {
-  //     // On précise qu’on attend un tableau d’Entrepot
-  //     const response = await this.entrepotService
-  //       .getEntrepots()
-  //       .toPromise() as Entrepot[];
-  //     this.boxes = response.map((entrepot: Entrepot) => ({
-  //       id: entrepot.id,
-  //       name: entrepot.libelle,
-  //       items: []
-  //     }));
-  //   } catch (error) {
-  //     console.error("Erreur lors du chargement des entrepôts", error);
-  //   }
-  // }
-
 async loadEntrepots() {
   try {
     const response = await this.entrepotService.getEntrepots().toPromise() as Entrepot[];
@@ -128,25 +111,23 @@ async loadEntrepots() {
   }
 
   // Mettre à jour l'entrepôt d'un article
-  async updateEntrepot(boxId: number, articleId: number) {
-    try {
-      await this.entrepotService.updateStockEntrepot({ 
-        stockId: articleId, 
-        entrepotId: boxId 
-      }).toPromise();
-      console.log('Mise à jour réussie');
-      // Recharger les données
-      this.loadArticlesWithoutEntrepot();
-      if (this.selectedBox) {
-        this.openBoxDetails(this.selectedBox);
-      }
-    } catch (error) {
-      console.error('Erreur de mise à jour', error);
-      console.log('boxid update', boxId);
-      console.log('stockid update', articleId);
+async updateEntrepot(boxId: number, articleId: number) {
+  try {
+    await this.entrepotService.updateStockEntrepot({ 
+      stockId: articleId, 
+      entrepotId: boxId 
+    }).toPromise();
 
+    console.log('Mise à jour réussie');
+    this.loadArticlesWithoutEntrepot();
+    if (this.selectedBox) {
+      this.openBoxDetails(this.selectedBox);
     }
+  } catch (error) {
+    console.error('Erreur de mise à jour', error);
   }
+}
+
 
   // Créer un nouvel entrepôt
   async NewEntrepot() {

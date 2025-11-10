@@ -4,7 +4,7 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div class="flex-1">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des Réapprovisionnements</h1>
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Gestion des Réapprovisionnements</h1>
           <p class="text-gray-600 text-lg">Produits avec stock faible 
             <span class="font-semibold text-orange-600">(≤ {{threshold}} unités)</span>
           </p>
@@ -35,7 +35,7 @@
       </div>
 
       <!-- Summary Bar -->
-      <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200">
+      <div class="mt-6 mb-3 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex flex-wrap gap-6 text-sm">
             <div class="flex items-center gap-2">
@@ -75,6 +75,23 @@
           </button>
         </div>
       </div>
+
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            [(ngModel)]="searchTerm"
+            [value]="searchTerm"
+            (input)="onSearchChange($event)"
+            class="border border-b border-blue-900 shadow-md rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-red-500 focus:shadow-xl focus:outline-none"
+          />
+          <button
+            (click)="onSearch()"
+            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Rechercher
+          </button>
+        </div>
     </div>
 
     <!-- Loading State -->
@@ -89,12 +106,12 @@
     <div *ngIf="!loading || lowStockProducts.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
       <!-- Table Header -->
       <div class="grid grid-cols-12 bg-gray-50 p-6 font-semibold text-gray-700 border-b border-gray-200 text-sm uppercase tracking-wide">
-        <div class="col-span-1 flex items-center">
-          <span class="ml-2">Sélection</span>
+        <div class="col-span-1 text-left">
+          Sélection
         </div>
         <div class="col-span-1">Référence</div>
-        <div class="col-span-2">Marque</div>
-        <div class="col-span-3">Désignation</div>
+        <div class="col-span-2 text-center">Marque</div>
+        <div class="col-span-3 text-center">Désignation</div>
         <div class="col-span-1 text-center">Stock</div>
         <div class="col-span-1 text-center">Qté à commander</div>
         <div class="col-span-2 text-right">Prix Unitaire (€)</div>

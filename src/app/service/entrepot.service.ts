@@ -21,11 +21,6 @@ export class EntrepotService {
     return this.http.get(`${this.apiUrl}`);
   }
 
-  // // Récupérer un entrepôt par ID
-  // getEntrepotById(id: number): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/${id}`);
-  // }
-
   // Supprimer un entrepôt
   deleteEntrepot(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
@@ -36,19 +31,6 @@ export class EntrepotService {
     return this.http.get(`${this.apiUrl}/entrepot`, { params: { entrepotId: entrepotId } });
   }
 
-
-
-  //     searchStocksWithoutEntrepot(searchQuery: any): Observable<any> {
-  //   let params = new HttpParams();
-    
-  //   // // Ajout des paramètres de filtrage
-  //   // if (filters.referenceCode) params = params.append('referenceCode', filters.referenceCode);
-  //   // if (filters.oem) params = params.append('oem', filters.oem);
-  //   // if (filters.libelle) params = params.append('libelle', filters.libelle);
-
-  //   return this.http.get(`${this.apiUrl}/one`, {params: searchQuery });
-  // }
-
    searchStocksWithoutEntrepot(searchQuery: string): Observable<any[]> {
     const params = new HttpParams().set('searchQuery', searchQuery);
 
@@ -58,17 +40,6 @@ export class EntrepotService {
   updateStockEntrepot(data: { stockId: number; entrepotId: number | null }): Observable<any> {
     return this.http.put(`${this.apiUrl}/entrepots`, data);
   }
-
-
-  // // Mettre à jour plusieurs stocks
-  // updateStockListe(stocks: any[]): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/entreports/import`, { stocks });
-  // }
-
-  // // Récupérer tous les articles avec entrepôt
-  // getArticlesWithEntrepot(): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/entrepots`);
-  // }
 
   // Récupérer les articles sans entrepôt
   getArticlesWithoutEntrepot(): Observable<any> {
