@@ -90,13 +90,13 @@
 
                         <!-- Téléphone -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Téléphone</label>
+                            <label class="block text-sm font-medium text-gray-700">Téléphone *</label>
                             <input
-                                formControlName="contact"
-                                placeholder="Téléphone"
-                                class="w-full p-2 border rounded"
-                                [readonly]="isB2B"
-                                [class.bg-gray-100]="isB2B"
+                            formControlName="telephone"
+                            placeholder="Téléphone"
+                            class="w-full p-2 border rounded"
+                            [readonly]="isB2B"
+                            [class.bg-gray-100]="isB2B"
                             />
                         </div>
 
@@ -251,7 +251,7 @@
                         </p>
                         <p><span class="font-semibold">Nom/ Raison Sociale :</span>{{orderForm.value.nom}}</p>
                         <p><span class="font-semibold">Adresse :</span>{{orderForm.value.adresse}}</p>
-                        <p><span class="font-semibold">Contact :</span>{{orderForm.value.contact}}</p>
+                        <p><span class="font-semibold">Contact :</span>{{orderForm.value.telephone}}</p>
                         <p><span class="font-semibold">NIF :</span>{{orderForm.value.nif}}</p>
                     </div>
                 </div>

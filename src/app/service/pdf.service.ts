@@ -87,24 +87,22 @@ export class PdfService {
           </div>
         </div>
 
-    <!-- Client - Aligné à droite mais contenu à gauche (items-start) -->
-<div style="margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: flex-end;">
-  <!-- En-tête -->
-  <div style="text-align: left;">
-    <p style="margin: 0 0 10px 0; font-size: 14px;">
-      <strong>Devis N°:</strong> ${devis.reference || 'TEMP'}
-    </p>
-    
-    <!-- Informations client -->
-    <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-      <p style="margin: 0;"><strong>Nom:</strong> ${devis.clientInfo?.nom || 'Non spécifié'}</p>
-      ${devis.clientInfo?.telephone ? `<p style="margin: 0;"><strong>Téléphone:</strong> ${devis.clientInfo.telephone}</p>` : ''}
-      ${devis.clientInfo?.email ? `<p style="margin: 0;"><strong>Email:</strong> ${devis.clientInfo.email}</p>` : ''}
-      ${devis.clientInfo?.adresse ? `<p style="margin: 0;"><strong>Adresse:</strong> ${devis.clientInfo.adresse}</p>` : ''}
-      ${devis.customerType === 'B2B' && devis.clientInfo?.nif ? `<p style="margin: 0;"><strong>NIF:</strong> ${devis.clientInfo.nif}</p>` : ''}
-    </div>
-  </div>
-</div>
+        <!-- Client - Aligné à droite mais contenu à gauche (items-start) -->
+        <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+          <div style="background: #f9f9f9; padding: 15px 25px; border-radius: 5px; border: 1px solid #eee; width: fit-content; text-align: left;">
+            <p style="margin: 0 0 10px 0; font-size: 14px;">
+              <strong>Devis N°:</strong> ${devis.reference || 'TEMP'}
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <p style="margin: 0;"><strong>Nom:</strong> ${devis.clientInfo?.nom || 'Non spécifié'}</p>
+              ${devis.clientInfo?.telephone ? `<p style="margin: 0;"><strong>Téléphone:</strong> ${devis.clientInfo.telephone}</p>` : ''}
+              ${devis.clientInfo?.email ? `<p style="margin: 0;"><strong>Email:</strong> ${devis.clientInfo.email}</p>` : ''}
+              ${devis.clientInfo?.adresse ? `<p style="margin: 0;"><strong>Adresse:</strong> ${devis.clientInfo.adresse}</p>` : ''}
+              ${devis.customerType === 'B2B' && devis.clientInfo?.nif ? `<p style="margin: 0;"><strong>NIF:</strong> ${devis.clientInfo.nif}</p>` : ''}
+            </div>
+          </div>
+        </div>
 
         <!-- Articles -->
         <h3 style="color: #333; font-size: 16px; margin: 0 0 15px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px;">ARTICLES</h3>
@@ -146,22 +144,51 @@ export class PdfService {
         </table>
 
         <!-- Totaux -->
-        <div style="display: flex; justify-content: flex-end;">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
           <div style="width: 300px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
             <div style="padding: 15px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-weight: 500;">Total:</span>
-                <span>${(devis.subtotal || 0).toLocaleString('fr-FR')} MGA</span>
+                <span style="font-weight: 500;">Remise:</span>
+                <span></span>
               </div>
-              
             </div>
             
             <div style="padding: 15px; background-color: #f63b42; color: white;">
               <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 17px;">
-                <span>NET À PAYER:</span>
+                <span>Net à payer:</span>
                 <span>${(devis.subtotal || 0).toLocaleString('fr-FR')} MGA</span>
               </div>
             </div>
+          </div>
+        </div>
+        <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-weight: 500;">Accompte payé:</span>
+            <span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-weight: 500;">Mode de paiement:</span>
+            <span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-weight: 500;">Date probable de livraison :</span>
+            <span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: 500;">Devis valable jusqu’au :</span>
+            <span></span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+          <!-- Paiement -->
+          <div style="width: 48%; padding: 15px; border-radius: 8px;">
+            <h5 style="font-size: 15px; font-weight: 600; margin: 0 0 10px 0; color: #333;">LE CLIENT</h5>
+          </div>
+          
+          <!-- Totaux -->
+          <div style="width: 48%; padding: 15px; border-radius: 8px;">
+            <h5 style="font-size: 15px; font-weight: 600; margin: 0 0 10px 0; color: #333;">LE RESPONSABLE MAGASIN</h5>
           </div>
         </div>
 
@@ -201,13 +228,13 @@ export class PdfService {
             <p style="margin: 2px 0;"><strong>Facture N° :</strong> ${facture.referenceFacture || 'PRO-FORMA'}</p>
             <h4 style="font-size: 15px; font-weight: 600; margin: 0 0 10px 0; color: #333;">CLIENT</h4>
             ${facture.commandeVente?.customer ? `
-              <p style="margin: 5px 0; font-weight: 500;"><strong>Nom :</strong>${facture.commandeVente.customer.nom}</p>
-              <p style="margin: 5px 0;"><strong>Contact :</strong> ${facture.commandeVente.customer.telephone || 'Non renseigné'}</p>
-              ${facture.commandeVente.customer.email ? `<p style="margin: 5px 0;"><strong>Email :</strong> ${facture.commandeVente.customer.email}</p>` : ''}
-              ${facture.commandeVente.customer.adresse ? `<p style="margin: 5px 0;"><strong>Adresse :</strong> ${facture.commandeVente.customer.adresse}</p>` : ''}
-              ${facture.commandeVente.customer.siret ? `<p style="margin: 5px 0;"><strong>NIF :</strong> ${facture.commandeVente.customer.siret}</p>` : ''}
+              <p style="margin: 5px 0; font-size: 14px; font-weight: 500;"><strong>Nom :</strong>${facture.commandeVente.customer.nom}</p>
+              <p style="margin: 5px 0; font-size: 14px;"><strong>Contact :</strong> ${facture.commandeVente.customer.telephone || 'Non renseigné'}</p>
+              ${facture.commandeVente.customer.email ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Email :</strong> ${facture.commandeVente.customer.email}</p>` : ''}
+              ${facture.commandeVente.customer.adresse ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Adresse :</strong> ${facture.commandeVente.customer.adresse}</p>` : ''}
+              ${facture.commandeVente.customer.siret ? `<p style="margin: 5px 0; font-size: 14px;"><strong>NIF :</strong> ${facture.commandeVente.customer.siret}</p>` : ''}
             ` : facture.commandeVente?.libelle ? `
-              <p style="margin: 5px 0; font-weight: 500;">${facture.commandeVente.libelle.replace('Client occasionnel: ', '')}</p>
+              <p style="margin: 5px 0; font-weight: 500; font-size: 14px;">${facture.commandeVente.libelle.replace('Client occasionnel: ', '')}</p>
             ` : `
               <p style="margin: 5px 0; color: #666;">Client non spécifié</p>
             `}

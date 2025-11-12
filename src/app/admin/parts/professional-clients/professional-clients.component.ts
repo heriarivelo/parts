@@ -212,13 +212,13 @@ saveClient(): void {
     creditLimit: formData.creditLimit
   };
   
-  console.log('Données envoyées:', clientData);
+  // console.log('Données envoyées:', clientData);
   
   if (this.isEditMode && this.selectedClient) {
     this.proClientService.updateClient(this.selectedClient.id, clientData)
       .subscribe({
         next: (updatedClient) => {
-          console.log('Client mis à jour:', updatedClient);
+          // console.log('Client mis à jour:', updatedClient);
           this.loadClients();
           this.closeClientModal();
         },
@@ -237,7 +237,7 @@ saveClient(): void {
     this.proClientService.createClient(clientData)
       .subscribe({
         next: (newClient) => {
-          console.log('Client créé:', newClient);
+          // console.log('Client créé:', newClient);
           this.loadClients();
           this.closeClientModal();
         },
@@ -269,7 +269,7 @@ saveClient(): void {
   openDetailModal(order: any): void {
     this.isLoadingDetails = true;
     this.errorDetails = null;
-    console.log('Commande sélectionnée:', order);
+    // console.log('Commande sélectionnée:', order);
 
     this.commandeService.getProClientCommandeDetails(order.orderId || order.id).subscribe({
       next: (data) => {
@@ -277,7 +277,7 @@ saveClient(): void {
         this.selectedCommande = data;
         this.showDetailsModal = true;
         this.isLoadingDetails = false;
-        console.log('Détails commande:', this.selectedCommande);
+        // console.log('Détails commande:', this.selectedCommande);
       },
       error: (err) => {
         console.error('Erreur récupération détails commande', err);

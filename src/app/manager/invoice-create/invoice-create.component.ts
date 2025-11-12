@@ -293,8 +293,6 @@ if (
     payload.discounts = this.discounts;
   }
 
-  console.log('Payload envoyé:', payload); // Debug
-
   // 4. Envoi au serveur (inchangé)
   this.orderService.validateOrder(this.orderId, payload).subscribe({
     next: (response) => {
@@ -306,18 +304,20 @@ if (
         commandeVente: {
           reference: this.orderDetails.reference,
           customer: this.orderDetails.customer || null,
-          pieces: this.orderDetails.pieces.map((piece: any) => ({
-            product: {
-              codeArt: piece.product?.codeArt || 'N/A',
-              libelle: piece.product?.libelle || 'Pièce non spécifiée',
-              marque: piece.product?.marque || '-'
-            },
-            prixArticle: piece.prixArticle,
-            quantite: piece.quantite,
-            // Ajout optionnel de l'entrepôt dans le PDF si besoin
-            entrepot: this.piecesFormArray?.value.find((p: any) => 
-              p.productId === piece.productId)?.entrepotId || 'N/A'
-          }))
+          pieces: this.orderDetails.pieces.map((piece: any) => {
+            const source = piece.product || piece.customProduct; // ✅ Choisir la bonne source
+            return {
+              product: {
+                codeArt: source?.codeArt || 'N/A',
+                libelle: source?.libelle || 'Pièce non spécifiée',
+                marque: source?.marque || '-'
+              },
+              prixArticle: piece.prixArticle,
+              quantite: piece.quantite,
+              entrepot: this.piecesFormArray?.value.find((p: any) => 
+                p.productId === piece.productId)?.entrepotId || 'N/A'
+            };
+          })
         },
         subtotal: totals.subtotal,
         remises: totals.discountTotal,
@@ -327,7 +327,6 @@ if (
           reference: paymentReference
         } : null
       };
-
       this.pdfService.exportAsImage(pdfData, 'facture', 'png')
         .then(() => {
           alert('Facture générée avec succès');
