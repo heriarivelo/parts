@@ -9,6 +9,7 @@ import { DatePipe } from '@angular/common';
 import { PdfService } from '../../../../service/pdf.service';
 import { ManagerService } from '../../../../service/manager.service';
 import { ProClientService } from '../../../../service/pro-clients.service';
+import { AuthService, User } from '../../../../service/auth.service';
 
 enum CustomerType {
   RETAIL = 'RETAIL',
@@ -33,6 +34,8 @@ export class NewMComponent implements OnInit {
   showClientModal = false;
   today = new Date();
   isLoading = false;
+
+  currentUser: User | null = null;
   
   // Facture preview data
   devisPreview: any = null;
@@ -47,6 +50,7 @@ export class NewMComponent implements OnInit {
     private managerService: ManagerService,
     private proClientService: ProClientService,
     private pdfService : PdfService,
+    private authService: AuthService,
     private fb: FormBuilder
   ) {
     this.pieceForm = this.fb.group({
@@ -74,6 +78,8 @@ export class NewMComponent implements OnInit {
       this.clientForm.get('customerType')?.valueChanges.subscribe(type => {
           this.onCustomerTypeChange();
       });
+    
+      this.currentUser = this.authService.currentUserValue;
   }
 
   ngOnInit(): void {
@@ -137,7 +143,7 @@ export class NewMComponent implements OnInit {
         items: this.panier.map(item => ({
           reference: item.reference,
           productName: item.nom,
-          marque: 'N/A',
+          marque: item.marque || 'N/A',
           unitPrice: item.prixVente,
           quantity: item.quantite,
           total: item.prixVente * item.quantite
@@ -185,7 +191,7 @@ async confirmDevis() {
   const orderPayload = {
     customerType: clientInfo.customerType,
     commandeType: 'PARTICULIERE',
-    managerId: 1,
+    managerId: this.currentUser?.id,
     customerId: clientInfo.customerId, // ⬅️ AJOUTEZ L'ID CLIENT SI B2B
     items: this.panier.map(item => ({
       // productId: item.id, // ⬅️ ASSUREZ-VOUS D'AVOIR UN ID DE PRODUIT
@@ -193,7 +199,7 @@ async confirmDevis() {
       productName: item.nom,
       marque: item.marque || null,
       unitPrice: item.prixVente,
-      quantity: item.quantite
+      quantity: Number(item.quantite)
     })),
     info: {
       nom: clientInfo.nom,
@@ -213,7 +219,14 @@ async confirmDevis() {
     const pdfData = {
       reference: tempReference,
       clientInfo,
-      items: this.panier,
+      // items: this.panier,
+      items: this.panier.map(item => ({
+        reference: item.reference,
+        productName: item.nom,
+        marque: item.marque || null,
+        unitPrice: item.prixVente,
+        quantity: Number(item.quantite)
+      })),
       customerType: clientInfo.customerType,
       date: this.today,
       subtotal: total
@@ -259,14 +272,14 @@ async confirmDevis() {
 
 onCustomerTypeChange(): void {
   const type = this.clientForm.get('customerType')?.value;
-  console.log('Type de client changé:', type);
+  // console.log('Type de client changé:', type);
 
   if (type === 'B2B') {
     this.proClientService.getProClients('', 'ACTIVE').subscribe({
       next: (clients) => {
         // Filtrer uniquement les B2B
         this.clientsB2B = clients.filter((c: any) => c.type === 'B2B');
-        console.log('Clients B2B chargés:', this.clientsB2B);
+        // console.log('Clients B2B chargés:', this.clientsB2B);
       },
       error: (err) => console.error('Erreur chargement clients B2B :', err)
     });
@@ -285,11 +298,9 @@ onCustomerTypeChange(): void {
 
 onB2BClientSelected(): void {
   const selectedClientId = this.clientForm.get('customerId')?.value;
-  console.log('ID client sélectionné:', selectedClientId);
   
   if (selectedClientId) {
     const client = this.clientsB2B.find(c => c.id === selectedClientId);
-    console.log('Client trouvé:', client);
     
     if (client) {
       this.clientForm.patchValue({

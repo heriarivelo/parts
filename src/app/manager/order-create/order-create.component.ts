@@ -76,7 +76,7 @@ export class OrderCreateComponent implements OnInit {
           searchOem: [''],
           searchMarque: [''],
           nom: [''],
-          contact: [''],
+          // contact: [''],
           nif: [''],
           adresse: [''],
           telephone: ['', { validators: [Validators.required, Validators.pattern(/^\d{10,}$/)] }],
@@ -125,10 +125,10 @@ onCustomerTypeChange(): void {
         this.orderForm.patchValue({ 
             customerId: null,
             nom: '', 
-            contact: '', 
+            // contact: '', 
             nif: '', 
             adresse: '' ,
-            telephone: '', // ⬅️ CORRIGEZ ICI
+            telephone: '',
             email: '',
         });
     }
@@ -145,7 +145,7 @@ onB2BClientSelected(): void {
         if (client) {
             this.orderForm.patchValue({
                 nom: client.nom || '',
-                contact: client.telephone || client.phone || '',
+                // contact: client.telephone || client.phone || '',
                 nif: client.nif || client.siret || '',
                 adresse: client.adresse || client.address || '',
                 telephone: client.telephone, // ⬅️ CORRIGEZ ICI
@@ -156,10 +156,10 @@ onB2BClientSelected(): void {
         // Réinitialiser si aucun client sélectionné
         this.orderForm.patchValue({ 
             nom: '', 
-            contact: '', 
+            // contact: '', 
             nif: '', 
             adresse: '',
-            telephone: '', // ⬅️ CORRIGEZ ICI
+            telephone: '', 
             email: '',
         });
     }
@@ -302,7 +302,8 @@ onB2BClientSelected(): void {
       })),
       info: {
         nom: this.orderForm.value.nom,
-        contact: this.orderForm.value.contact,
+        // contact: this.orderForm.value.contact,
+        telephone: this.orderForm.value.telephone,
         nif: this.orderForm.value.nif,
       },
       totalAmount: this.getTotal(),

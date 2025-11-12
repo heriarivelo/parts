@@ -247,7 +247,9 @@ exportToExcel() {
     "Oem1+oem2": item.product?.oem,
     'Auto_final': item.product?.autoFinal,
     Désignation: item.product?.libelle,
-    Quantité: item.quantity
+    Quantité: item.quantity,
+    Poids: item.weightKg,
+    "Prix_Achat": item.unitPrice,
   }));
   if (!data) {
   console.warn("Aucune donnée à exporter");
