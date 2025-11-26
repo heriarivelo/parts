@@ -36,7 +36,7 @@
                     <div class="text-sm text-gray-600">Réf: {{ product.referenceCode }}</div>
                     <div class="text-sm text-gray-600">Stock: {{ product.currentStock }}</div>
                     <div class="text-sm font-medium text-blue-600">
-                        Prix: {{ product.importDetails[0]?.salePrice | currency:'MGA':'symbol':'1.2-2' }}
+                        Prix: {{ product.stocks[0].prixFinal | currency:'MGA':'symbol':'1.2-2' }}
                     </div>
                 </div>
             </div>
