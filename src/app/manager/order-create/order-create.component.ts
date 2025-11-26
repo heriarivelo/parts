@@ -210,7 +210,7 @@ onB2BClientSelected(): void {
         productId: product.id,
         reference: product.referenceCode,
         description: product.libelle,
-        unitPrice: product.importDetails[0]?.salePrice || 0,
+        unitPrice: product.stocks[0].prixFinal || 0,
         quantity: 1,
         availableStock: product.currentStock
       });
@@ -302,7 +302,6 @@ onB2BClientSelected(): void {
       })),
       info: {
         nom: this.orderForm.value.nom,
-        // contact: this.orderForm.value.contact,
         telephone: this.orderForm.value.telephone,
         nif: this.orderForm.value.nif,
       },
