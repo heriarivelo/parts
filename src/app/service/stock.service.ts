@@ -58,4 +58,26 @@ getAllStocks(params: any): Observable<any> {
     return this.http.get<any[]>(`${this.apiUrl}/stocks/all`);
   }
 
+  searchStockLocations(params: {
+    mode?: 'all' | 'unassigned';
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    return this.http.get<{
+      items: any[];
+      totalItems: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    }>(`${this.apiUrl}/stocks/locations`, {
+      params: {
+        mode: params.mode || 'unassigned',
+        search: params.search || '',
+        page: String(params.page || 1),
+        pageSize: String(params.pageSize || 10),
+      },
+    });
+  }
+
 }

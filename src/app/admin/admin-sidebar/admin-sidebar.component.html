@@ -1,47 +1,66 @@
-<div
-  class="w-64 min-h-screen bg-gradient-to-b from-red-700 to-red-900 text-white p-4 flex flex-col fixed h-screen overflow-y-auto">
-  
+<div class="h-full bg-gray-900 text-white px-2 py-4 flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300"
+  [class.w-64]="!isCollapsed" [class.w-20]="isCollapsed">
+
   <!-- Logo & titre -->
-  <div class="flex items-center space-x-3 mb-10">
-    <i class="fas fa-car-side text-3xl"></i>
-    <h1 class="text-2xl font-extrabold tracking-wide">{{ getRoleLabel() }}</h1>
+  <div class="sticky top-0 z-10 mb-4 bg-gray-900 pb-4 flex items-center justify-between">
+    <div class="flex items-center gap-3 overflow-hidden">
+      <img class="h-12 w-12 rounded-xl shadow-sm bg-white/10 p-1 object-contain" src="logo/android-chrome-192x192.png"
+        alt="Logo Kaleocar" />
+
+      <div *ngIf="!isCollapsed" class="leading-tight">
+        <h2 class="text-lg font-black tracking-wide">
+          <span class="text-red-500">Kaleo</span>
+          <span class="text-gray-300">Parts</span>
+        </h2>
+        <p class="text-xs text-gray-400">Gestion pièces auto</p>
+      </div>
+    </div>
+
+    <button type="button" (click)="toggleSidebar()"
+      class="h-8 w-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-red-600 transition">
+      <i class="fas text-sm" [class.fa-chevron-left]="!isCollapsed" [class.fa-chevron-right]="isCollapsed"></i>
+    </button>
   </div>
 
   <!-- Navigation principale -->
-  <nav class="flex-1 space-y-6">
+  <nav class="flex-1 space-y-6 overflow-y-auto pl-2 mr-1 custom-sidebar-scroll">
 
     <!-- Tableau de bord -->
     <div *ngIf="isAdmin()">
       <a routerLink="/admin-tableau-de-bord" routerLinkActive="bg-red-700"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-medium">
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all duration-300 font-medium"
+        [class.justify-center]="isCollapsed">
         <i class="fas fa-tachometer-alt text-lg"></i>
-        <span>Tableau de bord</span>
+        <span *ngIf="!isCollapsed">Tableau de bord</span>
       </a>
     </div>
 
     <!-- Gestion des stocks -->
     <div>
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Stocks & Réapprovisionnement</h2>
+      <h2 *ngIf="!isCollapsed" class="text-sm uppercase text-gray-300 mb-2 ml-4">Stock</h2>
       <ul class="space-y-2">
         <li>
           <a routerLink="/inventaire-piece" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
             <i class="fas fa-boxes text-lg"></i>
-            <span>Stocks pièces</span>
-          </a>
-        </li>
-        <li *ngIf="isAdmin()">
-          <a routerLink="/admin-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
-            <i class="fas fa-plus-circle text-lg"></i>
-            <span>Réapprovisionnement</span>
+            <span *ngIf="!isCollapsed">Stocks pièces</span>
           </a>
         </li>
         <li>
           <a routerLink="/historique-stocks" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
             <i class="fas fa-history text-lg"></i>
-            <span>Mouvement de stock</span>
+            <span *ngIf="!isCollapsed">Mouvement de stock</span>
+          </a>
+        </li>
+        <li *ngIf="isAdmin()">
+          <a routerLink="/entrepot" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
+            <i class="fas fa-warehouse text-lg"></i>
+            <span *ngIf="!isCollapsed">Entrepôts</span>
           </a>
         </li>
       </ul>
@@ -49,28 +68,28 @@
 
     <!-- Commandes clients -->
     <div>
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Commandes clients</h2>
+      <h2 *ngIf="!isCollapsed" class="text-sm uppercase text-gray-300 mb-2 ml-4">VENTES</h2>
       <ul class="space-y-2">
         <li>
           <div
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-700 transition-all font-medium cursor-pointer"
-            (click)="showCommande = !showCommande">
+            class="flex items-center gap-3 px-2 py-3 rounded-lg hover:bg-red-700 transition-all font-medium cursor-pointer"
+            [class.justify-center]="isCollapsed" (click)="toggleCommandeMenu()">
             <i class="fas fa-shopping-cart text-lg"></i>
-            <span>Commandes</span>
-            <i class="fas fa-chevron-down ml-auto transform transition-transform duration-300"
+            <span *ngIf="!isCollapsed">Commandes clients</span>
+            <i *ngIf="!isCollapsed" class="fas fa-chevron-down ml-auto transform transition-transform duration-300"
               [class.rotate-180]="showCommande"></i>
           </div>
-          <ul *ngIf="showCommande" class="pl-8 mt-1 space-y-1">
+          <ul *ngIf="showCommande && !isCollapsed" class="pl-8 mt-1 space-y-1">
             <li>
               <a routerLink="/manager/order" routerLinkActive="font-bold bg-red-700"
                 class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
-                Commande normale
+                Nouvelle commande
               </a>
             </li>
             <li *ngIf="isAdmin()">
               <a routerLink="/commande/specifique" routerLinkActive="font-bold bg-red-700"
                 class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
-                Commande particulier
+                Commande particulière
               </a>
             </li>
             <li>
@@ -82,58 +101,56 @@
             <li>
               <a routerLink="/historique-commandes" routerLinkActive="bg-red-700"
                 class="block px-3 py-2 rounded hover:bg-red-700 transition-all font-medium text-nowrap">
-                Historique
+                Historique commandes
               </a>
             </li>
           </ul>
+        </li>
+        <li>
+          <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
+            <i class="fas fa-file-invoice-dollar text-lg"></i>
+            <span *ngIf="!isCollapsed">Liste des factures</span>
+          </a>
+        </li>
+        <li *ngIf="isAdmin()">
+          <a routerLink="/admin-clients-pro" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
+            <i class="fas fa-building text-lg"></i>
+            <span *ngIf="!isCollapsed">Clients B2B</span>
+          </a>
         </li>
       </ul>
     </div>
 
     <!-- Commandes fournisseurs -->
     <div *ngIf="isAdmin()">
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Commandes fournisseurs</h2>
+      <h2 *ngIf="!isCollapsed" class="text-sm uppercase text-gray-300 mb-2 ml-4">Besoin/ACHATS</h2>
       <ul class="space-y-2">
+        <li>
+          <a routerLink="/admin-reapprovisionnements" routerLinkActive="bg-red-700"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
+            <i class="fas fa-plus-circle text-lg"></i>
+            <span *ngIf="!isCollapsed">Alertes de stock</span>
+          </a>
+        </li>
         <li>
           <a routerLink="/admin-commande" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
-            <i class="fas fa-truck text-lg"></i>
-            <span>Mes commandes fournisseurs</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Facturation -->
-    <div>
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Facturation</h2>
-      <ul class="space-y-2">
-        <li>
-          <a routerLink="/liste-facture" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
-            <i class="fas fa-file-invoice-dollar text-lg"></i>
-            <span>Liste des factures</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Logistique -->
-    <div *ngIf="isAdmin()">
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Logistique</h2>
-      <ul class="space-y-2">
-        <li>
-          <a routerLink="/entrepot" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
-            <i class="fas fa-warehouse text-lg"></i>
-            <span>Entrepôts</span>
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
+            <i class="fa-solid fa-truck-arrow-right fa-sm"></i>
+            <span *ngIf="!isCollapsed">Réapprovisionnement</span>
           </a>
         </li>
         <li>
           <a routerLink="/importation-historique" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
             <i class="fas fa-truck-loading text-lg"></i>
-            <span>Importations</span>
+            <span *ngIf="!isCollapsed">Importations</span>
           </a>
         </li>
       </ul>
@@ -141,20 +158,14 @@
 
     <!-- Administration -->
     <div *ngIf="isAdmin()">
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Administration</h2>
+      <h2 *ngIf="!isCollapsed" class="text-sm uppercase text-gray-300 mb-2 ml-4">Administration</h2>
       <ul class="space-y-2">
         <li>
           <a routerLink="/admin-gestion-users" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
             <i class="fas fa-users text-lg"></i>
-            <span>Utilisateurs</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin-clients-pro" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
-            <i class="fas fa-building text-lg"></i>
-            <span>Clients B2B</span>
+            <span *ngIf="!isCollapsed">Utilisateurs</span>
           </a>
         </li>
       </ul>
@@ -162,13 +173,14 @@
 
     <!-- Outils -->
     <div *ngIf="isAdmin()">
-      <h2 class="text-sm uppercase text-gray-300 mb-2 ml-4">Outils</h2>
+      <h2 *ngIf="!isCollapsed" class="text-sm uppercase text-gray-300 mb-2 ml-4">Outils</h2>
       <ul class="space-y-2">
         <li>
           <a routerLink="/admin-calculatrice-prix" routerLinkActive="bg-red-700"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium">
+            class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-red-700 transition-all font-medium"
+            [class.justify-center]="isCollapsed">
             <i class="fas fa-calculator text-lg"></i>
-            <span>Calculatrice de prix</span>
+            <span *ngIf="!isCollapsed">Calculatrice de prix</span>
           </a>
         </li>
       </ul>

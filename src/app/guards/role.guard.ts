@@ -11,14 +11,20 @@ export class RoleGuard implements CanActivate {
 
   canActivate(
     next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): boolean {
+    state: RouterStateSnapshot
+  ): boolean {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      return false;
+    }
+
     const requiredRoles = next.data['roles'] as Array<string>;
     const user = this.authService.currentUserValue;
-    
+
     if (user && requiredRoles.includes(user.role)) {
       return true;
     }
-    
+
     this.router.navigate(['/']);
     return false;
   }

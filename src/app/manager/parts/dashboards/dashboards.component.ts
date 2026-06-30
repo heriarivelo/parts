@@ -9,8 +9,7 @@ Chart.register(...registerables);
   selector: 'app-dashboards',
   standalone:true,
   imports: [CommonModule, FormsModule ],
-  templateUrl: './dashboards.component.html',
-  styleUrl: './dashboards.component.scss'
+  templateUrl: './dashboards.component.html'
 })
 export class DashboardsMComponent implements OnInit {
   stats: any = {};

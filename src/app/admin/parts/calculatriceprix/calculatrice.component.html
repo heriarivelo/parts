@@ -1,10 +1,10 @@
-<div class="lg:max-w-7xl overflow-auto p-4">
-    <h1 class="text-2xl font-bold mb-6 text-primary-dark">
+<div class="h-full w-full flex flex-col overflow-hidden px-6">
+    <!-- <h1 class="text-2xl font-bold mb-6 text-primary-dark">
         <i class="fas fa-calculator mr-2"></i>Gestion des Pièces - Calculs Complets
-    </h1>
+    </h1> -->
 
     <!-- Paramètres Globaux -->
-    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border-l-4 border-accent">
+    <!-- <div class="bg-white p-4 rounded-lg shadow-md mb-6 border-l-4 border-accent">
         <h2 class="text-lg font-semibold mb-3 text-secondary-dark">
             <i class="fas fa-cog mr-2"></i>Paramètres de Calcul
         </h2>
@@ -45,11 +45,10 @@
                 <i class="fas fa-sync-alt mr-2"></i>Actualiser les Calculs
             </button>
         </div>
-    </div>
+    </div> -->
     <!-- Dans la section des contrôles du tableau -->
-    <div class="flex justify-between p-4">
+    <!-- <div class="flex justify-between p-4">
         <div class="flex space-x-2">
-            <!-- ... autres boutons ... -->
 
             <button (click)="exporterExcel()" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-dark">
                 <i class="fas fa-file-export mr-2"></i>Exporter Excel
@@ -78,7 +77,6 @@
                 </button>
             </div>
 
-            <!-- Bouton pour ouvrir le modal -->
             <button (click)="previewDevis()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
                 [disabled]="isLoading">
                 <i class="fa-solid fa-file-pen mr-2"></i> Aperçu Devis
@@ -89,17 +87,107 @@
         <button (click)="showImportModal = true" class="bg-primary text-white px-4 py-2 rounded hover:bg-accent-dark">
             <i class="fa-solid fa-floppy-disk mr-2"></i>Enregister
         </button>
+    </div> -->
+    <!-- EN-TÊTE CONFIGURATION GLOBAL : Reste fixe en haut de la page -->
+<div class="flex-shrink-0 bg-white border-b border-gray-200 py-4 space-y-4">
+  
+  <!-- ================= BLOC 1 : PARAMÈTRES DE CALCUL (Masquable) ================= -->
+  <div class="bg-gray-50 rounded-2xl border border-gray-200 p-4 transition-all duration-300">
+    
+    <!-- Barre de titre de la section : Sert aussi de bouton pour plier/déplier -->
+    <div class="flex items-center justify-between border-b border-gray-200/60 pb-2 cursor-pointer"
+         (click)="isParamsVisible = !isParamsVisible">
+      
+      <div class="flex items-center gap-2">
+        <i class="fas fa-cog text-gray-400 transition-transform duration-300"
+           [class.rotate-90]="isParamsVisible"></i> 
+        <h2 class="text-lg font-bold text-gray-900">Paramètres de Calcul Globaux</h2>
+        <!-- Indicateur discret d'état -->
+        <span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-md font-medium">
+          {{ isParamsVisible ? 'Masquer' : 'Afficher' }}
+        </span>
+      </div>
+
+      <!-- Le bouton Actualiser reste visible dans la barre supérieure du bloc -->
+      <button (click)="appliquerParametres(); $event.stopPropagation()"
+        class="h-9 px-4 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition flex items-center gap-1.5 shadow-sm">
+        <i class="fas fa-sync-alt"></i> Actualiser les calculs
+      </button>
     </div>
 
+    <!-- Zone des inputs : Se masque dynamiquement avec une animation Angular -->
+    <div *ngIf="isParamsVisible" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-xs mt-4 animate-fade-in">
+      <div>
+        <label class="block font-semibold text-gray-500 mb-1">Taux de Change (€ → MGA)</label>
+        <input [(ngModel)]="parametres.tauxChange" type="number"
+          class="h-11 border border-gray-300 rounded-xl px-3 w-full bg-white focus:ring-2 focus:ring-red-500 focus:outline-none font-bold text-gray-800">
+      </div>
+      <div>
+        <label class="block font-semibold text-gray-500 mb-1">Fret Méthode 1 (€)</label>
+        <input [(ngModel)]="parametres.fretTotal" type="number"
+          class="h-11 border border-gray-300 rounded-xl px-3 w-full bg-white focus:ring-2 focus:ring-red-500 focus:outline-none font-medium text-gray-800">
+      </div>
+      <div>
+        <label class="block font-semibold text-gray-500 mb-1">Fret Méthode 2 (€)</label>
+        <input [(ngModel)]="parametres.fretMethode2" type="number"
+          class="h-11 border border-gray-300 rounded-xl px-3 w-full bg-white focus:ring-2 focus:ring-red-500 focus:outline-none font-medium text-gray-800">
+      </div>
+      <div>
+        <label class="block font-semibold text-gray-500 mb-1">Marge Standard (%)</label>
+        <input [(ngModel)]="parametres.margeStandard" type="number"
+          class="h-11 border border-gray-300 rounded-xl px-3 w-full bg-white focus:ring-2 focus:ring-red-500 focus:outline-none font-medium text-gray-800">
+      </div>
+      
+      <div class="bg-blue-50/50 border border-blue-200 rounded-xl px-2.5 py-1">
+        <label class="block font-bold text-blue-700 mb-1 truncate">Douane Méthode 1 (%)</label>
+        <input [(ngModel)]="parametres.tauxDouane" type="number"
+          class="h-8 border border-blue-300 rounded-lg px-2 w-full bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-center font-bold text-blue-900">
+      </div>
+      <div class="bg-blue-50/50 border border-blue-200 rounded-xl px-2.5 py-1">
+        <label class="block font-bold text-blue-700 mb-1 truncate">TVA Méthode 1 (%)</label>
+        <input [(ngModel)]="parametres.tauxTVA" type="number" 
+          class="h-8 border border-blue-300 rounded-lg px-2 w-full bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-center font-bold text-blue-900">
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BLOC 2 : CONTROLES ET ACTIONS ================= -->
+  <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+    <!-- Le contenu de la barre d'action du bas reste STRICTEMENT identique au précédent -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1 border border-gray-200 max-w-sm">
+        <select [(ngModel)]="selectedImportId" class="custom-select h-9 text-xs font-semibold bg-transparent border-0 px-3 pr-8 focus:outline-none text-gray-700 cursor-pointer w-48 truncate">
+          <option [ngValue]="null" disabled selected>Choisir une importation</option>
+          <option *ngFor="let imp of listeImports" [ngValue]="imp.id">{{ imp.reference }}</option>
+        </select>
+        <button (click)="chargerPartsDepuisImport()" [disabled]="!selectedImportId" class="h-9 px-4 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-gray-800 transition">Charger</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="exporterExcel()" class="py-3 px-4 border border-gray-300 bg-white text-gray-700 rounded-xl text-sm font-semibold transition shadow-sm"><i class="fas fa-file-export mr-2 text-gray-400"></i> Exporter</button>
+        <div class="relative">
+          <input type="file" id="file-input" class="hidden" accept=".xlsx, .xls" (change)="importerExcel($event)" #fileInput>
+          <button (click)="fileInput.click()" class="py-3 px-4 border border-red-300 bg-red-50/50 hover:bg-red-50 text-red-700 rounded-xl text-sm font-semibold transition shadow-sm"><i class="fas fa-file-import mr-2 text-red-500"></i> Importer</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 justify-end shrink-0">
+      <button (click)="previewDevis()" [disabled]="isLoading" class="py-3 px-5 border border-blue-200 text-blue-600 bg-blue-50/50 hover:bg-blue-50 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2"><i class="fa-solid fa-file-pen"></i><span>Aperçu Devis</span></button>
+      <button (click)="showImportModal = true" class="py-3 px-6 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-md"><i class="fa-solid fa-floppy-disk"></i><span>Enregistrer l'importation</span></button>
+    </div>
+  </div>
+
+</div>
+
+<div class="flex-1 min-h-0 overflow-y-auto bg-gray-50">
     <!-- Tableau Comparatif -->
-    <div class="bg-white shadow rounded-lg overflow-x-auto mb-6">
+    <div class="overflow-x-auto bg-white shadow rounded-lg mb-6">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-secondary text-white">
                 <tr>
                     <th rowspan="2"
                         class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sticky left-0 bg-secondary z-10">
                         Code Art</th>
-                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Marque</th>
+                    <th rowspan="2" class="max-w-[120px] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Marque</th>
                     <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Référence
                     </th>
                     <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Auto final
@@ -162,11 +250,24 @@
                 <tr *ngFor="let piece of pieceService.getPieces(); let i = index" class="hover:bg-gray-50">
                     <td class="px-4 py-3 whitespace-nowrap sticky left-0 bg-white font-medium text-primary-dark">
                         {{piece.code}}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{piece.marque}}</td>
-                    <td class="w-12 px-4 py-3 overflow-hidden whitespace-nowrap text-ellipsis">{{piece.reference}}
+                    <td class="px-4 py-3 whitespace-nowrap"><div class="max-w-[120px] truncate" [title]="piece.marque">{{piece.marque}}</div></td>
+                    <td class="px-4 py-3 max-w-[300px] max-h-[40px] overflow-hidden relative break-words group"
+                        [title]="piece.reference">
+
+                        <div class="line-clamp-2">
+                            {{ piece.reference }}
+                        </div>
+
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{piece.autofinal}}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{piece.libelle}}</td>
+
+                    <td class="px-4 py-3 max-w-[300px] max-h-[40px] overflow-hidden relative break-words group"
+                        [title]="piece.autofinal">
+                        <div class="line-clamp-2">{{piece.autofinal}}</div>
+                    </td>
+                    <td class="px-4 py-3 max-w-[300px] max-h-[40px] overflow-hidden relative break-words group"
+                        [title]="piece.libelle">
+                        <div class="line-clamp-2">{{piece.libelle}}</div>
+                    </td>
                     <td class="px-4 py-3 whitespace-nowrap">
                         <input [(ngModel)]="piece.quantite" (change)="pieceService.updatePiece(i, piece)" type="number"
                             class="w-16 border rounded px-2 py-1 text-center">
@@ -275,64 +376,71 @@
             </tbody>
         </table>
     </div>
-
+</div>
     <!-- Totaux Comparatifs -->
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-method1 text-white p-3 rounded-lg shadow">
-            <h3 class="text-lg font-semibold mb-2">Total Méthode 1</h3>
-            <div class="grid grid-cols-2 gap-2">
+<!-- ================= ÉTAGE 3 : LE FOOTER DE CALCULS (Fixe tout en bas) ================= -->
+<div class="flex-shrink-0 border-t border-gray-200 bg-white px-6 py-4 shadow-xl z-20">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Méthode 1 : Épuré avec une bordure de couleur discrète -->
+        <div class="border border-blue-200 bg-blue-50/30 rounded-xl p-3 flex items-center justify-between gap-4">
+            <div>
+                <h3 class="text-xs font-bold text-blue-700 uppercase tracking-wider">Méthode 1</h3>
+                <p class="text-[10px] text-gray-400 font-medium mt-0.5">Calcul prévisionnel</p>
+            </div>
+            <div class="flex gap-6 text-right">
                 <div>
-                    <p class="text-sm">CA Prévisionnel:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxMethode1.caPrevisionnel | number:'1.0-0' }} MGA
-                    </p>
-
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase">CA Prév.</p>
+                    <p class="text-base font-bold text-gray-900">{{ totauxMethode1.caPrevisionnel | number:'1.0-0' }} <span class="text-xs text-gray-500 font-medium">MGA</span></p>
                 </div>
                 <div>
-                    <p class="text-sm">Marge Totale:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxMethode1.margeTotale | number:'1.0-0' }} MGA
-                    </p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase">Marge</p>
+                    <p class="text-base font-bold text-blue-600">{{ totauxMethode1.margeTotale | number:'1.0-0' }} <span class="text-xs text-gray-500 font-medium">MGA</span></p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-method2 text-white p-3 rounded-lg shadow">
-            <h3 class="text-lg font-semibold mb-2">Total Méthode 2</h3>
-            <div class="grid grid-cols-2 gap-2">
+        <!-- Méthode 2 -->
+        <div class="border border-purple-200 bg-purple-50/30 rounded-xl p-3 flex items-center justify-between gap-4">
+            <div>
+                <h3 class="text-xs font-bold text-purple-700 uppercase tracking-wider">Méthode 2</h3>
+                <p class="text-[10px] text-gray-400 font-medium mt-0.5">Calcul alternatif</p>
+            </div>
+            <div class="flex gap-6 text-right">
                 <div>
-                    <p class="text-sm">CA Prévisionnel:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxMethode2.caPrevisionnel | number:'1.0-0' }} MGA
-                    </p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase">CA Prév.</p>
+                    <p class="text-base font-bold text-gray-900">{{ totauxMethode2.caPrevisionnel | number:'1.0-0' }} <span class="text-xs text-gray-500 font-medium">MGA</span></p>
                 </div>
                 <div>
-                    <p class="text-sm">Marge Totale:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxMethode2.margeTotale | number:'1.0-0' }} MGA
-                    </p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase">Marge</p>
+                    <p class="text-base font-bold text-purple-600">{{ totauxMethode2.margeTotale | number:'1.0-0' }} <span class="text-xs text-gray-500 font-medium">MGA</span></p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-final text-white p-3 rounded-lg shadow">
-            <h3 class="text-lg font-semibold mb-2">Totaux Finaux</h3>
-            <div class="grid grid-cols-2 gap-2">
+        <!-- Totaux Finaux (Mis en valeur avec la couleur de votre marque) -->
+        <div class="border-2 border-red-600 bg-red-50/40 rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm">
+            <div>
+                <h3 class="text-xs font-bold text-red-700 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-chart-pie text-red-500 text-[10px]"></i> Totaux Finaux
+                </h3>
+                <p class="text-[10px] text-red-600 font-semibold mt-0.5">Valeurs validées</p>
+            </div>
+            <div class="flex gap-6 text-right">
                 <div>
-                    <p class="text-sm">CA Prévisionnel:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxFinaux.caPrevisionnel | number:'1.0-0' }} MGA
-                    </p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase">CA Global</p>
+                    <p class="text-base font-black text-gray-900">{{ totauxFinaux.caPrevisionnel | number:'1.0-0' }} <span class="text-xs text-gray-500 font-medium">MGA</span></p>
                 </div>
                 <div>
-                    <p class="text-sm">Marge Totale:</p>
-                    <p class="text-xl font-bold">
-                        {{ totauxFinaux.margeTotale | number:'1.0-0' }} MGA
-                    </p>
+                    <p class="text-[10px] font-semibold text-red-600 uppercase">Marge Totale</p>
+                    <p class="text-lg font-black text-red-600">{{ totauxFinaux.margeTotale | number:'1.0-0' }} <span class="text-xs text-red-500 font-bold">MGA</span></p>
                 </div>
             </div>
         </div>
+
     </div>
+</div>
+
 </div>
 
 <!-- MODAL OVERLAY -->

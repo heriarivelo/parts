@@ -8,11 +8,13 @@ import { Order, OrderStats, PaginatedOrders, Supplier } from '../../../models/st
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 
 @Component({
   selector: 'app-commandes-fournisseurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatusFrPipe],
+  imports: [CommonModule, FormsModule, StatusFrPipe, AdminPaginationComponent, SearchInputComponent],
   templateUrl: './commandes-fournisseurs.component.html',
   styleUrl: './commandes-fournisseurs.component.scss'
 })

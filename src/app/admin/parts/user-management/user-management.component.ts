@@ -3,12 +3,14 @@ import { UserService } from '../../../service/user.service';
 import { User, CreateUserDto } from '../../../models/user.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
   imports: [
-    FormsModule, CommonModule
+    FormsModule, CommonModule, AdminPaginationComponent, SearchInputComponent
   ],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss']
@@ -24,21 +26,75 @@ export class UserManagementComponent implements OnInit {
   isLoading = false;
   successMessage = '';
 
+searchTerm = '';
+selectedRole = '';
+
+currentPage = 1;
+totalItems = 0;
+
+errorMessage = '';
+
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.loadUsers();
   }
 
-  loadUsers(): void {
-    this.userService.getUsers(this.page, this.pageSize).subscribe({
-      next: (response) => {
-        this.users = response.users;
-        this.total = response.total;
-      },
-      error: (error) => console.error('Error loading users:', error)
-    });
-  }
+  // loadUsers(): void {
+  //   this.userService.getUsers(this.page, this.pageSize).subscribe({
+  //     next: (response) => {
+  //       this.users = response.users;
+  //       this.total = response.total;
+  //     },
+  //     error: (error) => console.error('Error loading users:', error)
+  //   });
+  // }
+
+loadUsers(): void {
+  this.isLoading = true;
+  this.errorMessage = '';
+
+  this.userService.getUsers({
+    page: this.currentPage,
+    pageSize: this.pageSize,
+    search: this.searchTerm,
+    role: this.selectedRole,
+  }).subscribe({
+    next: (res) => {
+      this.users = res.data || [];
+      this.totalItems = res.pagination?.total || 0;
+      this.isLoading = false;
+    },
+    error: () => {
+      this.users = [];
+      this.totalItems = 0;
+      this.errorMessage = 'Erreur lors du chargement des utilisateurs.';
+      this.isLoading = false;
+    },
+  });
+}
+
+onSearch(): void {
+  this.currentPage = 1;
+  this.loadUsers();
+}
+
+onRoleChange(): void {
+  this.currentPage = 1;
+  this.loadUsers();
+}
+
+onPageChange(page: number): void {
+  this.currentPage = page;
+  this.loadUsers();
+}
+
+resetFilters(): void {
+  this.searchTerm = '';
+  this.selectedRole = '';
+  this.currentPage = 1;
+  this.loadUsers();
+}
 
   openAddModal(): void {
     this.isEditMode = false;
@@ -141,11 +197,6 @@ saveUser(): void {
         error: (error) => console.error('Error deleting user:', error)
       });
     }
-  }
-
-  onPageChange(newPage: number): void {
-    this.page = newPage;
-    this.loadUsers();
   }
 
   getRoleBadgeClass(role: string): string {

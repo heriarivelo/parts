@@ -8,6 +8,7 @@ export interface StockMovement {
   createdAt: string;    // ISO date
   product: {
     id: number;
+    codeArt?: string;
     referenceCode: string;
     libelle: string;
   };

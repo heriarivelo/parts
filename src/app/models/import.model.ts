@@ -9,7 +9,10 @@ export interface Import {
     tva: number;
     marge: number;
     totalCost: number;
-    partsCount?: number;
+    _count?: {
+      parts?: number;
+    };
+    status: string;
   }
   
   export interface ImportDetail {

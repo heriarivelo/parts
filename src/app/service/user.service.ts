@@ -15,9 +15,18 @@ export class UserService {
     private authService: AuthService
   ) { }
 
- getUsers(page: number = 1, pageSize: number = 10): Observable<any> {
-    return this.http.get(`${this.apiUrl}?page=${page}&pageSize=${pageSize}`);
-  }
+//  getUsers(page: number = 1, pageSize: number = 10): Observable<any> {
+//     return this.http.get(`${this.apiUrl}?page=${page}&pageSize=${pageSize}`);
+//   }
+
+getUsers(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: string;
+}) {
+  return this.http.get<any>(this.apiUrl, { params });
+}
 
   createUser(user: any): Observable<any> {
     return this.http.post(this.apiUrl, user);
@@ -41,4 +50,34 @@ export class UserService {
 
     return this.http.delete(`${this.apiUrl}/${id}`, { body: { userId } });
   }
+
+getMyProfile() {
+  const token = localStorage.getItem('token');
+
+  return this.http.get<any>(`${this.apiUrl}/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+updateMyProfile(payload: { name: string; email: string }) {
+  const token = localStorage.getItem('token');
+
+  return this.http.put<any>(`${this.apiUrl}/profile`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+changePassword(payload: any) {
+  const token = localStorage.getItem('token');
+
+  return this.http.put<any>(`${this.apiUrl}/change-password`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
 }

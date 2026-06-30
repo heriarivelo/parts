@@ -16,10 +16,25 @@ export class EntrepotService {
     return this.http.post(`${this.apiUrl}`, { libelle });
   }
 
-  // Récupérer tous les entrepôts
-  getEntrepots(): Observable<any> {
-    return this.http.get(`${this.apiUrl}`);
-  }
+  getEntrepots(params?: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  return this.http.get<{
+    items: any[];
+    totalItems: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>(`${this.apiUrl}`, {
+    params: {
+      search: params?.search || '',
+      page: String(params?.page || 1),
+      pageSize: String(params?.pageSize || 9),
+    },
+  });
+}
 
   // Supprimer un entrepôt
   deleteEntrepot(id: number): Observable<any> {
@@ -27,26 +42,39 @@ export class EntrepotService {
   }
 
   // Récupérer les stocks d'un entrepôt
-  getEntrepotStock(entrepotId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/entrepot`, { params: { entrepotId: entrepotId } });
-  }
-
-   searchStocksWithoutEntrepot(searchQuery: string): Observable<any[]> {
-    const params = new HttpParams().set('searchQuery', searchQuery);
-
-    return this.http.get<any[]>(`${this.apiUrl}/one`, { params });
+  getEntrepotStock(params: {
+    entrepotId: number;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  }): Observable<{
+    items: any[];
+    totalItems: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }> {
+    return this.http.get<{
+      items: any[];
+      totalItems: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    }>(`${this.apiUrl}/entrepot`, {
+      params: {
+        entrepotId: String(params.entrepotId),
+        search: params.search || '',
+        page: String(params.page || 1),
+        pageSize: String(params.pageSize || 10),
+      },
+    });
   }
 
   updateStockEntrepot(data: { stockId: number; entrepotId: number | null }): Observable<any> {
     return this.http.put(`${this.apiUrl}/entrepots`, data);
   }
 
-  // Récupérer les articles sans entrepôt
-  getArticlesWithoutEntrepot(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/entrepots/no`);
-  }
-
-    transferStock(transferData: {
+  transferStock(transferData: {
     stockId: number;
     fromEntrepotId: number;
     toEntrepotId: number;

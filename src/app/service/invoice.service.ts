@@ -56,9 +56,14 @@ export class InvoiceService {
   //   );
   // }
 
-   getFactures(): Observable<Invoice[]> {
-    return this.http.get<Invoice[]>(this.apiUrls);
-  }
+getFactures(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+}) {
+  return this.http.get<any>(this.apiUrls, { params });
+}
 
 
   enregistrerPaiement(id: number, paymentData: any): Observable<Invoice> {

@@ -34,13 +34,24 @@ export class CommandeService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-    getHistorique(page: number = 1, pageSize: number = 10): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
+  //   getHistorique(page: number = 1, pageSize: number = 10): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set('page', page.toString())
+  //     .set('pageSize', pageSize.toString());
 
-    return this.http.get(this.apiUrl, { params });
-  }
+  //   return this.http.get(this.apiUrl, { params });
+  // }
+
+getHistorique(page = 1, pageSize = 10, search = '', status = '') {
+  return this.http.get<any>(this.apiUrl, {
+    params: {
+      page,
+      pageSize,
+      search,
+      status,
+    },
+  });
+}
 
   //   createOrder(orderData: any): Observable<Order> {
   //   return this.http.post<Order>(this.apiUrl, orderData);
@@ -50,9 +61,14 @@ export class CommandeService {
     return this.http.post(`${this.apiUrl}/${orderId}/validate`, invoiceData);
   }
 
-    getActiveOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.apiUrl}/all`);
-  }
+  // a jour le 20 juin
+getActiveOrders(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/all`, { params });
+}
 
   cancelOrder(id: number): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, {});
@@ -68,6 +84,10 @@ export class CommandeService {
     getProClientCommandeDetails(orderId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${orderId}/details`);
   }
+
+  getOrderDetails(id: number) {
+  return this.http.get<any>(`${this.apiUrl}/${id}/details`);
+}
 
   // getCommandeDetails(orderId: number): Observable<OrderDetails> {
   //   return this.http.get<OrderDetails>(`${this.apiUrl}/${orderId}`);

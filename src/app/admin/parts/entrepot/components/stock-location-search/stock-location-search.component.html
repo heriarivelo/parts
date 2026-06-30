@@ -1,0 +1,99 @@
+<section class="h-full w-full flex flex-col overflow-hidden p-4">
+    <div class="flex-shrink-0 py-2">
+    <div class="mb-2">
+        <h2 class="text-lg font-bold text-gray-900">Localiser une pièce</h2>
+        <p class="text-sm text-gray-500">
+            Recherchez une pièce pour voir dans quels entrepôts elle est disponible.
+        </p>
+    </div>
+
+    <app-search-input placeholder="Code, référence, OEM, marque..." [(value)]="search" (search)="onSearch()">
+    </app-search-input>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto custom-sidebar-scroll">
+        <div *ngIf="isLoading" class="mt-5 text-sm text-gray-500">
+            Recherche en cours...
+        </div>
+
+        <div *ngIf="!isLoading && results.length === 0"
+            class="mt-5 rounded-xl border border-dashed border-gray-300 p-6 text-center text-gray-500">
+            Aucune pièce trouvée.
+        </div>
+
+        <div *ngIf="results.length > 0" class="mt-5 space-y-4">
+            <div
+            *ngFor="let item of results"
+            [attr.draggable]="item.qttsansEntrepot > 0 ? true : null"
+            (dragstart)="onDragStart($event, item)"
+            class="rounded-xl border border-gray-200 bg-gray-50 p-4 hover:shadow-sm transition"
+            [class.cursor-move]="item.qttsansEntrepot > 0">
+
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="font-bold text-gray-900">
+                            {{ item.codeArt || item.referenceCode }}
+                        </p>
+                        <p class="text-sm text-gray-600 line-clamp-2">
+                            {{ item.libelle }}
+                        </p>
+                    </div>
+
+                    <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                        Stock : {{ item.quantite }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-3 text-xs text-gray-500">
+                    <!-- <p>OEM : {{ item.oem || '-' }}</p> -->
+                    <p>Marque : {{ item.marque || '-' }}</p>
+                </div>
+
+                <div class="mt-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Localisation</p>
+
+                    <div *ngIf="item.locations?.length > 0; else noLocation" class="grid grid-cols-3 gap-2">
+                        <div *ngFor="let location of item.locations"
+                            class="flex items-center justify-between rounded-lg bg-white border border-gray-200 px-3 py-2">
+                            <span class="text-sm text-gray-700">{{ location.entrepotName }}</span>
+                            <span class="text-sm font-bold text-gray-900">{{ location.quantity }}</span>
+                        </div>
+                    </div>
+
+                    <ng-template #noLocation>
+                        <div class="rounded-lg bg-yellow-50 border border-yellow-200 px-3 py-2 text-sm text-yellow-700">
+                            Cette pièce n’est affectée à aucun entrepôt.
+                        </div>
+                    </ng-template>
+
+                    <div *ngIf="item.qttsansEntrepot > 0"
+                        class="mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+                        Sans entrepôt : {{ item.qttsansEntrepot }}
+                    </div>
+                    <button *ngIf="item.qttsansEntrepot > 0" type="button" (click)="onDistribute(item)"
+                        class="mt-3 w-full border border-red-500 text-red-600 rounded-lg py-2 text-sm font-semibold hover:bg-red-50">
+                        Répartir dans les entrepôts
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="totalItems > pageSize"
+        class="mt-5 flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+
+        <button type="button" (click)="previousPage()" [disabled]="currentPage === 1"
+            class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-40">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <span class="text-gray-600 font-medium">
+            Page {{ currentPage }} / {{ totalPages }}
+        </span>
+
+        <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
+            class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-40">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</section>

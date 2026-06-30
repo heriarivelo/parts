@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { CalculatriceComponent } from './admin/parts/calculatriceprix/calculatrice.component';
 import { StocksComponent } from './admin/parts/stocks/stocks.component';
 import { DashboardsComponent } from './admin/parts/dashboards/dashboards.component';
@@ -11,63 +12,71 @@ import { RoleGuard } from '../app/guards/role.guard';
 import { CommandesFournisseursComponent } from './admin/parts/commandes-fournisseurs/commandes-fournisseurs.component';
 import { UserManagementComponent } from './admin/parts/user-management/user-management.component';
 import { ProfessionalClientsComponent } from './admin/parts/professional-clients/professional-clients.component';
+import { CommandeParticuliereComponent } from './admin/commandes/commande-particuliere/commande-particuliere.component';
 
-import { ArcticlesMComponent } from './manager/parts/articles/articles.component';
 import { DashboardsMComponent } from './manager/parts/dashboards/dashboards.component';
-import { CommandeMComponent } from './manager/parts/Commande/commande.component';
-import { NewMComponent } from './manager/parts/Commande/new/new.component';
-import { FactureMComponent } from './manager/parts/Facture/facture.component';
-import { FactureMDComponent } from './manager/parts/Facture/Detaille/factureD.component';
-import { StocksMComponent } from './manager/parts/stocks/stocks.component';
 import { EntrepotComponent } from './admin/parts/entrepot/entrepot.component';
 import { ProduitComponent } from './admin/parts/produit/produit.component';
 import { ImportListComponent } from './admin/parts/import-list/import-list.component';
 import { InvoiceCreateComponent } from './manager/invoice-create/invoice-create.component';
 import { OrderCreateComponent } from './manager/order-create/order-create.component';
-import { StockDashboardComponent } from './manager/stock-dashboard/stock-dashboard.component';
 import { HistoriqueCommandesComponent } from './admin/historique/historique-commandes/historique-commandes.component';
 import { StockHistoryComponent } from './admin/historique/stock-history/stock-history.component';
 import { InvoiceListComponent } from './manager/invoice-list/invoice-list.component';
 import { CommandeVenteListComponent } from './manager/commande-vente-list/commande-vente-list.component';
 
+import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ProfileComponent } from './pages/profile/profile.component';
+
 export const routes: Routes = [
-  { path: '', component: LoginComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+    {
+    path: '',
+    component: PublicLayoutComponent,
+    children: [
+      { path: '', component: HomeComponent },
+      // { path: 'a-propos', component: AboutComponent },
+      // { path: 'contact', component: ContactComponent },
+    ],
+  },
 
-  { path: 'admin-stocks', component: StocksComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'admin-tableau-de-bord', component: DashboardsMComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'admin-calculatrice-prix', component: CalculatriceComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'admin-commande', component: CommandesFournisseursComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'admin-gestion-users', component: UserManagementComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'admin-clients-pro', component: ProfessionalClientsComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'entrepot' , component: EntrepotComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'importation-historique' , component: ImportListComponent, canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
+  {
+    path: '',
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent },
+    ],
+  },
+
+  {
+    path: '',
+    component: DashboardLayoutComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'MANAGER'] },
+    children: [
+      { path: 'profile', component: ProfileComponent },
+      { path: 'admin-reapprovisionnements', component: StocksComponent,data: { roles: ['ADMIN']} },
+      { path: 'admin-tableau-de-bord', component: DashboardsMComponent, data: { roles: ['ADMIN']} },
+      { path: 'admin-calculatrice-prix', component: CalculatriceComponent, data: { roles: ['ADMIN']} },
+      { path: 'admin-commande', component: CommandesFournisseursComponent, data: { roles: ['ADMIN']} },
+      { path: 'admin-gestion-users', component: UserManagementComponent, data: { roles: ['ADMIN']} },
+      { path: 'admin-clients-pro', component: ProfessionalClientsComponent, data: { roles: ['ADMIN']} },
+      { path: 'entrepot' , component: EntrepotComponent, data: { roles: ['ADMIN']} },
+      { path: 'importation-historique' , component: ImportListComponent, data: { roles: ['ADMIN']} },
+      // { path: 'manager/tableau-de-bord', component: DashboardsComponent },
+      { path: 'commande/specifique', component: CommandeParticuliereComponent, data: { roles: ['ADMIN']} },
+
+      { path: 'manager/invoice/:commandeId' , component: InvoiceCreateComponent },
+      { path: 'manager/order' , component: OrderCreateComponent },
 
 
-  { path: 'manager/article', component: ArcticlesMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER']} },
-  { path: 'manager/tableau-de-bord', component: DashboardsComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'manager/commande', component: CommandeMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'commande/specifique', component: NewMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['ADMIN']} },
-  { path: 'manager/facture', component: FactureMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'manager/facture/D', component: FactureMDComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'manager/stock' , component: StocksMComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-
-
-  { path: 'manager/invoice/:commandeId' , component: InvoiceCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'manager/order' , component: OrderCreateComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-  { path: 'manager/stocks' , component: StockDashboardComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER', 'ADMIN']} },
-
-
-
-
-  { path: 'inventaire-piece' , component: ProduitComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER' , 'ADMIN']} },
-  { path: 'historique-commandes' , component: HistoriqueCommandesComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER' , 'ADMIN']} },
-  { path: 'historique-stocks' , component: StockHistoryComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER' , 'ADMIN']} },
-  { path: 'liste-facture' , component: InvoiceListComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER' , 'ADMIN']} },
-  { path: 'liste-commandes' , component: CommandeVenteListComponent,canActivate: [AuthGuard, RoleGuard],data: { roles: ['MANAGER' , 'ADMIN']} },
-
-
+      { path: 'inventaire-piece' , component: ProduitComponent },
+      { path: 'historique-commandes' , component: HistoriqueCommandesComponent },
+      { path: 'historique-stocks' , component: StockHistoryComponent },
+      { path: 'liste-facture' , component: InvoiceListComponent },
+      { path: 'liste-commandes' , component: CommandeVenteListComponent },
+    ],
+  },
 
 
 

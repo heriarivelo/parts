@@ -5,12 +5,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProClientService, ProClient, ClientStats } from '../../../service/pro-clients.service';
 import { CommandeService } from '../../../service/commande.service';
 import { DatePipe } from '@angular/common';
-
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 
 @Component({
   selector: 'app-professional-clients',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminPaginationComponent, SearchInputComponent],
   templateUrl: './professional-clients.component.html',
   styleUrls: ['./professional-clients.component.scss'],
   providers: [ DatePipe ]
@@ -101,30 +102,15 @@ export class ProfessionalClientsComponent implements OnInit {
     this.paginatedClients = this.filteredClients.slice(startIndex, startIndex + this.itemsPerPage);
   }
   
-  // Pagination methods
-  getPageNumbers(): number[] {
-    const pageCount = Math.ceil(this.filteredClients.length / this.itemsPerPage);
-    return Array.from({ length: pageCount }, (_, i) => i + 1);
-  }
   
   goToPage(page: number): void {
     this.currentPage = page;
     this.updatePaginatedClients();
   }
-  
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePaginatedClients();
-    }
-  }
-  
-  nextPage(): void {
-    if (this.currentPage * this.itemsPerPage < this.filteredClients.length) {
-      this.currentPage++;
-      this.updatePaginatedClients();
-    }
-  }
+
+  get totalItems(): number {
+  return this.filteredClients.length;
+}
   
   // Client actions
   viewClientDetails(client: ProClient): void {

@@ -1,49 +1,56 @@
-<div class="p-6">
+<div class="h-full w-full flex flex-col overflow-hidden  p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Gestion des Factures</h1>
-            <p class="text-sm text-gray-600">Total: {{ filteredFactures.length }} facture(s)</p>
+            <p class="text-sm text-gray-600">Total: {{ totalItems }} facture(s)</p>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3">
-            <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher..."
-                class="px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <app-search-input
+            placeholder="Rechercher une facture..."
+            [(value)]="searchTerm"
+            (search)="onSearch()">
+            </app-search-input>
 
-            <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()"
-                class="px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="TOUS">Tous statuts</option>
-                <option value="PARTIELLEMENT_PAYEE">Partielle</option>
-                <option value="PAYEE">Payée</option>
+            <select
+            [(ngModel)]="statusFilter"
+            (change)="onStatusFilterChange()"
+            class="custom-select px-4 py-2 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+            <option value="TOUS">Tous statuts</option>
+            <option value="NON_PAYEE">Non payée</option>
+            <option value="PARTIELLEMENT_PAYEE">Partielle</option>
+            <option value="PAYEE">Payée</option>
+            <option value="ANNULEE">Annulée</option>
             </select>
         </div>
     </div>
 
-    <div class="container mx-auto px-2 py-8">
+    <div class="flex-1 overflow-y-auto custom-sidebar-scroll">
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
 
-    <!-- Factures List -->
-    <div *ngIf="!isLoading" class="overflow-x-auto bg-white shadow rounded-lg overflow-hidden">
+        <!-- Factures List -->
+        <div *ngIf="!isLoading" class="overflow-x-auto bg-white shadow rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 font-semibold text-gray-700">
                     <tr>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-2 py-3 text-left text-xs uppercase tracking-wider">
                             Référence</th>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-2 py-3 text-left text-xs uppercase tracking-wider">
                             Commande</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">
                             Client</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">
                             Montant</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">
                             Paiement</th>
-                        <th class="px-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-1 py-3 text-left text-xs uppercase tracking-wider">
                             Statut</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">
                             Actions</th>
                     </tr>
                 </thead>
@@ -61,7 +68,7 @@
                         <td class="px-2 py-4 text-sm whitespace-nowrap">
                             <div class="font-medium">{{ facture.commandeVente.reference }}</div>
                             <div class="text-xs text-gray-500 capitalize">
-                                {{ facture.commandeVente.type.toLowerCase() }}
+                                {{ facture.commandeVente.commandetype.toLowerCase() }}
                             </div>
                         </td>
 
@@ -81,8 +88,8 @@
                         <!-- Montant -->
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="font-medium">{{ facture.prixTotal | currency:'MGA':'symbol':'1.0-0' }}</div>
-                            <div *ngIf="facture.remises.length > 0" class="text-xs text-red-500">
-                                Remise: -{{ calculateRemiseTotale(facture) | currency:'MGA':'symbol':'1.0-0' }}
+                            <div class="text-xs text-red-500">
+                                Remise: -{{ facture.remiseTotale | currency:'MGA':'symbol':'1.0-0' }}
                             </div>
                         </td>
 
@@ -117,39 +124,54 @@
 
                         <!-- Actions -->
                         <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end gap-2">
                             <button *ngIf="facture.resteAPayer > 0 || facture.status === 'NON_PAYEE'"
-                                class="text-blue-600 hover:text-blue-900 mr-2" (click)="openPaiementModal(facture)">
+                                class="px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-xs transition" (click)="openPaiementModal(facture)">
                                 Payer
                             </button>
-                            <a (click)="openDetailsModal(facture)"
-                                class="cursor-pointer text-gray-600 hover:text-gray-900">
-                                Détails
-                            </a>
+              <button (click)="openOrderDetailsFromInvoice(facture)"
+                class="h-9 w-9 bg-gray-200 text-gray-700 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition"
+                title="Détails">
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
                             <button *ngIf="canCancel(facture)" (click)="annulerFacture(facture.id)" type="button"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-2 py-1.5 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                                 Annuler
                             </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-        <!-- Empty State -->
-        <div *ngIf="filteredFactures.length === 0 && !isLoading" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune facture trouvée</h3>
-            <p class="mt-1 text-sm text-gray-500">
-                {{ searchTerm ? 'Aucun résultat pour votre recherche' : 'Aucune facture disponible' }}
-            </p>
+            <!-- Empty State -->
+            <div *ngIf="filteredFactures.length === 0 && !isLoading" class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune facture trouvée</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ searchTerm ? 'Aucun résultat pour votre recherche' : 'Aucune facture disponible' }}
+                </p>
+            </div>
         </div>
     </div>
-    </div>
+    <app-admin-pagination
+  *ngIf="totalItems > pageSize"
+  [currentPage]="currentPage"
+  [pageSize]="pageSize"
+  [totalItems]="totalItems"
+  (pageChange)="onPageChange($event)">
+</app-admin-pagination>
 </div>
 
-<!-- Payment Modal -->
+<!-- Details Modal -->
+ <app-order-details
+  [orderId]="selectedOrderId"
+  [isOpen]="isOrderDetailsOpen"
+  (close)="closeOrderDetails()">
+</app-order-details>
 
 <!-- Modal de paiement -->
 <div *ngIf="showPaiementModal" class="fixed z-10 inset-0 overflow-y-auto">
@@ -163,26 +185,32 @@
         <div
             class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
             <div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg leading-6 font-semibold text-gray-900">
                     Enregistrement de paiement
                 </h3>
+            <button type="button" (click)="showPaiementModal = false"
+                class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">
+                <i class="fa-solid fa-xmark fa-lg"></i>
+            </button>
+                </div>
                 <div class="mt-2">
                     <div class="grid grid-cols-1 gap-y-4">
                         <div>
-                            <label for="montant" class="block text-sm font-medium text-gray-700">Montant</label>
+                            <label for="montant" class="block text-sm font-medium text-gray-800">Montant</label>
                             <input type="number" [(ngModel)]="paiementMontant" id="montant"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                class="mt-1 block w-full px-4 py-2 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                 [max]="selectedFacture?.resteAPayer || null">
-                            <p class="mt-1 text-sm text-gray-500">
+                            <p class="mt-1 text-sm text-gray-600">
                                 Reste à payer: {{ selectedFacture?.resteAPayer | currency:'MGA':'symbol':'1.0-0' }}
                             </p>
                         </div>
 
                         <div>
-                            <label for="methode" class="block text-sm font-medium text-gray-700">Méthode de
+                            <label for="methode" class="block text-sm font-medium text-gray-800">Méthode de
                                 paiement</label>
                             <select [(ngModel)]="paiementMethode" id="methode"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                class="mt-1 block w-full px-4 py-2 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                                 <option value="CASH">Espèces</option>
                                 <option value="CHEQUE">Chèque</option>
                                 <option value="VIREMENT">Virement</option>
@@ -194,11 +222,11 @@
             </div>
             <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button type="button" (click)="submitPaiement()"
-                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm">
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm">
                     Valider le paiement
                 </button>
                 <button type="button" (click)="showPaiementModal = false"
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-400 shadow-sm px-4 py-2 bg-gray-50 text-base font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                     Annuler
                 </button>
             </div>
@@ -208,15 +236,13 @@
 
 
 <!-- Modal des détails -->
-<div *ngIf="showDetailsModal && selectedFacture" class="fixed z-10 inset-0 overflow-y-auto">
+<!-- <div *ngIf="showDetailsModal && selectedFacture" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- ... fond semi-transparent ... -->
 
         <div
             class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="border p-4 flex justify-between items-start">
-                    <!-- Logo et infos entreprise -->
                     <div class="flex gap-4">
                         <img src="/logo/facture.png" alt="Kaleo Parts" class="w-32 h-auto object-contain" />
                         <div class="text-sm leading-6">
@@ -231,14 +257,12 @@
                         </div>
                     </div>
 
-                    <!-- Date -->
                     <div class="text-right">
                         <p><span class="font-semibold">Date :</span> {{ selectedFacture.createdAt | date: 'dd/MM/yyyy à
                             HH:mm:ss' }}</p>
                     </div>
                 </div>
 
-                <!-- Détails client -->
                 <div class="flex justify-end mt-8">
                     <div class="mb-6 w-96 p-4 bg-gray-50 rounded-lg">
                         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -263,7 +287,6 @@
                     </div>
                 </div>
 
-                <!-- Liste des produits -->
                 <div class="mb-6">
                     <h4 class="font-medium text-gray-900 mb-2">Articles</h4>
                     <div class="border rounded-md overflow-hidden">
@@ -310,7 +333,6 @@
                     </div>
                 </div>
 
-                <!-- Récapitulatif financier -->
                 <div class="bg-gray-50 p-4 rounded-md">
                     <div class="flex justify-between mb-2">
                         <span class="font-medium">Total :</span>
@@ -340,4 +362,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->

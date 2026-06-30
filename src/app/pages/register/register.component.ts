@@ -15,14 +15,25 @@ export class RegisterComponent {
   name: string = '';
   email: string = '';
   password: string = '';
+  confirmPassword = '';
   role: string = 'USER'; // Valeur par défaut
   error: string | null = null;
   isLoading: boolean = false;
   success: boolean = false;
 
+  showPassword = false;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
   constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit(): void {
+    if (this.password !== this.confirmPassword) {
+      alert('Les mots de passe ne correspondent pas !');
+      return;
+    }
     this.isLoading = true;
     this.error = null;
     this.success = false;
@@ -30,8 +41,9 @@ export class RegisterComponent {
     this.authService.register(this.name, this.email, this.password, this.role).subscribe({
       next: () => {
         this.success = true;
+        // console.log('SUCCESS', res);
         this.isLoading = false;
-        setTimeout(() => this.router.navigate(['/profile']), 2000);
+        setTimeout(() => this.router.navigate(['/login']), 1500);
       },
       error: (err) => {
         this.error = err.error?.message || "Erreur lors de l'inscription";

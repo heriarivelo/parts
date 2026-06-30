@@ -1,0 +1,252 @@
+<section class="h-full w-full grid grid-cols-1 lg:grid-cols-5 gap-4 overflow-hidden px-6 py-4">
+    <!-- Formulaire de calcul -->
+    <div
+        class="lg:col-span-3 h-full flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm p-6 overflow-hidden">
+        <h2 class="text-lg font-bold text-gray-900">Calculatrice de Prix</h2>
+        <form [formGroup]="pieceForm" class="space-y-4">
+            <div class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-4 custom-sidebar-scroll">
+                <div>
+                    <label for="nom" class="block text-gray-700 mb-1">
+                        Libellé <span class="text-red-600">*</span>
+                    </label>
+                    <input id="nom" type="text" formControlName="nom"
+                        class="w-full p-2 rounded-xl border border-gray-500"
+                        [class.border-red-500]="isFieldInvalid('nom')" placeholder="Nom du piece" required>
+                    <p *ngIf="isFieldInvalid('nom')" class="text-xs text-red-600 mt-1">
+                        Le libellé est obligatoire.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-1">
+                            Référence pièce <span class="text-red-600">*</span>
+                        </label>
+                        <input type="text" formControlName="reference"
+                            class="w-full p-2 rounded-xl border border-gray-500"
+                            [class.border-red-500]="isFieldInvalid('reference')" placeholder="Référence du piece"
+                            required>
+                        <p *ngIf="isInvalid('reference')" class="text-xs text-red-600 mt-1">
+                            La référence est obligatoire.
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Marque</label>
+                        <input type="text" formControlName="marque"
+                            class="w-full p-2 rounded-xl border border-gray-500 uppercase"
+                            placeholder="Marque du piece">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-1">Poids Kg<span class="text-red-600 text-lg">*</span></label>
+                        <input type="number" formControlName="poidsKg"
+                            class="w-full p-2 rounded-xl border border-gray-500" [class.border-red-500]="isFieldInvalid('poidsKg')" min="0" step="0.01">
+                        <p *ngIf="isInvalid('poidsKg')" class="text-xs text-red-600 mt-1">
+                            Le poids est obligatoire.
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">
+                            Prix fret <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number" formControlName="fraisPort"
+                            class="w-full p-2 rounded-xl border border-gray-500" min="0" step="0.01">
+                        <p *ngIf="isInvalid('fraisPort')" class="text-xs text-red-600 mt-1">
+                            Le prix fret est obligatoire.
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">
+                            Prix site pièce <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number" formControlName="prixAchat"
+                            class="w-full p-2 rounded-xl border border-gray-500"
+                            [class.border-red-500]="isFieldInvalid('prixAchat')" min="0" step="0.01">
+                        <p *ngIf="isInvalid('prixAchat')" class="text-xs text-red-600 mt-1">
+                            Le prix site pièce est obligatoire.
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-1">Taux de change</label>
+                        <input type="number" formControlName="tauxChange"
+                            class="w-full p-2 rounded-xl border border-gray-500" min="0">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">
+                            Marge % <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number" formControlName="marge"
+                            class="w-full p-2 rounded-xl border border-gray-500" min="0" step="1">
+                        <p *ngIf="isInvalid('marge')" class="text-xs text-red-600 mt-1">
+                            La marge est obligatoire.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <p class="text-gray-700 mb-1">Prix de vente conseillé</p>
+                    <p class="text-2xl font-bold text-red-800">{{ prixVenteConseille | number:'1.0-0' }} MGA</p>
+                    <p class="text-sm text-gray-500">
+                        Marge: {{ getMarge() | number:'1.0-0' }} MGA ({{ pieceForm.value.marge }}%)
+                    </p>
+                </div>
+            </div>
+            <button type="button" (click)="ajouterArticle()"
+                class="py-2.5 px-4 border-2 border-red-700 bg-red-50/50 hover:bg-red-700 hover:text-gray-50 text-red-700 rounded-xl text-base font-semibold transition shadow-sm">
+                Ajouter au panier
+            </button>
+        </form>
+    </div>
+
+    <!-- Panier -->
+    <div
+        class="lg:col-span-2 h-full flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm p-6 overflow-hidden">
+        <div class="flex justify-between items-center text-lg font-bold text-gray-900 mb-4 border-b pb-4">
+            <h2>Panier</h2>
+            <span>{{ getTotal() | number:'1.0-0' }} MGA</span>
+        </div>
+        <div class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-4 custom-sidebar-scroll">
+            <div *ngFor="let article of panier" class="space-y-4">
+                <div class="border-b pb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="font-medium">{{ article.nom }}</span>
+                        <button (click)="supprimerArticle(article.id)" class="text-gray-600 hover:text-red-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-1">{{ article.reference }}-{{ article.marque }}</div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="text-gray-700">Prix unitaire:</span>
+                            <span class="font-medium ml-1">{{ article.prixVente | number:'1.0-0' }} MGA</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-gray-700 mr-2">Quantité:</span>
+                            <input type="number" [value]="article.quantite" (change)="updateQuantity(article, $event)"
+                                min="1" class="w-16 border border-gray-500 rounded-md px-2 py-2.5 text-center">
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-gray-700 font-mono">Total:</span>
+                        <span class="font-medium ml-1">
+                            {{ (article.prixVente * article.quantite) | number:'1.0-0' }} MGA
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="panier.length === 0" class="text-center py-4 text-gray-500">
+                Votre panier est vide
+            </div>
+        </div>
+        <!-- <div *ngIf="panier.length > 0" class="mt-6"> -->
+        <!-- <div class="flex justify-between mb-2">
+              <span class="font-medium">Total HT</span>
+              <span>{{ getTotal() / 1.2 | number:'1.0-0' }} MGA</span>
+            </div> -->
+        <!-- <div class="flex justify-between mb-2">
+              <span class="font-medium">TVA (20%)</span>
+              <span>{{ getTotal() - (getTotal() / 1.2) | number:'1.0-0' }} MGA</span>
+            </div> -->
+        <div *ngIf="panier.length > 0" class="flex justify-between text-lg font-bold mt-4 pt-4 border-t">
+            <span>Total à payer</span>
+            <span>{{ getTotal() | number:'1.0-0' }} MGA</span>
+        </div>
+        <!-- </div> -->
+
+        <button (click)="openModal()"
+            class="w-full mt-6 bg-red-600 text-gray-100 text-sm py-3 rounded-xl hover:bg-red-700 font-bold"
+            [disabled]="panier.length === 0">
+            Valider la commande
+        </button>
+    </div>
+</section>
+
+<!-- Modal Aperçu Devis -->
+<app-order-preview-modal [isOpen]="showModal" [isLoading]="isLoading" title="Aperçu de Devis"
+    confirmLabel="Confirmer le Devis" [preview]="devisPreview" [showClientBlock]="false" [date]="today"
+    (close)="closeModal()" (confirm)="openClientModal()">
+</app-order-preview-modal>
+
+<!-- Modal Client -->
+<div *ngIf="showClientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+        <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations du Client</h3>
+
+            <form [formGroup]="clientForm">
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Type de client -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Type de client</label>
+                        <select formControlName="customerType" class="w-full p-2 border rounded">
+                            <option *ngFor="let type of customerTypes" [value]="type">{{ type }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Nom / Client -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nom / Client *</label>
+
+                        <!-- 🧍 Si non-B2B -->
+                        <input *ngIf="!isB2B" formControlName="nom" placeholder="Nom complet"
+                            class="w-full p-2 border rounded" />
+
+                        <!-- 🏢 Si B2B -->
+                        <select *ngIf="isB2B" formControlName="customerId" (change)="onB2BClientSelected()"
+                            class="w-full p-2 border rounded">
+                            <option [ngValue]="null">-- Sélectionner un client B2B --</option>
+                            <option *ngFor="let client of clientsB2B" [ngValue]="client.id">
+                                {{ client.nom }} ({{ client.email || client.telephone }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Téléphone -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Téléphone *</label>
+                        <input formControlName="telephone" placeholder="Téléphone" class="w-full p-2 border rounded"
+                            [readonly]="isB2B" [class.bg-gray-100]="isB2B" />
+                    </div>
+
+                    <!-- SIRET -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nif</label>
+                        <input formControlName="nif" placeholder="Nif" class="w-full p-2 border rounded"
+                            [readonly]="isB2B" [class.bg-gray-100]="isB2B" />
+                    </div>
+
+                    <!-- Adresse -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Adresse</label>
+                        <input formControlName="adresse" placeholder="Adresse" class="w-full p-2 border rounded"
+                            [readonly]="isB2B" [class.bg-gray-100]="isB2B" />
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input formControlName="email" placeholder="Email" class="w-full p-2 border rounded"
+                            [readonly]="isB2B" [class.bg-gray-100]="isB2B" />
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" (click)="cancelClientModal()"
+                        class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="button" (click)="confirmDevis()" [disabled]="!clientForm.valid || isSubmitting"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300">
+                        {{ isSubmitting ? 'Traitement...' : 'Enregistrer et générer le devis' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -5,6 +5,7 @@ export interface Invoice {
   prixTotal: number;
   montantPaye: number;
   resteAPayer: number;
+  remiseTotale: number;
   status: string;
   userId: number;
   createdAt: string;
@@ -24,7 +25,7 @@ interface CommandeVente {
   libelle: string | null;
   status: string;
   totalAmount: number;
-  type: string;
+  commandetype: string;
   createdAt: string;
   updatedAt: string;
   customer: any | null;

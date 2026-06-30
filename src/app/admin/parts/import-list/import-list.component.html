@@ -1,186 +1,103 @@
-<div class="container mx-auto px-4 py-8">
-  <!-- Header -->
-  <header class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Historique des Imports</h1>
-    <div class="mt-2 flex justify-between items-center">
-      <p class="text-gray-600">Gestion des imports de pièces automobiles</p>
-      <button
-      (click)="goToCalculatrice()"
-      class="bg-primary hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center">
-        <i class="fas fa-file-import mr-2"></i> Nouvel Import
-      </button>
+<!-- CONTENEUR PRINCIPAL : Bloqué à l'écran, aucun scroll global -->
+<div class="h-full w-full flex flex-col overflow-hidden">
+
+  <!-- ================= ÉTAGE 1 : EN-TÊTE FIXE (Top) ================= -->
+  <header class="flex-shrink-0 bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between gap-4 mb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Importations de Marchandises</h1>
+      <p class="text-sm text-gray-500 mt-0.5">Gestion et suivi des dossiers d'import de pièces automobiles</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <app-search-input
+    placeholder="Rechercher un fichier importé..."
+    [(value)]="searchTerm"
+    (search)="onSearch()">
+  </app-search-input>
+    <button (click)="goToCalculatrice()"
+      class="inline-flex items-center justify-center gap-2 h-11 bg-red-600 hover:bg-red-700 text-white px-5 rounded-xl font-bold shadow-md transition shrink-0">
+      <i class="fa-solid fa-plus text-xs"></i>
+      <span>Nouvel Import</span>
+    </button>
     </div>
   </header>
 
-  <!-- Liste des imports -->
-  <div class="bg-white rounded-xl shadow-md max-w-6xl overflow-hidden mb-8 border border-gray-100">
-    <!-- En-têtes stylisés -->
-    <div
-      class="grid grid-cols-12 bg-gradient-to-r from-pink-50 to-purple-50 p-4 font-medium text-purple-900 border-b border-gray-200">
-      <div class="col-span-2 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        Date
-      </div>
-      <div class="col-span-3 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Fichier
-      </div>
-      <div class="col-span-2 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Coût
-      </div>
-      <div class="col-span-2 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-        Pièces
-      </div>
-      <div class="col-span-3 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Statut
+  <div class="flex-1 overflow-y-auto custom-sidebar-scroll px-6">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p class="text-gray-600">Chargement des produits...</p>
       </div>
     </div>
 
-    <!-- Loading animation améliorée -->
-    <ng-container *ngIf="isLoading">
-      <div class="p-8 text-center space-y-4">
-        <div class="inline-flex items-center space-x-2">
-          <div class="animate-bounce h-3 w-3 bg-pink-500 rounded-full"></div>
-          <div class="animate-bounce h-3 w-3 bg-purple-500 rounded-full" style="animation-delay: 0.1s"></div>
-          <div class="animate-bounce h-3 w-3 bg-blue-500 rounded-full" style="animation-delay: 0.2s"></div>
-        </div>
-        <p class="text-sm text-gray-500 font-medium">Chargement de vos données...</p>
-      </div>
-    </ng-container>
-
-    <!-- Lignes des imports - style plus attrayant -->
-    <div class="divide-y divide-gray-100">
-      <div *ngFor="let importItem of imports"
-        class="grid grid-cols-12 p-4 hover:bg-gradient-to-r from-pink-50/30 to-purple-50/30 items-center cursor-pointer transition-all duration-200"
-        (click)="showDetails(importItem)" [ngClass]="{
-    'bg-gradient-to-r from-pink-100/30 to-purple-100/30': selectedImport?.id === importItem.id}">
-
-        <div class="col-span-2 text-sm font-medium text-gray-700">
-          {{ importItem.importedAt | date:'dd/MM/yyyy' }}
-        </div>
-
-        <div
-          class="col-span-3 font-mono text-sm text-purple-800 bg-purple-50 px-2 py-1 rounded inline-block max-w-full truncate">
-          {{ importItem.fileName }}
-        </div>
-
-        <div class="col-span-2 font-semibold text-pink-600">
-          {{ importItem.totalCost | currency:'EUR' }}
-        </div>
-
-        <div class="col-span-2 text-sm text-gray-600">
-          <span class="bg-gray-100 px-2 py-1 rounded-full">{{ importItem.partsCount }} pièces</span>
-        </div>
-
-        <div class="col-span-3">
-          <span
-            class="px-3 py-1 bg-gradient-to-r from-green-100 to-teal-100 text-green-800 text-xs font-semibold rounded-full flex items-center justify-center w-fit">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Complété
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pied de table optionnel -->
-    <div class="bg-gray-50 px-4 py-3 text-right text-sm text-gray-500 border-t border-gray-200">
-      <span *ngIf="imports.length > 0">{{ imports.length }} importations trouvées</span>
-      <span *ngIf="imports?.length === 0 && !isLoading">Aucune importation à afficher</span>
-    </div>
-  </div>
-
-  <!-- Détails de l'import sélectionné -->
-  <div *ngIf="selectedImport" class="bg-white max-w-6xl rounded-lg shadow-sm overflow-x-scroll ">
-    <div class="p-4 border-b">
-      <h2 class="text-xl font-semibold text-gray-800">Détails de l'import</h2>
-      <div class="grid grid-cols-4 gap-4 mt-4">
-        <div>
-          <p class="text-sm text-gray-500">Fichier</p>
-          <p class="font-medium">{{ selectedImport.fileName }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Date</p>
-          <p class="font-medium">{{ selectedImport.importedAt | date:'medium' }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Coût total</p>
-          <p class="font-medium">{{ selectedImport.totalCost | currency:'EUR' }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Nombre de pièces</p>
-          <p class="font-medium">{{ selectedImport.partsCount }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Détails des pièces -->
-    <div class="p-4">
-      <h3 class="text-lg font-medium text-gray-800 mb-3">Pièces importées</h3>
-
-      <div *ngIf="detailsLoading" class="text-center py-4">
-        <div class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+    <!-- Products Table -->
+    <div *ngIf="!isLoading"
+      class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <!-- Table Header -->
+      <div class="grid grid-cols-12 bg-gray-50 font-semibold text-gray-700 px-4 py-2 border-b border-gray-200">
+        <div class="col-span-2 text-xs uppercase tracking-wider">Date</div>
+        <div class="col-span-2 text-xs uppercase tracking-wider text-center">Fichier</div>
+        <div class="col-span-3 text-xs uppercase tracking-wider text-center">Cout</div>
+        <div class="col-span-1 text-xs uppercase tracking-wider text-center">Status</div>
+        <div class="col-span-2 text-xs uppercase tracking-wider text-center">Pièces</div>
+        <div class="col-span-2 text-xs uppercase tracking-wider text-center">Action(s)</div>
       </div>
 
-      <div *ngIf="!detailsLoading" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 table-fixed">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marque</th>
-              <th class="w-20 p-3 text-left text-xs font-medium text-gray-500 uppercase">OEM</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Quantité</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Prix Achat</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Prix Vente</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Marge</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let detail of importDetails" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">{{ detail.codeArt }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">{{ detail.lib1 }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">{{ detail.marque }}</td>
-              <td class="w-20 p-4 text-sm truncate">{{ detail.oem }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ detail.qttArrive }}/{{ detail.quantity }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ detail.purchasePrice | currency:'EUR' }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ detail.salePrice | currency:'Ar' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium"
-                [class.text-green-600]="calculateMargin(detail.purchasePrice, detail.salePrice) > 20"
-                [class.text-yellow-600]="calculateMargin(detail.purchasePrice, detail.salePrice) <= 20">
-                {{ calculateMargin(detail.purchasePrice, detail.salePrice) | number:'1.0-2' }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Products List -->
+      <div class="divide-y divide-gray-100">
+        <div *ngFor="let importItem of imports"
+          class="grid grid-cols-12 px-4 py-2.5 hover:bg-red-50/30 transition-all duration-200 items-center group">
+
+          <!-- Référence -->
+          <div class="col-span-2">
+            <span class="font-mono text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              {{ importItem.importedAt | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+
+          <!-- Marque -->
+          <div class="col-span-2 text-center">
+            <span class="text-sm font-medium text-gray-700 text-center">{{ importItem.fileName }}</span>
+          </div>
+
+          <!-- Désignation -->
+          <div class="col-span-3">
+            <div class="text-sm font-medium text-gray-900 line-clamp-2">{{ importItem.totalCost | currency:'EUR' }}</div>
+          </div>
+
+          <!-- Stock -->
+          <div class="col-span-1 text-center text-[12px] font-bold rounded-2xl py-2 {{ getStatusClass(importItem.status) }}">
+            {{ importItem.status }}
+          </div>
+
+          <!-- Prix Unitaire -->
+          <div class="col-span-2 text-sm text-center">
+{{ importItem._count?.parts || 0 }} pièce(s)
+          </div>
+
+          <!-- Actions -->
+          <div class="col-span-2 text-center">
+              <button (click)="openDetails(importItem.id)"
+                class="h-9 w-9 bg-gray-200 text-gray-700 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition"
+                title="Détails">
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+  <app-admin-pagination
+  *ngIf="totalItems > pageSize"
+  [currentPage]="currentPage"
+  [pageSize]="pageSize"
+  [totalItems]="totalItems"
+  (pageChange)="onPageChange($event)">
+</app-admin-pagination>
 </div>
+
+<app-import-details
+  *ngIf="showDetailsModal"
+  [importId]="selectedImportId"
+  (close)="closeDetails()">
+</app-import-details>

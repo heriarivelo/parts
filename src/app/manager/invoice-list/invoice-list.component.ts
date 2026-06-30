@@ -7,12 +7,14 @@ import { ActivatedRoute } from '@angular/router';
 import { CommandeService } from '../../service/commande.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { AuthService } from '../../service/auth.service';
-// import { RouterLink } from '@angular/router';
+import { SearchInputComponent } from '../../components/search-input/search-input.component';
+import { AdminPaginationComponent } from '../../components/admin-pagination/admin-pagination.component';
+import { OrderDetailsComponent } from '../../admin/commandes/order-details/order-details.component';
 
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, CommonModule, FormsModule ],
+  imports: [CurrencyPipe, DatePipe, CommonModule, FormsModule, SearchInputComponent, AdminPaginationComponent, OrderDetailsComponent ],
   templateUrl: './invoice-list.component.html',
   styleUrls: ['./invoice-list.component.scss'],
   // providers: [DatePipe]
@@ -26,10 +28,14 @@ export class InvoiceListComponent implements OnInit {
   selectedFacture: Invoice | null = null;
   paiementMontant = 0;
   paiementMethode = 'CASH';
-    filteredFactures: Invoice[] = [];
+  filteredFactures: Invoice[] = [];
   searchTerm = '';
   statusFilter = 'TOUS';
-showDetailsModal = false;
+  showDetailsModal = false;
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 0;
 
   constructor(
     private factureService: InvoiceService,
@@ -40,51 +46,69 @@ showDetailsModal = false;
     this.loadFactures();
   }
 
-    loadFactures(): void {
-    this.isLoading = true;
-    this.factureService.getFactures().subscribe({
-      next: (factures) => {
-        this.factures = factures;
-        this.filterFactures();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Erreur:', err);
-        this.isLoading = false;
-      }
-    });
-  }
+loadFactures(): void {
+  this.isLoading = true;
+  this.error = null;
 
-  filterFactures(): void {
-    this.filteredFactures = this.factures.filter(facture => {
-      const matchesSearch = facture.referenceFacture.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        facture.commandeVente.reference.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (facture.commandeVente.customer?.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false);
+  this.factureService.getFactures({
+    page: this.currentPage,
+    pageSize: this.pageSize,
+    search: this.searchTerm,
+    status: this.statusFilter,
+  }).subscribe({
+    next: (res) => {
+      this.factures = res.data || [];
+      this.filteredFactures = this.factures;
+
+      // console.log(this.filteredFactures, "fac")
+
+      this.totalItems = res.pagination?.totalCount || 0;
+      this.totalPages = res.pagination?.totalPages || 0;
+
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('Erreur:', err);
+      this.error = 'Échec du chargement des factures';
+      this.factures = [];
+      this.filteredFactures = [];
+      this.totalItems = 0;
+      this.totalPages = 0;
+      this.isLoading = false;
+    }
+  });
+}
+
+  // filterFactures(): void {
+  //   this.filteredFactures = this.factures.filter(facture => {
+  //     const matchesSearch = facture.referenceFacture.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+  //       facture.commandeVente.reference.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+  //       (facture.commandeVente.customer?.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false);
       
-      const matchesStatus = this.statusFilter === 'TOUS' || 
-        facture.status === this.statusFilter;
+  //     const matchesStatus = this.statusFilter === 'TOUS' || 
+  //       facture.status === this.statusFilter;
       
-      return matchesSearch && matchesStatus;
-    });
-  }
+  //     return matchesSearch && matchesStatus;
+  //   });
+  // }
 
   // calculateRemiseTotale(facture: Invoice): number {
   //   return facture.remises.reduce((sum, remise) => sum + remise.montant, 0);
   // }
 
-  calculateRemiseTotale(facture: Invoice): number {
-  return facture.remises.reduce((sum, remise) => {
-    if (remise.type === 'POURCENTAGE' && remise.taux) {
-      // Calculer le montant de la remise en pourcentage
-      const montantPourcentage = (facture.commandeVente.totalAmount * remise.taux) / 100;
-      return sum + montantPourcentage;
-    } else if (remise.montant) {
-      // Utiliser le montant fixe directement
-      return sum + remise.montant;
-    }
-    return sum;
-  }, 0);
-}
+//   calculateRemiseTotale(facture: Invoice): number {
+//   return facture.remises.reduce((sum, remise) => {
+//     if (remise.type === 'POURCENTAGE' && remise.taux) {
+//       // Calculer le montant de la remise en pourcentage
+//       const montantPourcentage = (facture.commandeVente.totalAmount * remise.taux) / 100;
+//       return sum + montantPourcentage;
+//     } else if (remise.montant) {
+//       // Utiliser le montant fixe directement
+//       return sum + remise.montant;
+//     }
+//     return sum;
+//   }, 0);
+// }
 
   updateStatus(facture: Invoice): void {
     // Logique pour mettre à jour le statut
@@ -97,33 +121,27 @@ showDetailsModal = false;
     }
   }
   
+  onSearch(): void {
+  this.currentPage = 1;
+  this.loadFactures();
+}
 
-  onSearchChange(): void {
-    this.filterFactures();
-  }
+onStatusFilterChange(): void {
+  this.currentPage = 1;
+  this.loadFactures();
+}
 
-  onStatusFilterChange(): void {
-    this.filterFactures();
-  }
+onPageChange(page: number): void {
+  this.currentPage = page;
+  this.loadFactures();
+}
+
 
 openDetailsModal(facture: Invoice): void {
   this.selectedFacture = facture;
   this.showDetailsModal = true;
 }
 
-  // loadFactures(): void {
-  //   this.isLoading = true;
-  //   this.factureService.getFactures().subscribe({
-  //     next: (factures) => {
-  //       this.factures = factures;
-  //       this.isLoading = false;
-  //     },
-  //     error: (err) => {
-  //       this.error = 'Échec du chargement des factures';
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
 
   openPaiementModal(facture: Invoice): void {
     this.selectedFacture = facture;
@@ -131,21 +149,6 @@ openDetailsModal(facture: Invoice): void {
     this.showPaiementModal = true;
   }
 
-  // submitPaiement(): void {
-  //   if (!this.selectedFacture) return;
-
-  //   this.factureService.enregistrerPaiement(
-  //     this.selectedFacture.id,
-  //     this.paiementMontant,
-  //     this.paiementMethode
-  //   ).subscribe({
-  //     next: () => {
-  //       this.loadFactures();
-  //       this.showPaiementModal = false;
-  //     },
-  //     error: () => alert('Erreur lors de l\'enregistrement du paiement')
-  //   });
-  // }
 
  // invoice-list.component.ts
 submitPaiement(): void {
@@ -175,15 +178,6 @@ submitPaiement(): void {
   });
 }
 
-  // getStatusClass(status: string): string {
-  //   const classes: Record<string, string> = {
-  //     'PAYEE': 'bg-green-100 text-green-800',
-  //     'PARTIELLEMENT_PAYEE': 'bg-blue-100 text-blue-800',
-  //     'NON_PAYEE': 'bg-red-100 text-red-800',
-  //     'ANNULEE': 'bg-gray-100 text-gray-800',
-  //   };
-  //   return classes[status] || 'bg-gray-100 text-gray-800';
-  // }
 
     getStatusClass(status: string): string {
     switch (status) {
@@ -229,6 +223,19 @@ async annulerFacture(factureId: number, raison: string = 'Annulation par l\'admi
     console.error('Erreur lors de l\'annulation de la facture :', error);
     alert('Une erreur est survenue lors de l\'annulation de la facture.');
   }
+}
+
+selectedOrderId: number | null = null;
+isOrderDetailsOpen = false;
+
+openOrderDetailsFromInvoice(facture: Invoice): void {
+  this.selectedOrderId = facture.commandeVente.id;
+  this.isOrderDetailsOpen = true;
+}
+
+closeOrderDetails(): void {
+  this.selectedOrderId = null;
+  this.isOrderDetailsOpen = false;
 }
 
 }

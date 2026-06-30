@@ -10,12 +10,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 
 @Component({
   selector: 'app-produit',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminPaginationComponent, SearchInputComponent],
   templateUrl: './produit.component.html',
   styleUrl: './produit.component.scss'
 })
@@ -39,7 +40,16 @@ export class ProduitComponent implements OnInit {
     private router: Router
   ) {
     this.searchForm = this.fb.group({
-      search: ['']
+      search: [''],
+      codeArt: [''],
+      referenceCode: [''],
+      libelle: [''],
+      marque: [''],
+      oem: [''],
+      autoFinal: [''],
+      stockStatus: [''],
+      minPrice: [''],
+      maxPrice: [''],
     });
     this.priceForm = this.fb.group({
       newPrice: ['', [Validators.required, Validators.min(0.01)]],
@@ -49,8 +59,9 @@ export class ProduitComponent implements OnInit {
 
 
 
-    stocks: any[] = [];
+  stocks: any[] = [];
   searchForm: FormGroup;
+  searchTerm = '';
   pagination = {
     page: 1,
     limit: 20,
@@ -84,6 +95,7 @@ export class ProduitComponent implements OnInit {
     this.stockService.getAllStocks(params).subscribe({
       next: (response) => {
         this.stocks = response.data;
+        // console.log('stocl', response.data)
         this.pagination.total = response.meta.total;
         this.isLoading = false;
       },
@@ -114,10 +126,14 @@ get pageNumbers(): number[] {
 
 // Dans le template, utilisez : *ngFor="let page of pageNumbers"
 
-  onSearch(): void {
-    this.pagination.page = 1;
-    this.loadStocks();
-  }
+onSearch(): void {
+  this.searchForm.patchValue({
+    search: this.searchTerm
+  });
+
+  this.pagination.page = 1;
+  this.loadStocks();
+}
 
   priceHistory: any[] = [];
   selectedPieceId: number | null = null;
@@ -324,6 +340,71 @@ exportToExcel() {
       this.isLoading = false;
     }
   });
+}
+
+showFilters = false;
+
+toggleFilters(): void {
+  this.showFilters = !this.showFilters;
+}
+
+resetFilters(): void {
+  this.searchTerm = '';
+  this.searchForm.reset({
+    search: '',
+    codeArt: '',
+    referenceCode: '',
+    libelle: '',
+    marque: '',
+    oem: '',
+    autoFinal: '',
+    stockStatus: '',
+    minPrice: '',
+    maxPrice: '',
+  });
+
+  this.pagination.page = 1;
+  this.loadStocks();
+}
+
+hasActiveFilters(): boolean {
+  const values = this.searchForm.value;
+
+  return Object.values(values).some(value =>
+    value !== null && value !== undefined && value !== ''
+  );
+}
+
+isEntrepotModalOpen = false;
+selectedStockEntrepots: any = null;
+
+getEntrepotSummary(stock: any): string {
+  const entrepots = stock.entrepots || [];
+
+  if (entrepots.length === 0) {
+    return stock.qttsansEntrepot > 0
+      ? `Sans emplacement (${stock.qttsansEntrepot})`
+      : 'Aucun';
+  }
+
+  const first = entrepots[0];
+  const label = first.entrepot?.libelle || 'N/A';
+
+  if (entrepots.length === 1) {
+    return `${label} (${first.quantite})`;
+  }
+
+  return `${label} (${first.quantite}) +${entrepots.length - 1}`;
+}
+
+openEntrepotModal(stock: any): void {
+  this.selectedStockEntrepots = stock;
+  this.isEntrepotModalOpen = true;
+}
+
+closeEntrepotModal(): void {
+  this.selectedStockEntrepots = null;
+  this.isEntrepotModalOpen = false;
 }
 
 }

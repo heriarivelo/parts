@@ -45,4 +45,10 @@ export class LoginComponent {
     };
     this.router.navigate([routes[role] || '/']);
   }
+
+  showPassword = false;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 }

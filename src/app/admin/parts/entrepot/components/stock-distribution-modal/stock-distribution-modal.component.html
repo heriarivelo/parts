@@ -1,0 +1,142 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+  <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+
+    <div class="flex justify-between items-center border-b border-gray-200 p-6">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Répartition du stock</h2>
+        <p class="text-sm text-gray-500 mt-1">
+          Affectez la quantité disponible dans un ou plusieurs entrepôts.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-6 overflow-auto max-h-[calc(90vh-160px)]">
+
+      <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="isLoading" class="text-center py-10 text-gray-500">
+        Chargement de la répartition...
+      </div>
+
+      <ng-container *ngIf="!isLoading && distribution">
+
+        <!-- Infos produit -->
+        <div class="mb-5 p-4 bg-red-50 rounded-xl border border-red-100">
+          <h3 class="font-semibold text-red-800">
+            {{ selectedProduct.referenceCode || selectedProduct.codeArt }} -
+           
+          </h3>
+          <span class="text-blue-800"> {{ selectedProduct.lib1 || selectedProduct.libelle }}</span>
+
+          <div class="grid grid-cols-3 gap-3 mt-4">
+            <div class="bg-white rounded-lg p-3 border border-red-100">
+              <p class="text-xs text-gray-500">Quantité totale</p>
+              <p class="font-bold text-gray-900">{{ distribution.total }}</p>
+            </div>
+
+            <div class="bg-white rounded-lg p-3 border border-red-100">
+              <p class="text-xs text-gray-500">Total affecté</p>
+              <p class="font-bold text-gray-900">{{ getTotalAssigned() }}</p>
+            </div>
+
+            <div class="bg-white rounded-lg p-3 border border-red-100">
+              <p class="text-xs text-gray-500">Reste</p>
+              <p
+                class="font-bold"
+                [class.text-green-600]="getRemainingQuantity() === 0"
+                [class.text-red-600]="getRemainingQuantity() !== 0">
+                {{ getRemainingQuantity() }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lignes de répartition -->
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                  Entrepôt
+                </th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">
+                  Quantité
+                </th>
+                <th class="py-3 px-4 w-12"></th>
+              </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let item of distribution.assigned; let i = index" class="hover:bg-gray-50">
+                <td class="py-3 px-4">
+                  <select
+                    [(ngModel)]="item.entrepotId"
+                    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <option [ngValue]="null">Sélectionner un entrepôt</option>
+                    <option *ngFor="let e of boxes" [ngValue]="e.id">{{ e.name }}</option>
+                  </select>
+                </td>
+
+                <td class="py-3 px-4">
+                  <input
+                    type="number"
+                    [(ngModel)]="item.quantity"
+                    min="0"
+                    [max]="distribution.total"
+                    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </td>
+
+                <td class="py-3 px-4 text-right">
+                  <button
+                    type="button"
+                    (click)="removeDistributionRow(i)"
+                    class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50">
+                    ✕
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button
+          type="button"
+          (click)="addDistributionRow()"
+          class="mt-3 text-red-600 hover:text-red-800 text-sm font-semibold">
+          + Ajouter une ligne
+        </button>
+
+        <div *ngIf="getRemainingQuantity() !== 0"
+          class="mt-4 p-3 rounded-lg bg-yellow-50 text-yellow-800 text-sm border border-yellow-200">
+          La quantité affectée doit être exactement égale à la quantité totale.
+        </div>
+
+        <div class="flex justify-end gap-3 pt-5 mt-5 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+            Annuler
+          </button>
+
+          <button
+            type="button"
+            (click)="saveDistribution()"
+            [disabled]="!isValidDistribution() || isSaving"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-300 disabled:cursor-not-allowed">
+            {{ isSaving ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

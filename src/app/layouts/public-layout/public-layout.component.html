@@ -1,0 +1,60 @@
+<div class="min-h-screen flex flex-col bg-gray-50">
+  <header class="sticky top-0 z-50 bg-gray-900 text-gray-300 shadow-sm border-b">
+    <nav class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a routerLink="/" class="flex items-center gap-3">
+        <img src="logo/android-chrome-192x192.png" class="h-12 w-12 rounded-lg" />
+        <span class="text-2xl font-black text-gray-300">
+          <span class="text-red-600">Kaleo</span>Parts
+        </span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8 font-semibold text-gray-50">
+        <a routerLink="/" class="hover:text-red-600">Accueil</a>
+        <a routerLink="/catalogue" class="hover:text-red-600">Catalogue</a>
+        <a routerLink="/contact" class="hover:text-red-600">Contact</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a routerLink="/panier" class="relative px-3 py-2 rounded-xl hover:bg-red-700">
+          <i class="fas fa-shopping-cart text-xl"></i>
+        </a>
+
+        <a routerLink="/login" class="hidden sm:block text-gray-100 text-sm border-2 border-gray-100 rounded-xl px-4 py-2 hover:border-red-500 hover:text-red-600 font-semibold">
+          Connexion
+        </a>
+
+        <a routerLink="/register" class="bg-red-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-red-700">
+          S’inscrire
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="bg-gray-950 text-gray-300 py-10">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-white text-xl font-bold mb-3">KaleoParts</h3>
+        <p class="text-sm">Vente de pièces automobiles fiables et accessibles.</p>
+      </div>
+
+      <div>
+        <h4 class="text-white font-semibold mb-3">Navigation</h4>
+        <div class="space-y-2 text-sm">
+          <a routerLink="/" class="block hover:text-white">Accueil</a>
+          <a routerLink="/catalogue" class="block hover:text-white">Catalogue</a>
+          <a routerLink="/contact" class="block hover:text-white">Contact</a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-white font-semibold mb-3">Contact</h4>
+        <p class="text-sm">Antananarivo, Madagascar</p>
+        <p class="text-sm">kaleoparts&#64;gmail.com</p>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -259,7 +259,7 @@ if (
   // 3. Préparation du payload (adapté pour les entrepôts)
   const payload: any = {
     orderId: this.orderId,
-    referenceFacture: `FAC-${Date.now()}`,
+    // referenceFacture: this.genererReference(),
     prixTotal: totals.total,
     managerId: this.currentUser?.id
   };
@@ -296,11 +296,12 @@ if (
   // 4. Envoi au serveur (inchangé)
   this.orderService.validateOrder(this.orderId, payload).subscribe({
     next: (response) => {
+      const referenceFacture = response.invoice?.referenceFacture;
       // 5. Génération du PDF (adapté pour garder la même structure)
       const pdfData = {
-        referenceFacture: payload.referenceFacture,
-        createdAt: new Date(),
-        prixTotal: totals.total,
+        referenceFacture,
+        createdAt: response.invoice?.createdAt || new Date(),
+        prixTotal: response.invoice?.prixTotal || totals.total,
         commandeVente: {
           reference: this.orderDetails.reference,
           customer: this.orderDetails.customer || null,

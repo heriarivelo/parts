@@ -13,23 +13,31 @@ export class StockMovementService {
 
   constructor(private http: HttpClient) {}
 
-  // getMovements(filters?: {
-  //   type?: string;
-  //   productId?: number;
-  //   dateFrom?: string;
-  //   dateTo?: string;
-  // }): Observable<StockMovement[]> {
-  //   let params = new HttpParams();
-  //   if (filters) {
-  //     Object.entries(filters).forEach(([k, v]) => {
-  //       if (v != null) params = params.set(k, v.toString());
-  //     });
-  //   }
-  //   return this.http.get<StockMovement[]>(this.apiUrls, { params });
+  // getMovements(params: any): Observable<{ data: StockMovement[]; meta: any }> {
+  //   return this.http.get<{ data: StockMovement[]; meta: any }>(this.apiUrls, { params });
   // }
-    getMovements(params: any): Observable<{ data: StockMovement[]; meta: any }> {
-    return this.http.get<{ data: StockMovement[]; meta: any }>(this.apiUrls, { params });
-  }
+
+  getStockMovements(params: {
+  productId?: number | null;
+  search?: string;
+  type?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}) {
+  return this.http.get<any>(this.apiUrls, {
+    params: {
+      ...(params.productId ? { productId: params.productId } : {}),
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.type ? { type: params.type } : {}),
+      ...(params.startDate ? { startDate: params.startDate } : {}),
+      ...(params.endDate ? { endDate: params.endDate } : {}),
+      page: params.page || 1,
+      limit: params.limit || 20,
+    },
+  });
+}
 
   createMovement(data: Omit<StockMovement, 'id'|'createdAt'>): Observable<StockMovement> {
     return this.http.post<StockMovement>(this.apiUrls, data);

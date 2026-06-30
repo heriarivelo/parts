@@ -1,0 +1,83 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+    <div class="flex justify-between items-center border-b border-gray-200 p-6">
+      <h3 class="text-xl font-semibold text-gray-900">Transfert de stock</h3>
+
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-6">
+      <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Depuis l'entrepôt
+          </label>
+
+          <input
+            type="text"
+            [value]="selectedBox?.name"
+            readonly
+            class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Vers l'entrepôt
+          </label>
+
+          <select
+            formControlName="toEntrepotId"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+            <option value="">Sélectionner un entrepôt</option>
+
+            <option
+              *ngFor="let entrepot of boxes"
+              [value]="entrepot.id"
+              [disabled]="entrepot.id === selectedBox?.id">
+              {{ entrepot.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Quantité max : {{ selectedStock?.quantite }}
+          </label>
+
+          <input
+            type="number"
+            formControlName="quantity"
+            [max]="selectedStock?.quantite"
+            min="0.01"
+            step="0.01"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50">
+            {{ isLoading ? 'Transfert...' : 'Confirmer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

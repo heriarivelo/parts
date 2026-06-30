@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 import { User } from '../../service/auth.service';
 import { Subscription } from 'rxjs';
-
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-admin-sidebar',
@@ -20,6 +20,7 @@ export class AdminSidebarComponent  implements OnInit, OnDestroy {
     isLoggedIn = false;
      user: User | null = null;
      private sub!: Subscription;
+     @Output() collapsedChange = new EventEmitter<boolean>();
    
      constructor(private authService: AuthService) {}
    
@@ -55,4 +56,29 @@ export class AdminSidebarComponent  implements OnInit, OnDestroy {
     logout(): void {
       this.authService.logout();
     }
+
+    isCollapsed = false;
+
+    toggleSidebar(): void {
+      this.isCollapsed = !this.isCollapsed;
+      this.collapsedChange.emit(this.isCollapsed);
+
+      if (this.isCollapsed) {
+        this.showCommande = false;
+      }
+    }
+
+    isSidebarCollapsed = false;
+
+    onSidebarCollapsedChange(isCollapsed: boolean): void {
+      this.isSidebarCollapsed = isCollapsed;
+    }
+
+  toggleCommandeMenu(): void {
+    if (this.isCollapsed) {
+      return;
+    }
+
+    this.showCommande = !this.showCommande;
+  }
 }

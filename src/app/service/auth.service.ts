@@ -5,14 +5,11 @@ import { BehaviorSubject, Observable, map, catchError, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../environments/environment';
 
-// export type UserRole = 'ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'CLIENT';
-// export type CreateUserDto = Omit<User, '_id' | 'createdAt' | 'updatedAt'>;
-
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'MANAGER' | 'USER' | 'CLIENT';
+  role: 'ADMIN' | 'MANAGER' | 'USER';
 }
 
 interface AuthResponse {
@@ -37,12 +34,37 @@ export class AuthService {
   }
 
   private initializeAuthState(): void {
-    if (this.isBrowser) {
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        this.currentUserSubject.next(JSON.parse(user));
-      }
+    if (!this.isBrowser) return;
+
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('currentUser');
+
+    if (!token || !user || this.isTokenExpired(token)) {
+      this.clearAuthStorage();
+      return;
     }
+
+    this.currentUserSubject.next(JSON.parse(user));
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000;
+
+      return Date.now() >= expiry;
+    } catch {
+      return true;
+    }
+  }
+
+  private clearAuthStorage(): void {
+    if (this.isBrowser) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+    }
+
+    this.currentUserSubject.next(null);
   }
 
   private get isBrowser(): boolean {
@@ -60,10 +82,6 @@ export class AuthService {
 
   public get isModerateur(): boolean {
     return this.currentUserValue?.role === 'MANAGER';
-  }
-
-  public get isClient(): boolean {
-    return this.currentUserValue?.role === 'CLIENT';
   }
 
   public get isUser(): boolean {
@@ -86,26 +104,35 @@ export class AuthService {
     );
   }
   
-  register(name: string, email: string, password: string, role: string): Observable<User> {
+  register(name: string, email: string, password: string, role: string): Observable<any> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, { 
       name, 
       email, 
       password, 
       role: role || 'USER'
     }).pipe(
-      map(response => {
-        const user = this.handleAuthSuccess(response);
-        if (!user) {
-          throw new Error('Registration failed');
-        }
-        return user;
-      }),
-      catchError(error => {
-        this.handleAuthError(error);
-        throw error; // Propagation de l'erreur
-      })
-    );
-  }
+        catchError(error => {
+          this.handleAuthError(error);
+          throw error;
+        })
+      );
+    }
+    
+    
+  //   .pipe(
+  //     map(response => {
+  //       const user = this.handleAuthSuccess(response);
+  //       if (!user) {
+  //         throw new Error('Registration failed');
+  //       }
+  //       return user;
+  //     }),
+  //     catchError(error => {
+  //       this.handleAuthError(error);
+  //       throw error; // Propagation de l'erreur
+  //     })
+  //   );
+  // }
   
   private handleAuthSuccess(response: AuthResponse): User {
     if (!response?.user || !response?.token) {
@@ -122,16 +149,21 @@ export class AuthService {
   }
 
   logout(): void {
-    if (this.isBrowser) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('currentUser');
-    }
-    this.currentUserSubject.next(null);
+    this.clearAuthStorage();
     this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
-    return this.isBrowser && !!localStorage.getItem('token');
+    if (!this.isBrowser) return false;
+
+    const token = localStorage.getItem('token');
+
+    if (!token || this.isTokenExpired(token)) {
+      this.logout();
+      return false;
+    }
+
+    return true;
   }
 
   getToken(): string | null {

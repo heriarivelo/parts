@@ -8,6 +8,46 @@
   /* --color-accent: #f59e0b; */
 }
 
+/* src/styles.css */
+/* Dit à tous les composants injectés par le routeur de prendre 100% de la hauteur disponible */
+.flex-1 > router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+.custom-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #989fc1 transparent;
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar {
+  width: 2px;
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #93a5ff;
+  border-radius: 999px;
+}
+
+/* Modifie le fond de l'option sélectionnée en rouge */
+.custom-select option:checked,
+.custom-select option:hover {
+  background-color: #dc2626 !important; /* Le code couleur du red-600 Tailwind */
+  color: #ffffff !important;            /* Écrit le texte en blanc pour rester lisible */
+}
+
+/* Astuce pour Firefox et certains navigateurs basés sur Chromium */
+.custom-select option:focus {
+  background-color: #dc2626 !important;
+}
+
 
 .my-container {
     padding-left: 1rem; /* px-4 */

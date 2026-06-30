@@ -1,99 +1,96 @@
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div class="flex-1">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Gestion des Réapprovisionnements</h1>
-          <p class="text-gray-600 text-lg">Produits avec stock faible 
-            <span class="font-semibold text-orange-600">(≤ {{threshold}} unités)</span>
-          </p>
-        </div>
+<div class="h-full w-full flex flex-col overflow-hidden p-6">
 
-        <!-- Controls -->
-        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <!-- Seuil d'alerte -->
-          <div class="flex items-center gap-3 bg-red-50 rounded-lg px-4 py-3">
-            <label for="threshold" class="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Seuil d'alerte:
-            </label>
-            <input 
-              id="threshold" 
-              type="number" 
-              [(ngModel)]="threshold" 
-              (change)="onThresholdChange()"
-              class="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-          </div>
+  <div class="flex-shrink-0 bg-white border-b border-gray-200 px-8 py-3">
 
-          <!-- Filtre statut -->
-          <select 
-            [(ngModel)]="selectedStatus" 
-            class="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white">
-            <option *ngFor="let status of statuses" [value]="status.value">{{status.label}}</option>
-          </select>
-        </div>
+    <!-- Ligne Supérieure : Titres & Filtres principaux -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-5">
+      <div class="flex-1">
+        <h1 class="text-2xl font-bold text-gray-900">Gestion des Réapprovisionnements</h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Produits avec stock faible
+          <span class="font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md ml-1">
+            ≤ {{threshold}} unités
+          </span>
+        </p>
       </div>
 
-      <!-- Summary Bar -->
-      <div class="mt-6 mb-3 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex flex-wrap gap-6 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
-                {{selectedProducts.length}}
-              </span>
-              <span class="text-gray-700">produits sélectionnés</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
-                {{totalQuantity}}
-              </span>
-              <span class="text-gray-700">quantité totale</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-medium">
-                {{totalValue | currency:'EUR':'symbol':'1.2-2'}}
-              </span>
-              <span class="text-gray-700">valeur totale</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium">
-                {{totalWeightKg}} kg
-              </span>
-              <span class="text-gray-700">poids total</span>
-            </div>
-          </div>
+      <!-- Filtres et Commandes alignés proprement -->
+      <div class="flex flex-wrap gap-4 items-center w-full lg:w-auto">
 
-          <button 
-            (click)="submitReappro()" 
-            [disabled]="selectedProducts.length === 0 || loading"
-            class="bg-primary hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center">
-            <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span>{{ loading ? 'Enregistrement...' : 'Enregistrer' }}</span>
-          </button>
+      <app-search-input
+  placeholder="Rechercher..."
+  [(value)]="searchTerm"
+  (search)="onSearch()">
+</app-search-input>
+
+        <!-- Seuil d'alerte compact -->
+        <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 h-12">
+          <label for="threshold" class="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+            Seuil:
+          </label>
+          <input id="threshold" type="number" [(ngModel)]="threshold" (change)="onThresholdChange()"
+            class="w-16 bg-transparent font-bold text-gray-800 focus:outline-none text-sm text-center">
         </div>
+
+        <!-- Filtre statut harmonisé -->
+        <select [(ngModel)]="selectedStatus"
+          class="h-12 border border-gray-300 rounded-xl px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 cursor-pointer shadow-sm hover:border-gray-400 transition">
+          <option *ngFor="let status of statuses" [value]="status.value">{{status.label}}</option>
+        </select>
+
       </div>
-
-        <div class="flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="Rechercher..."
-            [(ngModel)]="searchTerm"
-            [value]="searchTerm"
-            (input)="onSearchChange($event)"
-            class="border border-b border-blue-900 shadow-md rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-red-500 focus:shadow-xl focus:outline-none"
-          />
-          <button
-            (click)="onSearch()"
-            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Rechercher
-          </button>
-        </div>
     </div>
 
+    <!-- Summary Bar : Devient un vrai bandeau d'action clair -->
+    <div
+      class="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+      <!-- Les Badges de données -->
+      <div class="flex flex-wrap gap-6 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-sm">
+          <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-bold text-sm">
+            {{selectedProducts.length}}
+          </span>
+          <span>Sélectionnés</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-sm">
+          <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold text-sm">
+            {{totalQuantity}}
+          </span>
+          <span>Qté Totale</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-sm">
+          <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-bold text-sm">
+            {{totalValue | currency:'EUR':'symbol':'1.2-2'}}
+          </span>
+          <span>Valeur Totale</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-sm">
+          <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-md font-bold text-sm">
+            {{totalWeightKg}} kg
+          </span>
+          <span>Poids Total</span>
+        </div>
+      </div>
+
+      <!-- Le bouton de validation (Isolé et percutant) -->
+      <button (click)="submitReappro()" [disabled]="selectedProducts.length === 0 || submitting"
+        class="bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white px-6 h-12 rounded-xl font-bold transition-all duration-200 shadow-md disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-2 justify-center shrink-0">
+        <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+          </path>
+        </svg>
+        <i *ngIf="!loading" class="fa-solid fa-floppy-disk"></i>
+        <span>{{ loading ? 'Enregistrement...' : 'Enregistrer le Réappro' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto custom-sidebar-scroll">
     <!-- Loading State -->
     <div *ngIf="loading && lowStockProducts.length === 0" class="flex justify-center items-center py-20">
       <div class="text-center">
@@ -103,37 +100,33 @@
     </div>
 
     <!-- Products Table -->
-    <div *ngIf="!loading || lowStockProducts.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div *ngIf="!loading || lowStockProducts.length > 0"
+      class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
       <!-- Table Header -->
-      <div class="grid grid-cols-12 bg-gray-50 p-6 font-semibold text-gray-700 border-b border-gray-200 text-sm uppercase tracking-wide">
-        <div class="col-span-1 text-left">
+      <div class="grid grid-cols-12 bg-gray-50 font-semibold text-gray-700 px-4 py-2 border-b border-gray-200">
+        <div class="col-span-1 text-xs uppercase tracking-wider text-left">
           Sélection
         </div>
-        <div class="col-span-1">Référence</div>
-        <div class="col-span-2 text-center">Marque</div>
-        <div class="col-span-3 text-center">Désignation</div>
-        <div class="col-span-1 text-center">Stock</div>
-        <div class="col-span-1 text-center">Qté à commander</div>
-        <div class="col-span-2 text-right">Prix Unitaire (€)</div>
-        <div class="col-span-1 text-right">Poids (kg)</div>
+        <div class="col-span-1 text-xs uppercase tracking-wider">Référence</div>
+        <div class="col-span-2 text-xs uppercase tracking-wider text-center">Marque</div>
+        <div class="col-span-3 text-xs uppercase tracking-wider text-center">Désignation</div>
+        <div class="col-span-1 text-xs uppercase tracking-wider text-center">Stock</div>
+        <div class="col-span-1 text-xs uppercase tracking-wider text-center">Qté à commander</div>
+        <div class="col-span-2 text-xs uppercase tracking-wider text-right">Prix Unitaire (€)</div>
+        <div class="col-span-1 text-xs uppercase tracking-wider text-right">Poids (kg)</div>
       </div>
 
       <!-- Products List -->
       <div class="divide-y divide-gray-100">
-        <div 
-          *ngFor="let product of lowStockProducts" 
-          class="grid grid-cols-12 p-6 hover:bg-red-50/30 transition-all duration-200 items-center group"
-          [class.bg-red-50]="product.selected"
-          [class.border-l-4]="product.selected"
+        <div *ngFor="let product of lowStockProducts"
+          class="grid grid-cols-12 px-6 py-3 hover:bg-red-50/30 transition-all duration-200 items-center group"
+          [class.bg-red-50]="product.selected" [class.border-l-4]="product.selected"
           [class.border-l-red-500]="product.selected">
-          
+
           <!-- Sélection -->
           <div class="col-span-1">
             <label class="flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                [checked]="product.selected" 
-                (click)="toggleProductSelection(product)"
+              <input type="checkbox" [checked]="product.selected" (click)="toggleProductSelection(product)"
                 class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded transition-all">
             </label>
           </div>
@@ -146,8 +139,8 @@
           </div>
 
           <!-- Marque -->
-          <div class="col-span-2">
-            <span class="text-sm font-medium text-gray-700">{{ product.marque }}</span>
+          <div class="col-span-2 text-center">
+            <span class="text-sm font-medium text-gray-700 text-center">{{ product.marque }}</span>
           </div>
 
           <!-- Désignation -->
@@ -157,11 +150,9 @@
 
           <!-- Stock -->
           <div class="col-span-1 text-center">
-            <span 
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-              [class.bg-amber-100]="product.quantite <= threshold"
-              [class.text-amber-800]="product.quantite <= threshold"
-              [class.bg-green-100]="product.quantite > threshold"
+            <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold"
+              [class.bg-orange-50]="product.quantite <= threshold"
+              [class.text-orange-600]="product.quantite <= threshold" [class.bg-green-100]="product.quantite > threshold"
               [class.text-green-800]="product.quantite > threshold">
               {{ product.quantite }}
             </span>
@@ -169,11 +160,7 @@
 
           <!-- Quantité à commander -->
           <div class="col-span-1">
-            <input 
-              type="number" 
-              [(ngModel)]="product.quantityToOrder" 
-              (ngModelChange)="updateQuantity(product)" 
-              min="1"
+            <input type="number" [(ngModel)]="product.quantityToOrder" (ngModelChange)="updateQuantity(product)" min="1"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
               placeholder="0">
           </div>
@@ -182,118 +169,31 @@
           <div class="col-span-2">
             <div class="flex items-center justify-end gap-2">
               <span class="text-gray-500 text-sm">€</span>
-              <input 
-                type="number" 
-                [(ngModel)]="product.unitPrice" 
-                (ngModelChange)="updateUnitPrice(product, $event)"
+              <input type="number" [(ngModel)]="product.unitPrice" (ngModelChange)="updateUnitPrice(product, $event)"
                 class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                step="0.01" 
-                min="0"
-                placeholder="0.00">
+                step="0.01" min="0" placeholder="0.00">
             </div>
           </div>
 
           <!-- Poids -->
           <div class="col-span-1">
             <div class="flex items-center justify-end gap-2">
-              <input 
-                type="number" 
-                [(ngModel)]="product.weightKg" 
-                (ngModelChange)="updateWeight(product, $event)"
+              <input type="number" [(ngModel)]="product.weightKg" (ngModelChange)="updateWeight(product, $event)"
                 class="w-20 border border-gray-300 rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                step="0.001" 
-                min="0"
-                placeholder="0.000">
+                step="0.001" min="0" placeholder="0.000">
               <span class="text-gray-500 text-sm">kg</span>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Pagination -->
-      <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-white">
-        <!-- Mobile Pagination -->
-        <div class="flex-1 flex justify-between sm:hidden">
-          <button 
-            (click)="onPageChange(currentPage - 1)" 
-            [disabled]="currentPage === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-            Précédent
-          </button>
-          <button 
-            (click)="onPageChange(currentPage + 1)" 
-            [disabled]="currentPage === totalPages"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-            Suivant
-          </button>
-        </div>
-
-        <!-- Desktop Pagination -->
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p class="text-sm text-gray-700">
-              Affichage de <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
-              à <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
-              sur <span class="font-medium">{{ totalItems }}</span> résultats
-            </p>
-          </div>
-          <div>
-            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
-              <!-- First Page -->
-              <button 
-                (click)="onPageChange(1)" 
-                [disabled]="currentPage === 1"
-                class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                <span class="sr-only">Première page</span>
-                &laquo;
-              </button>
-              
-              <!-- Previous Page -->
-              <button 
-                (click)="onPageChange(currentPage - 1)" 
-                [disabled]="currentPage === 1"
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                Précédent
-              </button>
-
-              <!-- Page Numbers -->
-              <ng-container *ngFor="let page of getPageNumbers()">
-                <button 
-                  (click)="onPageChange(page)" 
-                  [class.bg-blue-600]="page === currentPage"
-                  [class.text-white]="page === currentPage"
-                  [class.border-blue-600]="page === currentPage"
-                  [class.hover:bg-blue-700]="page === currentPage"
-                  [class.hover:bg-gray-50]="page !== currentPage"
-                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all">
-                  {{ page }}
-                </button>
-              </ng-container>
-
-              <!-- Next Page -->
-              <button 
-                (click)="onPageChange(currentPage + 1)" 
-                [disabled]="currentPage === totalPages"
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                Suivant
-              </button>
-              
-              <!-- Last Page -->
-              <button 
-                (click)="onPageChange(totalPages)" 
-                [disabled]="currentPage === totalPages"
-                class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                <span class="sr-only">Dernière page</span>
-                &raquo;
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
     </div>
+  </div>
+      <!-- Pagination -->
+    <app-admin-pagination *ngIf="totalItems > pageSize" [currentPage]="currentPage" [pageSize]="pageSize" [totalItems]="totalItems"
+      (pageChange)="onPageChange($event)"></app-admin-pagination>
 
-    <!-- Récapitulatif détaillé -->
-    <div *ngIf="selectedProducts.length > 0" class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+  <!-- Récapitulatif détaillé -->
+  <!-- <div *ngIf="selectedProducts.length > 0" class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-900">
           Récapitulatif de commande
@@ -344,6 +244,6 @@
           <p class="text-3xl font-bold text-gray-900">{{ totalWeightKg }} kg</p>
         </div>
       </div>
-    </div>
-  </div>
+    </div> -->
+  <!-- </div> -->
 </div>

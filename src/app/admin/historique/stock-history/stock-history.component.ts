@@ -7,24 +7,17 @@ import { FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { StockService } from '../../../service/stock.service';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 
 @Component({
   selector: 'app-stock-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminPaginationComponent, SearchInputComponent],
   templateUrl: './stock-history.component.html'
 })
 export class StockHistoryComponent implements OnInit {
-  movements: any[] = [];
-  filterForm: FormGroup;
-  isLoading = false;
-  pagination = {
-    page: 1,
-    limit: 20,
-    total: 0
-  };
-  products: any[] = [];
+
   movementTypes = [
     { value: 'IMPORT', label: 'Import' },
     { value: 'SALE', label: 'Vente' },
@@ -35,69 +28,87 @@ export class StockHistoryComponent implements OnInit {
     { value: 'LOSS', label: 'Perte' }
   ];
 
+  movements: any[] = [];
+
+searchTerm = '';
+selectedProductId: number | null = null;
+selectedType = '';
+startDate = '';
+endDate = '';
+
+currentPage = 1;
+pageSize = 20;
+totalItems = 0;
+
+isLoading = false;
+errorMessage = '';
+
+
   constructor(
     private movementService: StockMovementService,
     private productService: StockService,
     private fb: FormBuilder
-  ) {
-    this.filterForm = this.fb.group({
-      productId: [''],
-      type: [''],
-      startDate: [''],
-      endDate: ['']
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
     this.loadMovements();
   }
 
-  loadProducts(): void {
-    this.productService.getAvailableProducts().subscribe({
-      next: (products) => this.products = products
-    });
-  }
+loadMovements(): void {
+  this.isLoading = true;
+  this.errorMessage = '';
 
-  loadMovements(): void {
-    this.isLoading = true;
-    const params = {
-      page: this.pagination.page,
-      limit: this.pagination.limit,
-      ...this.filterForm.value
-    };
+  this.movementService.getStockMovements({
+    productId: this.selectedProductId,
+    search: this.searchTerm,
+    type: this.selectedType,
+    startDate: this.startDate,
+    endDate: this.endDate,
+    page: this.currentPage,
+    limit: this.pageSize,
+  }).subscribe({
+    next: (res) => {
+      this.movements = res.data || [];
+      this.totalItems = res.meta?.total || 0;
+      this.isLoading = false;
+    },
+    error: () => {
+      this.movements = [];
+      this.totalItems = 0;
+      this.errorMessage = 'Erreur lors du chargement des mouvements de stock.';
+      this.isLoading = false;
+    },
+  });
+}
 
-    this.movementService.getMovements(params).subscribe({
-      next: (response) => {
-        this.movements = response.data;
-        this.pagination.total = response.meta.total;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
-  }
+onSearch(): void {
+  this.currentPage = 1;
+  this.loadMovements();
+}
 
-  onFilter(): void {
-    this.pagination.page = 1;
-    this.loadMovements();
-  }
+onFilterChange(): void {
+  this.currentPage = 1;
+  this.loadMovements();
+}
 
-  onPageChange(page: number): void {
-    this.pagination.page = page;
-    this.loadMovements();
-  }
-  getPageNumbers(): number[] {
-  const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
-  return Array.from({ length: totalPages }, (_, i) => i + 1);
+onPageChange(page: number): void {
+  this.currentPage = page;
+  this.loadMovements();
+}
+
+resetFilters(): void {
+  this.searchTerm = '';
+  this.selectedProductId = null;
+  this.selectedType = '';
+  this.startDate = '';
+  this.endDate = '';
+  this.currentPage = 1;
+  this.loadMovements();
 }
 
 getMovementTypeLabel(type: string): string {
   const found = this.movementTypes.find(t => t.value === type);
   return found ? found.label : type;
 }
-
 
 }

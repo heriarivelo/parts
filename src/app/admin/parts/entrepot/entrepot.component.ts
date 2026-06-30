@@ -1,114 +1,74 @@
 import { Component, OnInit } from '@angular/core';
 import { EntrepotService } from '../../../service/entrepot.service';
-import { Entrepot, Box, Item } from '../../../models/entrepot.model';
-import { Stock } from '../../../models/stock.model';
+import { Entrepot, Warehouse, WarehouseStockItem } from '../../../models/entrepot.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { StockService } from '../../../service/stock.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { AdminPaginationComponent } from '../../../components/admin-pagination/admin-pagination.component';
+import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { DetailEntrepotComponent } from './detail-entrepot/detail-entrepot.component';
+import { StockDistributionModalComponent } from './components/stock-distribution-modal/stock-distribution-modal.component';
+import { StockLocationSearchComponent } from './components/stock-location-search/stock-location-search.component';
 
 @Component({
   selector: 'app-drag-drop',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminPaginationComponent, SearchInputComponent, DetailEntrepotComponent, StockDistributionModalComponent,
+    StockLocationSearchComponent
+  ],
   templateUrl: './entrepot.component.html',
 })
 export class EntrepotComponent implements OnInit {
   entrepot_libelle = '';
   newItem = { name: '', description: '' };
-   boxes: Box[] = [];
-  items: Item[] = [];
+  boxes: Warehouse[] = [];
 
-  errors: string = '';
   draggedItem: any = null;
   showModal = false;
   selectedBox: any = null;
   notFound: boolean = false;
-  okay: boolean = false;
 
-  transferForm: FormGroup;
+  showCreateEntrepotModal = false;
+  createEntrepotError = '';
+
+  warehouseSearch = '';
+  filteredBoxes: any[] = [];
+  totalWarehouseItems = 0;
+
+  currentWarehousePage = 1;
+  itemsPerPage = 12;
 
   constructor(
-    private entrepotService: EntrepotService,
-    private stockService: StockService,
-     private fb: FormBuilder
-  ) {
-    this.transferForm = this.fb.group({
-      stockId: ['', Validators.required],
-      fromEntrepotId: ['', Validators.required],
-      toEntrepotId: ['', Validators.required],
-      quantity: ['', [Validators.required, Validators.min(0.01)]],
-    });
-  }
-
-
+    private entrepotService: EntrepotService
+  ) {}
 
   ngOnInit(): void {
     this.loadEntrepots();
-    this.loadArticlesWithoutEntrepot(); // Nouvelle méthode
   }
 
-async loadEntrepots() {
-  try {
-    const response = await this.entrepotService.getEntrepots().toPromise() as Entrepot[];
-
-    // Pour chaque entrepôt, on charge ses items
-    this.boxes = await Promise.all(response.map(async (entrepot: Entrepot) => {
-      const items = await this.entrepotService.getEntrepotStock(entrepot.id).toPromise();
-      return {
-        id: entrepot.id,
-        name: entrepot.libelle,
-        items: items || []
-      };
+loadEntrepots(): void {
+  this.entrepotService.getEntrepots({
+    search: this.warehouseSearch,
+    page: this.currentWarehousePage,
+    pageSize: this.itemsPerPage
+  }).subscribe({
+    next: (res) => {
+    this.boxes = res.items.map((entrepot: any): Warehouse => ({
+      id: entrepot.id,
+      name: entrepot.libelle,
+      stockCount: entrepot.stockCount,
+      totalQuantity: entrepot.totalQuantity
     }));
 
-  } catch (error) {
-    console.error("Erreur lors du chargement des entrepôts", error);
-  }
+      this.filteredBoxes = this.boxes;
+      this.totalWarehouseItems = res.totalItems;
+    },
+    error: (error) => {
+      console.error('Erreur lors du chargement des entrepôts', error);
+    }
+  });
 }
 
-
-    async loadArticlesWithoutEntrepot() {
-    try {
-      // On précise qu’on attend un tableau d’Item
-      const response = await this.entrepotService
-        .getArticlesWithoutEntrepot().subscribe({
-      next: (data) => {
-        // console.log('Produits reçus :', data);
-        this.items = data;
-        console.log('Produits reçus :', this.items );
-
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des produits', err);
-      }
-    }); } catch (error) {
-      console.error("Erreur lors du chargement des articles", error);
-    }
-  }
-
-
-    // stocks: any[] = [];
-  isLoading = false;
-  searchQuery: string = '';
-  resultats: any[] = [];
-
-
-  lancerRecherche() {
-    if (this.searchQuery.trim()) {
-      this.entrepotService.searchStocksWithoutEntrepot(this.searchQuery).subscribe({
-        next: (res) => {
-          this.resultats = res;
-          console.log('Résultats:', this.resultats);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la recherche', err);
-        }
-      });
-    }
-  }
 
   // Mettre à jour l'entrepôt d'un article
 async updateEntrepot(boxId: number, articleId: number) {
@@ -119,10 +79,9 @@ async updateEntrepot(boxId: number, articleId: number) {
     }).toPromise();
 
     console.log('Mise à jour réussie');
-    this.loadArticlesWithoutEntrepot();
-    if (this.selectedBox) {
-      this.openBoxDetails(this.selectedBox);
-    }
+    this.loadEntrepots();
+this.refreshStockSearch();
+
   } catch (error) {
     console.error('Erreur de mise à jour', error);
   }
@@ -134,7 +93,8 @@ async updateEntrepot(boxId: number, articleId: number) {
     if (!this.entrepot_libelle.trim()) return;
 
     try {
-      await this.entrepotService.createEntrepot(this.entrepot_libelle).toPromise();
+      const libelle = this.entrepot_libelle.trim().toUpperCase();
+      await this.entrepotService.createEntrepot(libelle).toPromise();
       this.entrepot_libelle = '';
       await this.loadEntrepots();
     } catch (error) {
@@ -142,26 +102,41 @@ async updateEntrepot(boxId: number, articleId: number) {
     }
   }
 
-  // Ouvrir les détails d'un entrepôt
-  async openBoxDetails(box: any) {
-    try {
-      const response = await this.entrepotService.getEntrepotStock(box.id).toPromise();
-      box.items = response || [];
-      this.selectedBox = box;
-      this.showModal = true;
-    } catch (error) {
-      console.error("Erreur chargement stock", error);
-      box.items = [];
-    }
-  }
 
-   drag(event: DragEvent, item: any) {
-    this.draggedItem = item;
+  openBoxDetails(box: any): void {
+    this.selectedBox = box;
+    this.showModal = true;
   }
 
   allowDrop(event: DragEvent) {
-    event.preventDefault();
-  }
+      event.preventDefault();
+    }
+
+stockSearchRefreshKey = 0;
+
+dragFromSearch(item: any): void {
+  this.draggedItem = {
+    ...item,
+    id: item.stockId || item.id
+  };
+}
+
+showDistribution(product: any): void {
+  this.selectedProduct = {
+    ...product,
+    id: product.stockId || product.id
+  };
+}
+
+refreshStockSearch(): void {
+  this.stockSearchRefreshKey++;
+}
+
+onDistributionSaved(): void {
+  this.closeDistribution();
+  this.loadEntrepots();
+  this.refreshStockSearch();
+}
 
   async drop(event: DragEvent, box: any) {
     event.preventDefault();
@@ -189,124 +164,60 @@ async updateEntrepot(boxId: number, articleId: number) {
     }
   }
 
-   entrepots: any[] = [];
-  // products: any[] = [];
   selectedProduct: any = null;
-  distribution: any = null;
-  newEntrepotName = '';
 
-  showDistribution(product: any): void {
-    this.selectedProduct = product;
-    const productId = product.productId;
-    this.stockService.getProductDistribution(productId).subscribe({
-      next: (data) => {
-        this.distribution = data;
-        // Ajouter une entrée pour le stock non affecté
-        if (!this.distribution.assigned.find((a: any) => a.entrepotId === null)) {
-          this.distribution.assigned.push({
-            entrepotId: null,
-            entrepotName: 'Non affecté',
-            quantity: this.distribution.unassigned
-          });
-        }
-      },
-      error: (err) => console.error(err)
-    });
+closeDistribution(): void {
+  this.selectedProduct = null;
+}
+
+openCreateEntrepotModal(): void {
+  this.createEntrepotError = '';
+  this.entrepot_libelle = '';
+  this.showCreateEntrepotModal = true;
+}
+
+closeCreateEntrepotModal(): void {
+  this.showCreateEntrepotModal = false;
+  this.createEntrepotError = '';
+}
+
+createEntrepotFromModal(): void {
+  if (!this.entrepot_libelle || !this.entrepot_libelle.trim()) {
+    this.createEntrepotError = 'Le nom de l’entrepôt est obligatoire.';
+    return;
   }
 
-  addDistributionRow(): void {
-    this.distribution.assigned.push({
-      entrepotId: null,
-      entrepotName: '',
-      quantity: 0
-    });
-  }
+  this.NewEntrepot();
+  this.showCreateEntrepotModal = false;
+}
 
-  removeDistributionRow(index: number): void {
-    this.distribution.assigned.splice(index, 1);
-  }
+filterWarehouses(): void {
+  this.currentWarehousePage = 1;
+  this.loadEntrepots();
+}
 
-  saveDistribution(): void {
-    const distributions = this.distribution.assigned
-      .filter((d: any) => d.quantity > 0)
-      .map((d: any) => ({
-        entrepotId: d.entrepotId,
-        quantity: d.quantity
-      }));
+get paginatedBoxes(): any[] {
+  return this.boxes;
+}
 
-    this.stockService.updateDistribution(
-      this.selectedProduct.productId,
-      distributions
-    ).subscribe({
-      next: () => {
-        this.closeDistribution();
-    this.loadArticlesWithoutEntrepot(); // Nouvelle méthode
-      },
-      error: (err) => console.error(err)
-    });
-  }
+onWarehousePageChange(page: number): void {
+  this.currentWarehousePage = page;
+  this.loadEntrepots();
+}
 
-  closeDistribution(): void {
-    this.selectedProduct = null;
-    this.distribution = null;
-  }
-
-  getTotalAssigned(): number {
-    if (!this.distribution) return 0;
-    return this.distribution.assigned.reduce((sum: number, a: any) => sum + (a.quantity || 0), 0);
-  }
-
-  isValidDistribution(): boolean {
-    if (!this.distribution) return false;
-    return this.getTotalAssigned() === this.distribution.total;
-  }
-
-    // stocks: any[] = [];
-  // entrepots: any[] = [];
-  showTransferModal = false;
-  selectedStock: any;
-  // isLoading = false;
+getItemCount(box: any): number {
+  return box.stockCount || 0;
+}
 
 
-  openTransferModal(stock: any): void {
-    this.selectedStock = stock;
-    this.transferForm.patchValue({
-      stockId: stock.id,
-      fromEntrepotId: stock.entrepotId,
-      quantity: stock.quantite
-    });
-    this.showTransferModal = true;
-  }
+confirmDeleteEntrepot(box: any): void {
+  const confirmed = confirm(`Supprimer l'entrepôt "${box.name}" ?`);
+  if (!confirmed) return;
 
-  closeTransferModal(): void {
-    this.showTransferModal = false;
-    this.selectedStock = null;
-    this.transferForm.reset();
-  }
+  this.deleteEntrepot(box.id);
+}
 
-  submitTransfer(): void {
-    if (this.transferForm.invalid) {
-      alert('Veuillez remplir tous les champs correctement');
-      return;
-    }
-
-    this.isLoading = true;
-    this.entrepotService.transferStock(this.transferForm.value).subscribe({
-      next: () => {
-        alert('Transfert effectué avec succès');
-        this.closeTransferModal();
-        this.loadArticlesWithoutEntrepot(); // Rafraîchir la liste
-      },
-      error: (err) => {
-        alert('Erreur lors du transfert');
-        console.error(err);
-      }
-    }).add(() => {
-      this.isLoading = false;
-    });
-  }
-
-  getItemCount(box: any): number {
-  return box.items && box.items.length ? box.items.length : 0;
+refreshAfterStockAction(): void {
+  this.loadEntrepots();
 }
 }

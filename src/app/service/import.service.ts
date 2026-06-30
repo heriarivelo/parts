@@ -11,11 +11,24 @@ export class ImportService {
 
   constructor(private http: HttpClient) { }
 
-  getImports(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/import`);
-  }
+getImports(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
+  return this.http.get<any>(`${this.apiUrl}/import`, { params });
+}
 
-  getImportDetails(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/import/${id}/details`);
+getImportDetails(
+  importId: number,
+  params: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
   }
+) {
+  return this.http.get<any>(`${this.apiUrl}/import/${importId}/details`, { params });
+}
 }

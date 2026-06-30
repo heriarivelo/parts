@@ -7,7 +7,9 @@ import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProClientService } from '../../service/pro-clients.service';
 import { AuthService, User } from '../../service/auth.service';
-
+import { ProductDetailModalComponent } from '../../admin/parts/produit/product-detail-modal/product-detail-modal.component';
+import { FloatingInputComponent } from '../../components/floating-input/floating-input.component';
+import { OrderPreviewModalComponent } from '../../admin/commandes/order-preview-modal/order-preview-modal.component';
 
 enum CustomerType {
   RETAIL = 'RETAIL',
@@ -16,6 +18,7 @@ enum CustomerType {
 }
 
 interface CartItem {
+  stockId: number;
   productId: number;
   reference: string;
   description: string;
@@ -43,7 +46,7 @@ interface InvoicePreview {
 @Component({
   selector: 'app-order-create',
    standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ProductDetailModalComponent, FloatingInputComponent, OrderPreviewModalComponent],
   templateUrl: './order-create.component.html',
   styleUrls: ['./order-create.component.scss']
 })
@@ -188,6 +191,7 @@ onB2BClientSelected(): void {
     }).subscribe({
       next: (results: any) => {
         this.searchResults = results as any[];
+        console.log(this.searchResults,'result')
         this.isLoading = false;
       },
       error: (err) => {
@@ -207,8 +211,9 @@ onB2BClientSelected(): void {
       }
     } else {
       this.cartItems.push({
+        stockId: product.stocks[0].id,
         productId: product.id,
-        reference: product.referenceCode,
+        reference: product.codeArt,
         description: product.libelle,
         unitPrice: product.stocks[0].prixFinal || 0,
         quantity: 1,
@@ -303,6 +308,8 @@ onB2BClientSelected(): void {
       info: {
         nom: this.orderForm.value.nom,
         telephone: this.orderForm.value.telephone,
+        email: this.orderForm.value.email || null,
+        adresse: this.orderForm.value.adresse || null,
         nif: this.orderForm.value.nif,
       },
       totalAmount: this.getTotal(),
@@ -324,7 +331,9 @@ onB2BClientSelected(): void {
 
     return {
       items: this.cartItems.map(item => ({
+        reference: item.reference,
         productName: item.description,
+        marque: '',
         unitPrice: item.unitPrice,
         quantity: item.quantity,
         total: item.unitPrice * item.quantity
@@ -335,4 +344,15 @@ onB2BClientSelected(): void {
       estimatedTax: total * 0.2
     };
   }
+
+selectedProductStockId: number | null = null;
+
+openProductDetail(stockId: number): void {
+  this.selectedProductStockId = stockId;
+}
+
+closeProductDetail(): void {
+  this.selectedProductStockId = null;
+}
+
 }

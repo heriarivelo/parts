@@ -33,29 +33,32 @@ export interface Stock {
 //   // … autres champs si besoin
 // }
 
-export interface Box {
+export interface Warehouse {
   id: number;
   name: string;
-  items: Item[];
+  stockCount: number;
+  totalQuantity: number;
 }
 
-export interface Item {
+export interface WarehouseStockItem {
   id: number;
+  stockEntrepotId?: number;
+  productId?: number;
+
   referenceCode?: string;
   codeArt?: string;
-  lib1?: string; 
-  oem:string;
-  marque:string;              // ← ajouté
+  lib1?: string;
+
+  oem?: string;
+  marque?: string;
+
   quantite: number;
-  qttsansEntrepot: number,
+  qttsansEntrepot?: number;
   quantiteVendu?: number;
-  prixFinal?: number;          // ← ajouté
-  status: string;
-  // product?: {                  // ← ajouté
-  //   marque?: string;
-  //   oem?: string;
-  //   autoFinal?: string;
-  //   lib?: string;
-  // };
+
+  prixFinal?: number;
+  status?: string;
+
+  entrepot?: string;
 }
 

@@ -1,0 +1,47 @@
+<button
+  type="button"
+  (click)="openModal()"
+  class="text-sm text-gray-700 hover:text-red-600 hover:underline truncate max-w-full"
+  [title]="oem || 'Aucun OEM'">
+  {{ preview }}
+</button>
+
+<div *ngIf="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+    <div class="flex justify-between items-center border-b border-gray-200 p-5">
+      <h3 class="text-lg font-bold text-gray-900">Références OEM</h3>
+
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-5 overflow-y-auto custom-thin-scroll">
+      <div *ngIf="oems.length > 0; else noOem" class="space-y-2">
+        <div
+          *ngFor="let item of oems"
+          class="p-2 bg-gray-50 border border-gray-200 rounded-lg break-all text-sm text-gray-700">
+          {{ item }}
+        </div>
+      </div>
+
+      <ng-template #noOem>
+        <p class="text-center text-gray-500 py-6">
+          Aucune référence OEM disponible.
+        </p>
+      </ng-template>
+    </div>
+
+    <div class="border-t border-gray-200 p-4 flex justify-end">
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black">
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>

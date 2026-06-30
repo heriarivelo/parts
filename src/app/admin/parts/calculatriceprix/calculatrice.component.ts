@@ -63,8 +63,11 @@ export class CalculatriceComponent {
   showImportModal = false;
   showDevisModal = false;
 
+  isParamsVisible: boolean = true;
+
   appliquerParametres(): void {
     this.pieceService.setParametres(this.parametres);
+    this.isParamsVisible = false;
   }
 
   ajouterPiece(): void {
@@ -310,4 +313,6 @@ async confirmDevis() {
     alert('Erreur lors de la confirmation: ');
   }
 }
+
+
 }

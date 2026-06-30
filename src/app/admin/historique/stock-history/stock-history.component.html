@@ -1,96 +1,101 @@
-<div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Historique des Mouvements de Stock</h2>
-        <!-- <button routerLink="/stock/add" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
-            <i class="fas fa-plus mr-2"></i> Nouveau Mouvement
-        </button> -->
-    </div>
-
+<div class="h-full w-full flex flex-col overflow-hidden px-6">
+    <!-- mouvement des stocks -->
     <!-- Filtres -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <form [formGroup]="filterForm" (ngSubmit)="onFilter()" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Produit -->
-            <div>
-                <label class="block text-sm font-medium mb-1">Produit</label>
-                <select formControlName="productId" class="w-full border rounded-lg p-2">
-                    <option value="">Tous les produits</option>
-                    <option *ngFor="let product of products" [value]="product.id">
-                        {{ product.referenceCode }} - {{ product.libelle }}
-                    </option>
+    <div class="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-6 mb-2">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+
+            <!-- Groupe principal : Recherche et Type -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center flex-1 gap-3">
+
+               
+                    <app-search-input placeholder="Rechercher produit, référence, marque, source..."
+                        [(value)]="searchTerm" (search)="onSearch()">
+                    </app-search-input>
+    
+
+                <!-- Filtre Type : Hauteur h-11 et design lissé -->
+                <select [(ngModel)]="selectedType" (change)="onFilterChange()"
+                    class="custom-select py-2.5 border border-gray-500 rounded-lg px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 cursor-pointer shadow-sm hover:border-gray-400 transition sm:w-56">
+                    <option value=""> Tous les types</option>
+                    <option value="SALE"> Vente</option>
+                    <option value="RETURN"> Retour</option>
+                    <option value="ADJUSTMENT"> Ajustement</option>
+                    <option value="REAPPRO"> Réapprovisionnement</option>
                 </select>
+
             </div>
 
-            <!-- Type -->
-            <div>
-                <label class="block text-sm font-medium mb-1">Type</label>
-                <select formControlName="type" class="w-full border rounded-lg p-2">
-                    <option value="">Tous les types</option>
-                    <option *ngFor="let type of movementTypes" [value]="type.value">
-                        {{ type.label }}
-                    </option>
-                </select>
-            </div>
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <div
+                    class="flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-lg px-3 h-11 text-xs text-gray-500 font-semibold shadow-sm">
+                    <i class="fa-solid fa-calendar-days text-gray-400 text-sm"></i>
 
-            <!-- Date de début -->
-            <div>
-                <label class="block text-sm font-medium mb-1">Date de début</label>
-                <input type="date" formControlName="startDate" class="w-full border rounded-lg p-2">
-            </div>
+                    <span>Du</span>
+                    <input type="date" [(ngModel)]="startDate" (change)="onFilterChange()"
+                        class="bg-transparent border-0 font-bold text-gray-800 focus:outline-none text-sm cursor-pointer p-0">
 
-            <!-- Date de fin -->
-            <div>
-                <label class="block text-sm font-medium mb-1">Date de fin</label>
-                <input type="date" formControlName="endDate" class="w-full border rounded-lg p-2">
-            </div>
+                    <span class="mx-1 text-gray-300">|</span>
 
-            <div class="md:col-span-4 flex justify-end">
-                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg mr-2">
-                    <i class="fas fa-filter mr-2"></i> Filtrer
-                </button>
-                <button type="button" (click)="filterForm.reset(); onFilter()" class="border px-4 py-2 rounded-lg text-white bg-secondary">
-                    Réinitialiser
+                    <span>Au</span>
+                    <input type="date" [(ngModel)]="endDate" (change)="onFilterChange()"
+                        class="bg-transparent border-0 font-bold text-gray-800 focus:outline-none text-sm cursor-pointer p-0">
+                </div>
+                <button (click)="resetFilters()"
+                    class="py-2.5 px-4 border border-gray-500 hover:border-gray-400 bg-white text-gray-700 text-sm font-bold rounded-lg shadow-sm hover:bg-gray-50 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-rotate-left text-gray-400"></i>
+                    <span>Réinitialiser</span>
                 </button>
             </div>
-        </form>
+        </div>
     </div>
+
 
     <!-- Liste -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-100">
+    <div class="flex-1 overflow-y-auto custom-sidebar-scroll">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 font-semibold text-gray-700">
                 <tr>
-                    <th class="px-4 py-3 text-left">Date</th>
-                    <th class="px-4 py-3 text-left">Produit</th>
-                    <th class="px-4 py-3 text-left">Type</th>
-                    <th class="px-4 py-3 text-left">Quantité</th>
-                    <th class="px-4 py-3 text-left">Source/Référence</th>
-                    <th class="px-4 py-3 text-left">Motif</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Produit</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Type</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Quantité</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Source/Référence</th>
+                    <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Motif</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let movement of movements" class="border-t hover:bg-gray-50">
+                <tr *ngFor="let movement of movements" class="border-t hover:bg-gray-50 text-sm text-gray-800">
+                    <td class="px-4 py-3">
+                        <div *ngIf="movement.product" class="flex flex-col min-w-0">
+                            <span class="font-mono font-bold text-gray-800 text-sm tracking-wide">
+                                {{ movement.product.codeArt }}
+                            </span>
+                            <span class="text-sm font-medium text-gray-900 mt-0.5 max-w-[250px] truncate" 
+                                [title]="movement.product.libelle">
+                                {{ movement.product.libelle }}
+                            </span>
+                        </div>
+                        <div *ngIf="!movement.product" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
+                            <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                            <span>Produit supprimé</span>
+                        </div>
+                    </td>
                     <td class="px-4 py-3">{{ movement.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td class="px-4 py-3">
-                        <span *ngIf="movement.product">
-                            {{ movement.product.referenceCode }} - {{ movement.product.libelle }}
-                        </span>
-                        <span *ngIf="!movement.product">Produit supprimé</span>
-                    </td>
-                    <td class="px-4 py-3">
                         <span [ngClass]="{
-              'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
-              'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS',
-              'text-blue-600': movement.type === 'TRANSFER',
-              'text-yellow-600': movement.type === 'ADJUSTMENT'
-            }">
+                        'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
+                        'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS',
+                        'text-blue-600': movement.type === 'TRANSFER',
+                        'text-yellow-600': movement.type === 'ADJUSTMENT'
+                        }">
                             {{ getMovementTypeLabel(movement.type) }}
                         </span>
                     </td>
                     <td class="px-4 py-3">
                         <span [ngClass]="{
-              'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
-              'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS'
-            }">
+                            'text-green-600': movement.type === 'IMPORT' || movement.type === 'RETURN',
+                            'text-red-600': movement.type === 'SALE' || movement.type === 'LOSS'
+                            }">
                             {{ (movement.type === 'IMPORT' || movement.type === 'RETURN' ? '+' : '-') +
                             movement.quantity }}
                         </span>
@@ -106,19 +111,9 @@
                 </tr>
             </tbody>
         </table>
-
-        <!-- Pagination -->
-        <div class="p-4 border-t flex justify-between items-center">
-            <div>
-                Total: {{ pagination.total }} mouvements
-            </div>
-            <div class="flex gap-1">
-                <button *ngFor="let page of getPageNumbers()" (click)="onPageChange(page)"
-                    [class.bg-blue-500]="page === pagination.page" [class.text-white]="page === pagination.page"
-                    class="px-3 py-1 border rounded">
-                    {{ page }}
-                </button>
-            </div>
-        </div>
     </div>
+    <!-- Pagination -->
+    <app-admin-pagination *ngIf="totalItems > pageSize" [currentPage]="currentPage" [pageSize]="pageSize"
+        [totalItems]="totalItems" (pageChange)="onPageChange($event)">
+    </app-admin-pagination>
 </div>

@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
-import { LayoutComponent } from './layout/layout.component';
-// import { provideHttpClient } from '@angular/common/http';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LayoutComponent],
-  template: `<app-layout></app-layout>`,
-  styleUrl: './app.component.scss'
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`,
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'front-parts';

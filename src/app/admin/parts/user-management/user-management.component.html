@@ -1,132 +1,133 @@
 <!-- src/app/components/user-list/user-list.component.html -->
-<div class="container mx-auto px-4 py-8">
+<div class="h-full w-full flex flex-col overflow-hidden p-6">
 
-    <div *ngIf="successMessage" 
-        class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+    <div *ngIf="successMessage"
+        class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative">
         {{ successMessage }}
     </div>
 
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Gestion d'utilisateurs</h1>
-        <button (click)="openAddModal()"
-            class="bg-primary hover:bg-red-700 text-white px-4 py-2 rounded flex items-center">
-            <i class="fas fa-plus mr-2"></i> Ajouter
-        </button>
+        <div class="flex items-center gap-2">
+            <app-search-input placeholder="Rechercher nom, email..." [(value)]="searchTerm" (search)="onSearch()">
+            </app-search-input>
+            <button (click)="openAddModal()"
+                class="inline-flex items-center justify-center gap-2 bg-red-600 text-sm text-white px-5 py-3 rounded-lg hover:bg-red-700 font-semibold shadow-sm transition">
+                <i class="fa-solid fa-user-plus"></i> Créer un utilisateur
+            </button>
+        </div>
     </div>
 
     <!-- User Table -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Created At</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr *ngFor="let user of users">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span [class]="getRoleBadgeClass(user.role)">
-                                {{ user.role }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.createdAt | date:'medium'
-                            }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button (click)="openEditModal(user)" class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button (click)="deleteUser(user.id)" class="text-red-600 hover:text-red-900">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div class="flex-1 flex justify-between sm:hidden">
-                <button (click)="onPageChange(page - 1)" [disabled]="page === 1"
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    Previous
-                </button>
-                <button (click)="onPageChange(page + 1)" [disabled]="page * pageSize >= total"
-                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    Next
-                </button>
+    <div class="flex-1 overflow-y-auto custom-sidebar-scroll">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 font-semibold text-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs uppercase tracking-wider">Name
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs uppercase tracking-wider">Email
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs uppercase tracking-wider">Role
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs uppercase tracking-wider">
+                                Created At</th>
+                            <th class="px-6 py-3 text-left text-xs uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let user of users">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span [class]="getRoleBadgeClass(user.role)">
+                                    {{ user.role }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.createdAt |
+                                date:'medium'
+                                }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button (click)="openEditModal(user)"
+                                    class="text-amber-600 hover:text-amber-900 mr-3">
+                                    <i class="fa-solid fa-marker fa-lg"></i>
+                                </button>
+                                <button (click)="deleteUser(user.id)" class="text-gray-400 hover:text-gray-800">
+                                    <i class="fas fa-trash fa-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+    <!-- Pagination -->
+    <app-admin-pagination *ngIf="totalItems > pageSize" [currentPage]="currentPage" [pageSize]="pageSize"
+        [totalItems]="totalItems" (pageChange)="onPageChange($event)">
+    </app-admin-pagination>
 
-    <!-- Modal -->
-    <div *ngIf="isModalOpen" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Background overlay -->
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75" (click)="closeModal()"></div>
-            </div>
+</div>
 
-            <!-- Modal content -->
-            <div
-                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-                        {{ isEditMode ? 'Edit User' : 'Add New User' }}
-                    </h3>
-                    <form (ngSubmit)="saveUser()">
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
-                            <input type="text" id="name" [(ngModel)]="currentUser.name" name="name" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" id="email" [(ngModel)]="currentUser.email" name="email" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div class="mb-4" *ngIf="!isEditMode">
-                            <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                            <input type="password" id="password" [(ngModel)]="currentUser.password" name="password"
-                                [required]="!isEditMode"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div class="mb-4">
-                            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                            <select id="role" [(ngModel)]="currentUser.role" name="role"
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="ADMIN">Admin</option>
-                                <option value="MANAGER">Manager</option>
-                                <option value="USER">User</option>
-                            </select>
-                        </div>
-                        <!-- Bouton de sauvegarde avec indicateur de chargement -->
-                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                            <button type="submit" [disabled]="isLoading"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span *ngIf="isLoading">Enregistrement...</span>
-                                <span *ngIf="!isLoading">Save</span>
-                            </button>
-                            <button type="button" (click)="closeModal()" [disabled]="isLoading"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
+<!-- Modal -->
+<div *ngIf="isModalOpen" class="fixed inset-0 flex items-center justify-center z-[80] p-4 animate-fade-in">
+    <div class="fixed inset-0 bg-black/50 transition-opacity" (click)="closeModal()"></div>
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10 transform transition-all">
+        <div class="shrink-0 border-b border-gray-200 px-6 py-4 flex items-center justify-between gap-4">
+            <h3 class="text-lg font-bold text-gray-900">
+                {{ isEditMode ? 'Modifier l\'utilisateur' : 'Créer un utilisateur' }}
+            </h3>
+            <button type="button" (click)="closeModal()" [disabled]="isLoading"
+                class="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition disabled:opacity-30">
+                <i class="fa-solid fa-xmark fa-xl"></i>
+            </button>
+        </div>
+        <form (ngSubmit)="saveUser()" class="flex flex-col min-h-0">
+            
+            <div class="flex-1 min-h-0 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label for="name" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nom complet*</label>
+                    <input type="text" id="name" [(ngModel)]="currentUser.name" name="name" required
+                        class="h-11 block w-full border border-gray-400 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm font-medium text-gray-800">
+                </div>
+                <div>
+                    <label for="email" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Email*</label>
+                    <input type="email" id="email" [(ngModel)]="currentUser.email" name="email" required
+                        class="h-11 block w-full border border-gray-400 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm font-medium text-gray-800">
+                </div>
+                <div *ngIf="!isEditMode">
+                    <label for="password" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Mot de passe*</label>
+                    <input type="password" id="password" [(ngModel)]="currentUser.password" name="password" [required]="!isEditMode"
+                        class="h-11 block w-full border border-gray-400 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm font-medium text-gray-800">
+                </div>
+                <div>
+                    <label for="role" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Rôle de l'agent</label>
+                    <select id="role" [(ngModel)]="currentUser.role" name="role"
+                        class="h-11 block w-full border border-gray-400 rounded-xl px-3 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm font-medium text-gray-700 cursor-pointer">
+                        <option value="ADMIN">Admin</option>
+                        <option value="MANAGER">Manager</option>
+                        <option value="USER">User</option>
+                    </select>
                 </div>
             </div>
-        </div>
+
+            <div class="shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">            
+                <button type="button" (click)="closeModal()" [disabled]="isLoading"
+                    class="px-5 h-11 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 font-bold text-sm transition disabled:opacity-40 min-w-[100px]">
+                    Annuler
+                </button>
+
+                <button type="submit" [disabled]="isLoading"
+                    class="px-6 h-11 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-md transition disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>{{ isLoading ? 'Enregistrement...' : 'Enregistrer' }}</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>

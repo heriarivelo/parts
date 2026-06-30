@@ -1,138 +1,150 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- 1. COMMANDE VENTE LISTE DES COMMANDE ACTIF -->
+<div class="h-full w-full flex flex-col overflow-hidden bg-gray-50">
 
-  <!-- En-tête -->
-  <div class="sm:flex sm:items-center mb-8">
-    <div class="sm:flex-auto">
-      <h1 class="text-2xl font-bold leading-tight text-gray-900">Commandes</h1>
-      <p class="mt-2 text-sm text-gray-600">Liste des commandes en cours</p>
+  <div class="flex-shrink-0 bg-white border-b border-gray-200 px-6 pt-6 text-base">
+    <!-- Les Onglets : S'affichent uniquement pour l'ADMIN -->
+    <div *ngIf="hasAdminRole()" class="flex border-b border-gray-200">
+      <button (click)="switchTab('STANDARD')" [ngClass]="{
+        'border-red-600 text-red-600 font-bold -mb-px': activeTab === 'STANDARD',
+        'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'STANDARD'
+        }" class="px-6 py-3 text-sm font-medium transition-all border-b-2">
+        Commandes Standard
+      </button>
+
+      <button (click)="switchTab('PARTICULIERE')" [ngClass]="{
+        'border-orange-500 text-orange-600 font-bold -mb-px': activeTab === 'PARTICULIERE',
+        'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'PARTICULIERE'
+        }" class="px-6 py-3 text-sm font-medium transition-all border-b-2">
+        Commandes Particulières
+      </button>
     </div>
 
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-      <a routerLink="/manager/order"
-        class="block rounded-md bg-primary px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-red-500">
-        Nouvelle commande
-      </a>
-    </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="flex border-b border-gray-200 mb-6">
-    <button
-      (click)="switchTab('STANDARD')"
-      [ngClass]="{
-        'border-b-2 border-blue-600 text-blue-600 font-semibold': activeTab === 'STANDARD',
-        'text-gray-500 hover:text-gray-700': activeTab !== 'STANDARD'
-      }"
-      class="px-6 py-2 text-sm transition-colors"
-    >
-      Commandes Standard
-    </button>
-
-    <button
-      *ngIf="hasAdminRole()"
-      (click)="switchTab('PARTICULIERE')"
-      [ngClass]="{
-        'border-b-2 border-orange-500 text-orange-600 font-semibold': activeTab === 'PARTICULIERE',
-        'text-gray-500 hover:text-gray-700': activeTab !== 'PARTICULIERE'
-      }"
-      class="px-6 py-2 text-sm transition-colors"
-    >
-      Commandes Particulières
-    </button>
-  </div>
-
-  <!-- Filtres -->
-  <div class="mb-4 flex flex-col sm:flex-row gap-3">
-    <input
-      type="text"
-      [(ngModel)]="searchQuery"
-      placeholder="Rechercher..."
-      class="flex-1 rounded-md border border-2 border-gray-300  focus:outline-none focus:ring-2 focus:ring-red-500 shadow-md p-3"
-    />
-  </div>
-
-  <!-- Loader -->
-  <div *ngIf="isLoading" class="flex justify-center py-12">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-  </div>
-
-  <!-- Erreur -->
-  <div *ngIf="error" class="rounded-md bg-red-50 p-4 mb-6">
-    <div class="flex">
-      <div class="ml-3">
-        <h3 class="text-sm font-medium text-red-800">{{ error }}</h3>
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 px-6 py-3">
+    <p class="mt-1 text-sm text-gray-500">
+      {{ hasAdminRole() ? 'Liste et gestion des flux de commandes' : 'Liste des commandes en cours' }}
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <!-- Intégration de votre composant réutilisable pour uniformiser l'UI -->
+      <app-search-input
+        placeholder="Rechercher une commande..."
+        [(value)]="searchQuery"
+        (search)="onSearch()">
+      </app-search-input>
+      <div>
+        <a [routerLink]="activeTab === 'STANDARD' ? '/manager/order' : '/manager/order-particuliere'"
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-red-700 transition">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nouvelle commande {{ activeTab === 'PARTICULIERE' ? 'particulière' : '' }}</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Tableau commun -->
-  <div *ngIf="!isLoading">
-    <ng-container *ngIf="activeTab === 'STANDARD'">
-      <ng-container *ngTemplateOutlet="tableTemplate; context: { list: filterOrders(standardOrders) }"></ng-container>
-    </ng-container>
-
-    <ng-container *ngIf="activeTab === 'PARTICULIERE' && hasAdminRole()">
-      <ng-container *ngTemplateOutlet="tableTemplate; context: { list: filterOrders(particuliereOrders) }"></ng-container>
-    </ng-container>
+  <!-- Écran de chargement et d'erreur -->
+  <div *ngIf="isLoading" class="flex-1 flex flex-col items-center justify-center text-gray-500 bg-white">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-2"></div>
+    <span>Chargement des commandes...</span>
   </div>
 
-  <!-- Template réutilisable -->
-  <ng-template #tableTemplate let-list="list">
-    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsable</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Articles</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-            <th class="relative py-3 pl-3 pr-6"><span class="sr-only">Actions</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          <tr *ngFor="let order of list" class="hover:bg-gray-50">
-            <td class="whitespace-nowrap px-6 py-4 font-medium text-gray-900">
-              {{ order.reference }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ order.createdAt | date:'dd/MM/yy HH:mm' }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <div>{{ order.manager.name }}</div>
-              <div class="text-gray-400">{{ order.manager.email }}</div>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-500">
-              <div *ngFor="let piece of order.pieces" class="mb-1 last:mb-0">
-                {{ piece.quantite }} × {{ piece.product?.codeArt || piece.customProduct?.codeArt || 'Produit particulier' }}
-              </div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-              {{ order.totalAmount | currency:'MGA':'symbol':'1.0-0' }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4">
-              <span
-                class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ getStatusClass(order.status) }}">
-                {{ order.status }}
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium space-x-2">
-              <button *ngIf="order.status === 'EN_ATTENTE'" (click)="createFacture(order.id)" class="btn-primary"
-                [disabled]="order.status !== 'EN_ATTENTE'">
+  <div *ngIf="error" class="m-6 p-4 rounded-xl bg-red-50 text-red-700 flex-shrink-0">
+    <h3 class="text-sm font-medium">{{ error }}</h3>
+  </div>
+
+  <!-- ================= ÉTAGE 3 : LE TABLEAU SCROLLABLE ================= -->
+  <!-- flex-1 min-h-0 et overflow-y-auto confinent le défilement au corps du tableau uniquement -->
+  <div *ngIf="!isLoading && !error" class="flex-1 min-h-0 overflow-y-auto p-6">
+
+    <ng-container *ngIf="activeTab === 'STANDARD'">
+      <ng-container *ngTemplateOutlet="tableTemplate; context: { list: standardOrders }"></ng-container>
+    </ng-container>
+
+    <!-- La condition hasAdminRole() sécurise le rendu de l'onglet particulier -->
+    <ng-container *ngIf="activeTab === 'PARTICULIERE' && hasAdminRole()">
+      <ng-container
+        *ngTemplateOutlet="tableTemplate; context: { list: particuliereOrders }"></ng-container>
+    </ng-container>
+
+  </div>
+
+  <!-- ================= ÉTAGE 4 : LA PAGINATION BLOQUÉE EN BAS ================= -->
+  <!-- Ce bloc restera sagement ancré tout en bas de la vue de vos utilisateurs -->
+  <div *ngIf="!isLoading && !error">
+    <app-admin-pagination
+      *ngIf="totalItems > pageSize"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      [totalItems]="totalItems"
+      (pageChange)="onPageChange($event)">
+    </app-admin-pagination>
+  </div>
+
+</div>
+
+<!-- Template réutilisable du Tableau (Nettoyé et ajusté avec vos boutons) -->
+<ng-template #tableTemplate let-list="list">
+  <div class="overflow-x-auto border border-gray-200 rounded-2xl bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50 font-semibold text-gray-700">
+        <tr>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Référence</th>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Client</th>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Responsable</th>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Date</th>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Montant</th>
+          <th class="px-6 py-4 text-left uppercase tracking-wider text-xs">Statut</th>
+          <th class="relative py-4 pl-3 pr-6 text-right uppercase tracking-wider text-xs">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 text-gray-600">
+        <tr *ngFor="let order of list" class="hover:bg-gray-50/70 transition">
+          <td class="px-6 py-4 font-bold text-gray-900">{{ order.reference }}</td>
+          <td class="px-6 py-4">
+            <div class="font-semibold text-gray-800" [title]="order?.customer?.telephone">{{ order?.customer?.nom }}</div>
+            <div class="text-xs text-gray-500">{{ order._count?.pieces || 0 }} référence(s) ·</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="font-semibold text-gray-800" [title]="order.manager.email">{{ order.manager.name }}</div>
+            <!-- <div class="text-xs text-gray-400">{{ order.manager.email }}</div> -->
+          </td>
+          <td class="px-6 py-4 text-gray-500 whitespace-nowrap">{{ order.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+          <td class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">
+            {{ order.totalAmount | currency:'MGA':'symbol':'1.0-0' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-3 py-1 text-xs font-bold rounded-full {{ getStatusClass(order.status) }}">
+              {{ order.status }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-2">
+              <button (click)="openOrderDetails(order.id)"
+                class="h-9 w-9 bg-gray-200 text-gray-700 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition"
+                title="Détails">
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
+
+              <button *ngIf="order.status === 'EN_ATTENTE'" (click)="createFacture(order.id)"
+                class="px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-xs transition">
                 Créer Facture
               </button>
+
               <button *ngIf="order.status === 'EN_ATTENTE'" (click)="handleCancel(order.id)"
-                class="text-red-600 hover:text-red-900">
+                class="px-3 h-9 text-gray-900 bg-orange-200 hover:bg-orange-300 rounded-xl font-semibold text-xs transition">
                 Annuler
               </button>
-            </td>
-          </tr>
-          <tr *ngIf="!list.length">
-            <td colspan="7" class="text-center text-gray-400 py-3">Aucune commande trouvée</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </ng-template>
-</div>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!list.length">
+          <td colspan="7" class="text-center text-gray-400 py-8 font-medium">Aucune commande trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-template>
+
+<!-- Composant de détails -->
+<app-order-details [isOpen]="isOrderDetailsOpen" [orderId]="selectedOrderId"
+  (close)="closeOrderDetails()"></app-order-details>
